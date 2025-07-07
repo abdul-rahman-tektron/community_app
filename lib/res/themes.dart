@@ -19,6 +19,11 @@ class AppThemes {
         ),
         color: AppColors.backgroundSecondary,
       ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: AppColors.textPrimary,
+        selectionColor: AppColors.primary.withOpacity(0.4),
+        selectionHandleColor: AppColors.textPrimary,
+      ),
       useMaterial3: true,
       // Extend with more theme customizations if needed
     );

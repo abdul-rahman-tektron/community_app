@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:community_app/core/model/error/error_response.dart';
 import 'package:community_app/core/remote/network/api_url.dart';
+import 'package:community_app/main.dart';
 import 'package:community_app/utils/enums.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -114,10 +116,15 @@ class NetworkRepository {
       return response;
     } on DioError catch (e, stack) {
       await _handleError(e);
-      return null;
-    } catch (e, stack) {
+      _logger.e("DioError returning response directly: ${e.response}");
+      return e.response;  // return the raw Dio error response
+    } catch (e) {
       _logger.e("Unexpected error during request to $url: $e");
-      return null;
+      return Response(
+        requestOptions: RequestOptions(path: url),
+        statusCode: HttpStatus.internalServerError,
+        statusMessage: "An unexpected error occurred",
+      );
     }
   }
 
@@ -159,7 +166,7 @@ class NetworkRepository {
       //   break;
 
       case HttpStatus.forbidden:
-        navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        MyApp.navigatorKey.currentState?.pushNamedAndRemoveUntil(
           AppRoutes.notFound,
               (_) => false,
         );

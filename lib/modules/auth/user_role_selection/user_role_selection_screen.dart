@@ -1,4 +1,3 @@
-import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/core/notifier/language_notifier.dart';
 import 'package:community_app/modules/auth/user_role_selection/user_role_selection_notifier.dart';
 import 'package:community_app/res/fonts.dart';
@@ -9,26 +8,37 @@ import 'package:community_app/utils/helpers/screen_size.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
-class UserRoleSelectionScreen extends ConsumerWidget {
+class UserRoleSelectionScreen extends StatelessWidget {
   const UserRoleSelectionScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final userRoleSelectionNotifier = ref.watch(userRoleSelectionNotifierProvider);
-
-    return SafeArea(
-      child: Scaffold(
-        body: SingleChildScrollView(
-          child: Column(children: [imageView(context, ref), 20.verticalSpace, mainContent(context, ref)]),
-        ),
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => UserRoleSelectionNotifier(),
+      child: Consumer<UserRoleSelectionNotifier>(
+        builder: (context, userRoleSelectionNotifier, child) {
+          return SafeArea(
+            child: Scaffold(
+              body: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    imageView(context),
+                    20.verticalSpace,
+                    mainContent(context, userRoleSelectionNotifier),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget imageView(BuildContext context, WidgetRef ref) {
+  Widget imageView(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(15.w),
       width: ScreenSize.width,
@@ -67,7 +77,7 @@ class UserRoleSelectionScreen extends ConsumerWidget {
     );
   }
 
-  Widget mainContent(BuildContext context, WidgetRef ref) {
+  Widget mainContent(BuildContext context, UserRoleSelectionNotifier userRoleSelectionNotifier) {
     return Padding(
       padding: EdgeInsets.all(15.w),
       child: Column(
@@ -80,34 +90,31 @@ class UserRoleSelectionScreen extends ConsumerWidget {
           CustomButton(
             text: context.locale.tenant,
             onPressed: () {
-              ref.read(baseNotifierProvider.notifier).userRole = UserRole.tenant;
-              ref.watch(userRoleSelectionNotifierProvider.notifier).selectRoleAndNavigate(context, UserRole.tenant);
+              userRoleSelectionNotifier.selectRoleAndNavigate(context, UserRole.tenant);
             },
           ),
           20.verticalSpace,
           CustomButton(
             text: context.locale.owner,
             onPressed: () {
-              ref.read(baseNotifierProvider.notifier).userRole = UserRole.owner;
-              ref.watch(userRoleSelectionNotifierProvider.notifier).selectRoleAndNavigate(context, UserRole.owner);
+              userRoleSelectionNotifier.selectRoleAndNavigate(context, UserRole.owner);
             },
           ),
           20.verticalSpace,
           CustomButton(
             text: context.locale.vendor,
             onPressed: () {
-              ref.read(baseNotifierProvider.notifier).userRole = UserRole.vendor;
-              ref.watch(userRoleSelectionNotifierProvider.notifier).selectRoleAndNavigate(context, UserRole.vendor);
+              userRoleSelectionNotifier.selectRoleAndNavigate(context, UserRole.vendor);
             },
           ),
           20.verticalSpace,
-          languageWidget(context, ref),
+          languageWidget(context),
         ],
       ),
     );
   }
 
-  Widget languageWidget(BuildContext context, WidgetRef ref) {
+  Widget languageWidget(BuildContext context) {
     return Text.rich(
       textAlign: TextAlign.center,
       TextSpan(
@@ -120,7 +127,8 @@ class UserRoleSelectionScreen extends ConsumerWidget {
             style: FontResolver.resolve(context.locale.switchLng, AppFonts.text16.regular.red.style),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
-                ref.read(languageNotifierProvider.notifier).switchLanguage();
+                final langNotifier = context.read<LanguageNotifier>();
+                langNotifier.switchLanguage();
               },
           ),
         ],

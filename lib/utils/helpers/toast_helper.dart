@@ -1,5 +1,6 @@
+import 'package:community_app/res/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:toastification/toastification.dart';
 
 class ToastHelper {
@@ -9,7 +10,8 @@ class ToastHelper {
     _show(
       message,
       type: ToastificationType.error,
-      icon: const Icon(LucideIcons.xCircle, color: Colors.red),
+      backgroundColor: Colors.red,
+      icon: Icon(LucideIcons.circleX, color: Colors.red),
       context: context,
     );
   }
@@ -18,7 +20,8 @@ class ToastHelper {
     _show(
       message,
       type: ToastificationType.success,
-      icon: const Icon(LucideIcons.checkCircle, color: Colors.green),
+      backgroundColor: Colors.green,
+      icon: Icon(LucideIcons.circleCheck, color: Colors.green),
       context: context,
     );
   }
@@ -27,6 +30,7 @@ class ToastHelper {
     _show(
       message,
       type: ToastificationType.info,
+      backgroundColor: Colors.blue,
       icon: const Icon(Icons.info, color: Colors.blue),
       context: context,
     );
@@ -58,10 +62,18 @@ class ToastHelper {
         maxLines: 10,
         overflow: TextOverflow.visible,
       ),
+      borderSide: BorderSide(
+        color: backgroundColor ?? AppColors.primary,
+        width: 1.5,
+      ),
       autoCloseDuration: duration,
       alignment: Alignment.topRight,
       icon: icon,
-      backgroundColor: backgroundColor,
+      progressBarTheme: ProgressIndicatorThemeData(
+        color: backgroundColor ?? AppColors.primary,
+        borderRadius: BorderRadius.circular(8),
+        linearMinHeight: 2,
+      ),
       borderRadius: BorderRadius.circular(8),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       showProgressBar: true,

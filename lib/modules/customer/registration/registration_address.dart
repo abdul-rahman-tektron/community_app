@@ -1,11 +1,9 @@
 import 'package:community_app/core/model/map/map_data.dart';
-import 'package:community_app/core/notifier/language_notifier.dart';
 import 'package:community_app/modules/customer/registration/registration_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/images.dart';
 import 'package:community_app/utils/extensions.dart';
-import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/helpers/screen_size.dart';
 import 'package:community_app/utils/helpers/validations.dart';
 import 'package:community_app/utils/router/routes.dart';
@@ -14,28 +12,32 @@ import 'package:community_app/utils/widgets/custom_search_dropdown.dart';
 import 'package:community_app/utils/widgets/custom_textfields.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-
-class OwnerTenantRegistrationAddressScreen extends ConsumerWidget {
-  const OwnerTenantRegistrationAddressScreen({super.key});
+class CustomerRegistrationAddressScreen extends StatelessWidget {
+  final CustomerRegistrationNotifier registrationNotifier;
+  const CustomerRegistrationAddressScreen({
+    super.key,
+    required this.registrationNotifier,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final registrationNotifier = ref.read(ownerTenantRegistrationNotifierProvider.notifier);
+  Widget build(BuildContext context) {
+    return buildBody(context);
+  }
 
+  Widget buildBody(BuildContext context) {
+    final addressKey = GlobalKey<FormState>();
     return SafeArea(
       child: Scaffold(
         body: SingleChildScrollView(
           child: Form(
-            key: registrationNotifier.addressFormKey,
+            key: addressKey,
             child: Column(
               children: [
-                imageView(context, ref),
-                mainContent(context, ref),
+                imageView(context),
+                mainContent(context, addressKey),
               ],
             ),
           ),
@@ -44,7 +46,7 @@ class OwnerTenantRegistrationAddressScreen extends ConsumerWidget {
     );
   }
 
-  Widget imageView(BuildContext context, WidgetRef ref) {
+  Widget imageView(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(15.w),
       width: ScreenSize.width,
@@ -82,9 +84,9 @@ class OwnerTenantRegistrationAddressScreen extends ConsumerWidget {
     );
   }
 
-  Widget mainContent(BuildContext context, WidgetRef ref) {
-    final registrationState = ref.watch(ownerTenantRegistrationNotifierProvider);
-    final registrationNotifier = ref.read(ownerTenantRegistrationNotifierProvider.notifier);
+  Widget mainContent(BuildContext context, GlobalKey<FormState> addressKey) {
+    // Use the notifier directly since state is inside it
+
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 15.w),
@@ -96,25 +98,21 @@ class OwnerTenantRegistrationAddressScreen extends ConsumerWidget {
           CustomSearchDropdown<String>(
             fieldName: "Community",
             hintText: "Enter Community",
-            controller: registrationState.communityController,
+            controller: registrationNotifier.communityController,
             items: registrationNotifier.dummyCommunityList,
-            currentLang: ref.watch(languageNotifierProvider).locale.languageCode,
-            itemLabel: (item, lang) => CommonUtils.getLocalizedString(
-              currentLang: lang,
-              getArabic: () => "",
-              getEnglish: () => "",
-            ),
+            currentLang: 'en', // You need to inject language if needed
+            itemLabel: (item, lang) => item, // Simplified for example
             onSelected: (String? menu) {
               registrationNotifier.setCommunity(menu);
             },
-          ),          // CustomTextField(
+          ),
           15.verticalSpace,
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
                 child: CustomTextField(
-                  controller: registrationState.addressController,
+                  controller: registrationNotifier.addressController,
                   fieldName: "Address",
                   showAsterisk: true,
                   validator: (value) => Validations.validateName(context, value),
@@ -123,10 +121,11 @@ class OwnerTenantRegistrationAddressScreen extends ConsumerWidget {
               10.horizontalSpace,
               InkWell(
                 onTap: () async {
-                  final result = await context.push(AppRoutes.mapLocation);
-
+                  final result = await Navigator.of(context, rootNavigator: true).pushNamed(AppRoutes.mapLocation);
                   if (result != null && result is MapData) {
-                    registrationState.addressController.text = result.address;
+                    registrationNotifier.addressController.text = result.address;
+                    registrationNotifier.buildingController.text = result.building;
+                    registrationNotifier.blockController.text = result.block;
                     registrationNotifier.setLatLng(result.latitude, result.longitude);
                   }
                 },
@@ -144,44 +143,35 @@ class OwnerTenantRegistrationAddressScreen extends ConsumerWidget {
           ),
           15.verticalSpace,
           CustomTextField(
-            controller: registrationState.buildingController,
+            controller: registrationNotifier.buildingController,
             fieldName: "Building",
             showAsterisk: true,
-            keyboardType: TextInputType.phone,
-            validator: (value) => Validations.validateMobile(context, value),
           ),
           15.verticalSpace,
           CustomTextField(
-            controller: registrationState.blockController,
+            controller: registrationNotifier.blockController,
             fieldName: "Block",
             showAsterisk: true,
-            isPassword: true,
-            validator: (value) => Validations.validatePassword(context, value),
           ),
           40.verticalSpace,
-          privacyPolicyWidget(context, ref),
+          privacyPolicyWidget(context),
           10.verticalSpace,
           CustomButton(
             text: context.locale.next,
             onPressed: () {
-              // if (registrationNotifier.validateAndSave()) {
-              //   // Navigate to next screen or call notifier method
-              //   // Example:
-              //   // context.pushNamed('OwnerVendorRegistrationAddress');
-              // }
+              if(addressKey.currentState!.validate()) {
+                registrationNotifier.performRegistration(context);
+              }
             },
           ),
           15.verticalSpace,
-          _alreadyHaveAnAccount(context, ref),
+          _alreadyHaveAnAccount(context),
         ],
       ),
     );
   }
 
-  Widget privacyPolicyWidget(BuildContext context,  WidgetRef ref) {
-    final registrationState = ref.watch(ownerTenantRegistrationNotifierProvider);
-    final registrationNotifier = ref.read(ownerTenantRegistrationNotifierProvider.notifier);
-
+  Widget privacyPolicyWidget(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -198,9 +188,11 @@ class OwnerTenantRegistrationAddressScreen extends ConsumerWidget {
               decoration: BoxDecoration(
                 border: Border.all(color: AppColors.primary, width: 1.5),
                 borderRadius: BorderRadius.circular(6),
-                color: registrationState.acceptedPrivacyPolicy ? AppColors.white : Colors.transparent,
+                color: registrationNotifier.acceptedPrivacyPolicy ? AppColors.white : Colors.transparent,
               ),
-              child: registrationState.acceptedPrivacyPolicy ? Icon(LucideIcons.check, size: 17, color: Colors.black) : null,
+              child: registrationNotifier.acceptedPrivacyPolicy
+                  ? Icon(LucideIcons.check, size: 17, color: Colors.black)
+                  : null,
             ),
             12.horizontalSpace,
             Text(context.locale.rememberMe, style: AppFonts.text14.regular.style),
@@ -210,7 +202,7 @@ class OwnerTenantRegistrationAddressScreen extends ConsumerWidget {
     );
   }
 
-  Widget _alreadyHaveAnAccount(BuildContext context, WidgetRef ref) {
+  Widget _alreadyHaveAnAccount(BuildContext context) {
     return Text.rich(
       TextSpan(
         text: "Already have an account? ",
@@ -220,7 +212,7 @@ class OwnerTenantRegistrationAddressScreen extends ConsumerWidget {
             text: "Sign in",
             style: AppFonts.text16.semiBold.black.style,
             recognizer: TapGestureRecognizer()..onTap = () {
-              context.pop();
+              Navigator.of(context).pop();
             },
           ),
         ],

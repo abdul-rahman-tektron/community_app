@@ -1,44 +1,86 @@
-import 'package:community_app/core/notifier/base_state.dart';
-import 'package:flutter/foundation.dart';
 import 'package:community_app/utils/enums.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:community_app/utils/storage/hive_storage.dart';
+import 'package:flutter/foundation.dart';
 
-class BaseNotifier extends StateNotifier<BaseState> {
-  BaseNotifier() : super(const BaseState());
+abstract class BaseChangeNotifier with ChangeNotifier {
+  // ----- Private Fields -----
+  String _userRole = '';
+  bool _isLoading = false;
+  LoadingState _loadingState = LoadingState.idle;
+  bool _disposed = false;
 
-  UserRole? get userRole => state.userRole;
+  // ----- Getters -----
+  String get userRole => _userRole;
+  bool get isLoading => _isLoading;
+  LoadingState get loadingState => _loadingState;
 
-  set userRole(UserRole? value) {
-    if (value != state.userRole) {
-      state = state.copyWith(userRole: value);
+
+  // ----- Setters with Notification -----
+  set userRole(String value) {
+    if (value != _userRole && value.length >= 2) {
+      _userRole = value;
+      notifyListeners();
     }
   }
-
-  bool get isLoading => state.isLoading;
-  LoadingState get loadingState => state.loadingState;
 
   set isLoading(bool value) {
-    if (value != state.isLoading) {
-      state = state.copyWith(isLoading: value);
+    if (value != _isLoading) {
+      _isLoading = value;
+      notifyListeners();
     }
   }
 
-  void setLoadingState(LoadingState newState) {
-    if (newState != state.loadingState) {
-      state = state.copyWith(loadingState: newState);
+  void setLoadingState(LoadingState state) {
+    if (state != _loadingState) {
+      _loadingState = state;
+      notifyListeners();
     }
   }
 
-  Future<void> runWithLoadingVoid(Future<void> Function() task) async {
+  Future<void> loadUserRole() async {
+    final role = HiveStorageService.getUserCategory();
+    if (role != null) {
+      _userRole = role;
+      notifyListeners();
+    }
+  }
+
+  Future<void> runWithLoadingVoid(Future<void> Function() task, {BaseChangeNotifier? target}) async {
+    final notifier = target ?? this;
     try {
-      setLoadingState(LoadingState.busy);
+      notifier.setLoadingState(LoadingState.busy);
       await task();
     } finally {
-      setLoadingState(LoadingState.idle);
+      notifier.setLoadingState(LoadingState.idle);
+    }
+  }
+
+  // ----- Shared Preference Loader -----
+  // Future<void> loadData() async {
+  //   final value = await SharedPreferencesMobileWeb.instance.getCountry('country');
+  //   countryBName = value ?? '';
+  // }
+
+  // ----- Safe Notify -----
+  @override
+  void notifyListeners() {
+    if (!_disposed) {
+      super.notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
+  // ----- Optional Logger -----
+  void logPrint(Object? object) {
+    const int chunkSize = 1000;
+    final text = object?.toString() ?? '';
+    for (int i = 0; i < text.length; i += chunkSize) {
+      debugPrint(text.substring(i, i + chunkSize > text.length ? text.length : i + chunkSize));
     }
   }
 }
-
-final baseNotifierProvider = StateNotifierProvider<BaseNotifier, BaseState>(
-      (ref) => BaseNotifier(),
-);

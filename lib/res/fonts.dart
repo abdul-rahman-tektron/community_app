@@ -1,3 +1,4 @@
+import 'package:community_app/res/colors.dart';
 import 'package:community_app/utils/extensions.dart';
 import 'package:flutter/material.dart';
 
@@ -25,10 +26,10 @@ class AppFonts {
   static _FontSizeStyles get text48 => const _FontSizeStyles(48);
 
   // Colors
-  static const Color black = Colors.black;
-  static const Color white = Colors.white;
-  static const Color grey = Colors.grey;
-  static const Color red = Colors.red;
+  static const Color black = AppColors.textPrimary;
+  static const Color white = AppColors.white;
+  static const Color grey = AppColors.textSecondary;
+  static const Color red = AppColors.error;
 }
 
 class _FontSizeStyles {

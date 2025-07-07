@@ -3,7 +3,7 @@ import 'package:community_app/res/fonts.dart';
 import 'package:community_app/utils/helpers/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
@@ -48,7 +48,7 @@ class CustomButton extends StatelessWidget {
 
     return SizedBox(
       width: fullWidth ? double.infinity : null,
-      height: height ?? (MediaQuery.of(context).devicePixelRatio >= 3.0 ? 43 : 48),
+      height: height ?? (MediaQuery.of(context).devicePixelRatio >= 3.0 ? 40 : 45),
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(

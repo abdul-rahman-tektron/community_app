@@ -1,5 +1,3 @@
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/notifier/language_notifier.dart';
 import 'package:community_app/modules/customer/registration/registration_notifier.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/images.dart';
@@ -11,27 +9,29 @@ import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_textfields.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-
-class OwnerTenantRegistrationPersonalScreen extends ConsumerWidget {
-  const OwnerTenantRegistrationPersonalScreen({super.key});
+class CustomerRegistrationPersonalScreen extends StatelessWidget {
+  final CustomerRegistrationNotifier registrationNotifier;
+  const CustomerRegistrationPersonalScreen({super.key, required this.registrationNotifier});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final registrationNotifier = ref.read(ownerTenantRegistrationNotifierProvider.notifier);
+  Widget build(BuildContext context) {
+    return _buildBody(context);
+  }
 
+  Widget _buildBody(BuildContext context) {
+    final personalKey = GlobalKey<FormState>();
     return SafeArea(
       child: Scaffold(
         body: SingleChildScrollView(
           child: Form(
-            key: registrationNotifier.personalFormKey,
+            key: personalKey,
             child: Column(
               children: [
-                imageView(context, ref),
-                mainContent(context, ref),
+                _imageView(context),
+                _mainContent(context, personalKey),
               ],
             ),
           ),
@@ -40,7 +40,7 @@ class OwnerTenantRegistrationPersonalScreen extends ConsumerWidget {
     );
   }
 
-  Widget imageView(BuildContext context, WidgetRef ref) {
+  Widget _imageView(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(15.w),
       width: ScreenSize.width,
@@ -49,7 +49,8 @@ class OwnerTenantRegistrationPersonalScreen extends ConsumerWidget {
         image: DecorationImage(
           image: AssetImage(AppImages.loginImage),
           fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.6), BlendMode.darken),
+          colorFilter:
+          ColorFilter.mode(Colors.black.withOpacity(0.6), BlendMode.darken),
         ),
       ),
       child: Stack(children: [_buildLogo(), _buildBottomText(context)]),
@@ -70,17 +71,17 @@ class OwnerTenantRegistrationPersonalScreen extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(context.locale.welcomeToCommunityApp, style: AppFonts.text20.semiBold.white.style),
+          Text(context.locale.welcomeToCommunityApp,
+              style: AppFonts.text20.semiBold.white.style),
           10.verticalSpace,
-          Text(context.locale.connectingResidents, style: AppFonts.text16.regular.white.style),
+          Text(context.locale.connectingResidents,
+              style: AppFonts.text16.regular.white.style),
         ],
       ),
     );
   }
 
-  Widget mainContent(BuildContext context, WidgetRef ref) {
-    final registrationNotifier = ref.watch(ownerTenantRegistrationNotifierProvider);
-
+  Widget _mainContent(BuildContext context, GlobalKey<FormState> personalKey) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 15.w),
       child: Column(
@@ -88,7 +89,8 @@ class OwnerTenantRegistrationPersonalScreen extends ConsumerWidget {
         children: [
           Text("Create Your Account", style: AppFonts.text24.semiBold.style),
           5.verticalSpace,
-          Text("One account, endless possibilities.", textAlign: TextAlign.center, style: AppFonts.text16.regular.style),
+          Text("One account, endless possibilities.",
+              textAlign: TextAlign.center, style: AppFonts.text16.regular.style),
           20.verticalSpace,
           CustomTextField(
             controller: registrationNotifier.nameController,
@@ -102,6 +104,13 @@ class OwnerTenantRegistrationPersonalScreen extends ConsumerWidget {
             fieldName: context.locale.email,
             showAsterisk: true,
             validator: (value) => Validations.validateEmail(context, value),
+          ),
+          15.verticalSpace,
+          CustomTextField(
+            controller: registrationNotifier.userIdController,
+            fieldName: "User ID",
+            showAsterisk: true,
+            validator: (value) => Validations.requiredField(context, value),
           ),
           15.verticalSpace,
           CustomTextField(
@@ -123,22 +132,20 @@ class OwnerTenantRegistrationPersonalScreen extends ConsumerWidget {
           CustomButton(
             text: context.locale.next,
             onPressed: () {
-              context.push(AppRoutes.ownerTenantRegistrationAddress);
-              // if (registrationNotifier.validateAndSave()) {
-              //   // Navigate to next screen or call notifier method
-              //   // Example:
-              //   // context.pushNamed('OwnerVendorRegistrationAddress');
-              // }
+              // Implement validation method in RegistrationNotifier if needed
+              if (personalKey.currentState!.validate()) {
+                Navigator.of(context).pushNamed(AppRoutes.customerRegistrationAddress);
+              }
             },
           ),
           15.verticalSpace,
-          _alreadyHaveAnAccount(context, ref),
+          _alreadyHaveAnAccount(context),
         ],
       ),
     );
   }
 
-  Widget _alreadyHaveAnAccount(BuildContext context, WidgetRef ref) {
+  Widget _alreadyHaveAnAccount(BuildContext context) {
     return Text.rich(
       TextSpan(
         text: "Already have an account? ",
@@ -147,9 +154,10 @@ class OwnerTenantRegistrationPersonalScreen extends ConsumerWidget {
           TextSpan(
             text: "Sign in",
             style: AppFonts.text16.semiBold.black.style,
-            recognizer: TapGestureRecognizer()..onTap = () {
-              context.pop();
-            },
+            recognizer: TapGestureRecognizer()
+              ..onTap = () {
+                Navigator.of(context).pop();
+              },
           ),
         ],
       ),

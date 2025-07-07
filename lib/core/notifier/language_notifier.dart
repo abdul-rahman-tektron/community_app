@@ -1,20 +1,16 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:community_app/core/base/base_notifier.dart';
 import 'package:flutter/material.dart';
 
-class LanguageState {
-  final Locale locale;
-  LanguageState(this.locale);
-}
+class LanguageNotifier extends BaseChangeNotifier {
+  Locale _locale = const Locale('en');
 
-class LanguageNotifier extends StateNotifier<LanguageState> {
-  LanguageNotifier() : super(LanguageState(const Locale('en')));
+  Locale get locale => _locale;
 
   void switchLanguage() {
-    final newLocale = state.locale.languageCode == 'en' ? const Locale('ar') : const Locale('en');
-    state = LanguageState(newLocale);
+    _locale = _locale.languageCode == 'en'
+        ? const Locale('ar')
+        : const Locale('en');
+    notifyListeners();
   }
 }
-
-final languageNotifierProvider = StateNotifierProvider<LanguageNotifier, LanguageState>((ref) {
-  return LanguageNotifier();
-});

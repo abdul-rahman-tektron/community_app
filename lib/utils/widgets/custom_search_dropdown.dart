@@ -3,7 +3,7 @@ import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/helpers/validations.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class CustomSearchDropdown<T> extends StatefulWidget {
   final List<T> items;
@@ -346,7 +346,7 @@ class _CustomSearchDropdownState<T> extends State<CustomSearchDropdown<T>> with 
                 child: Container(
                   width: size.width,
                   decoration: BoxDecoration(
-                    color: AppColors.white,
+                    color: AppColors.background,
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: [
                       BoxShadow(

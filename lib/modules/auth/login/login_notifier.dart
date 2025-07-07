@@ -1,21 +1,68 @@
-import 'package:community_app/core/notifier/login_state.dart';
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/core/model/login/login_request.dart';
+import 'package:community_app/core/remote/services/auth_repository.dart';
+import 'package:community_app/utils/helpers/toast_helper.dart';
+import 'package:community_app/utils/router/routes.dart';
+import 'package:community_app/utils/storage/secure_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final loginNotifierProvider = StateNotifierProvider<LoginNotifier, LoginState>(
-      (ref) => LoginNotifier(),
-);
+class LoginNotifier extends BaseChangeNotifier {
+  // Controllers
+  final TextEditingController userNameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController captchaController = TextEditingController();
 
-class LoginNotifier extends StateNotifier<LoginState> {
-  LoginNotifier() : super(const LoginState());
+  // Captcha + Remember Me
+  String? captchaImage;
+  String generatedCaptcha = '';
+  bool isChecked = false;
+  String captchaError = '';
+  String loginError = '';
 
+  // Form
   final formKey = GlobalKey<FormState>();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  bool rememberMe = false;
+
+  LoginNotifier() {
+    initNotifier();
+    _init();
+  }
+
+  Future<void> _init() async {
+    await _loadRememberMeData();
+  }
+
+  Future<void> initNotifier() async {
+    await loadUserRole();
+  }
+
+  Future<void> _loadRememberMeData() async {
+    // String? data = await SecureStorageService.getRememberMe();
+    // if (data != null) {
+    //   final json = jsonDecode(data);
+    //   userNameController.text = json['userName'] ?? '';
+    //   passwordController.text = json['password'] ?? '';
+    //   isChecked = true;
+    //   notifyListeners();
+    // }
+  }
 
   void toggleRememberMe(bool? value) {
-    rememberMe = value ?? false;
+    isChecked = value ?? false;
+    notifyListeners();
+  }
+
+  void generateNewCaptcha() {
+    generatedCaptcha = _generateRandomDigits(6);
+    captchaController.clear();
+    notifyListeners();
+  }
+
+  String _generateRandomDigits(int length) {
+    final rand = Random();
+    return List.generate(length, (_) => rand.nextInt(10)).join();
   }
 
   bool validateAndSave() {
@@ -27,8 +74,42 @@ class LoginNotifier extends StateNotifier<LoginState> {
     return false;
   }
 
+  Future<void> performLogin(BuildContext context) async {
+    if (!validateAndSave()) return;
+
+    try {
+      final request = LoginRequest(
+        email: userNameController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      final result = await AuthRepository().apiUserLogin(request);
+
+      await _handleLoginSuccess(result, context);
+    } catch (e) {
+      ToastHelper.showError('An error occurred. Please try again.');
+      loginError = 'An error occurred';
+      notifyListeners();
+    }
+  }
+
+  Future<void> _handleLoginSuccess(dynamic result, BuildContext context) async {
+    // if (isChecked) {
+    //   await SecureStorageService.setRememberMe(jsonEncode({
+    //     'userName': userNameController.text,
+    //     'password': passwordController.text,
+    //   }));
+    // } else {
+    //   await SecureStorageService.removeRememberMe();
+    // }
+
+    ToastHelper.showSuccess('Login Successful');
+    Navigator.pushReplacementNamed(context, AppRoutes.ownerTenantBottomBar);
+  }
+
   void disposeControllers() {
-    emailController.dispose();
+    userNameController.dispose();
     passwordController.dispose();
+    captchaController.dispose();
   }
 }

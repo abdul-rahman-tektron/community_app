@@ -3,91 +3,90 @@ import 'dart:ui';
 import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
-
 import 'package:community_app/utils/enums.dart';
-import 'package:community_app/utils/extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 
-class LoadingOverlay<T extends BaseNotifier> extends ConsumerWidget {
+class LoadingOverlay<T extends BaseChangeNotifier> extends StatelessWidget {
   final Widget child;
-  final ProviderListenable<dynamic> provider;
-  const LoadingOverlay({super.key, required this.child, required this.provider,});
+  const LoadingOverlay({super.key, required this.child});
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final notifier = ref.watch(provider);
-    final isLoading = notifier.loadingState == LoadingState.busy;
-
-    return Stack(
-      children: [
-        child,
-        if (isLoading)
-          Positioned.fill(
-            child: AbsorbPointer(
-              absorbing: true,
-              child: Container(
-                color: Colors.black12,
-                child: Center(
-                  child: _LoadingBox(),
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _LoadingBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(40),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          width: 180,
-          height: 180,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(40),
-            border: Border.all(color: Colors.white.withOpacity(0.2)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 30,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+    return Consumer<T>(
+      builder: (_, notifier, __) {
+        return Scaffold(
+          body: Stack(
             children: [
-              const SizedBox(
-                height: 80,
-                width: 80,
-                child: DotCircleSpinner(),
-              ),
-              const SizedBox(height: 18),
-              Text(
-                '${context.locale.welcome}...',
-                style: AppFonts.text18.bold.white.style,
-                textAlign: TextAlign.center,
-              ),
+              child,
+              // Always absorb pointer events to block interaction beneath
+              if (notifier.loadingState == LoadingState.busy)
+                Positioned.fill(
+                  child: AbsorbPointer(
+                    absorbing: true,
+                    // Use transparent container so it blocks interaction but doesn't obscure UI when not loading
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: Container(
+                        color: Colors.black12,
+                        child: Center(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(40),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                              child: Container(
+                                width: 180,
+                                height: 180,
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(40),
+                                  border: Border.all(color: Colors.white.withOpacity(0.2)),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.15),
+                                      blurRadius: 30,
+                                      offset: const Offset(0, 10),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const SizedBox(
+                                      height: 80,
+                                      width: 80,
+                                      child: DotCircleSpinner(),
+                                    ),
+                                    const SizedBox(height: 18),
+                                    Text(
+                                      'Loading...',
+                                      style: AppFonts.text18.regular.white.style,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
+
 
 class DotCircleSpinner extends StatefulWidget {
   final double size;
-  final double dotSize;
   final Color color;
+  final double dotSize;
 
   const DotCircleSpinner({
     super.key,
@@ -100,12 +99,17 @@ class DotCircleSpinner extends StatefulWidget {
   State<DotCircleSpinner> createState() => _DotCircleSpinnerState();
 }
 
-class _DotCircleSpinnerState extends State<DotCircleSpinner>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    duration: const Duration(seconds: 1),
-    vsync: this,
-  )..repeat();
+class _DotCircleSpinnerState extends State<DotCircleSpinner> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: this,
+    )..repeat();
+  }
 
   @override
   void dispose() {
@@ -120,13 +124,15 @@ class _DotCircleSpinnerState extends State<DotCircleSpinner>
       height: widget.size,
       child: AnimatedBuilder(
         animation: _controller,
-        builder: (_, __) => CustomPaint(
-          painter: _DotSpinnerPainter(
-            animationValue: _controller.value,
-            dotColor: widget.color,
-            dotSize: widget.dotSize,
-          ),
-        ),
+        builder: (_, __) {
+          return CustomPaint(
+            painter: _DotSpinnerPainter(
+                animationValue: _controller.value,
+                dotColor: widget.color,
+                dotSize: widget.dotSize
+            ),
+          );
+        },
       ),
     );
   }
@@ -136,7 +142,6 @@ class _DotSpinnerPainter extends CustomPainter {
   final double animationValue;
   final double dotSize;
   final Color dotColor;
-  static const int _dotCount = 12;
 
   _DotSpinnerPainter({
     required this.animationValue,
@@ -146,26 +151,28 @@ class _DotSpinnerPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Offset center = size.center(Offset.zero);
-    final double radius = size.width / 2 * 0.7;
+    const int dotCount = 12;
+    final double radius = size.width / 2;
+    final double dotRadius = dotSize;
+    final Offset center = Offset(size.width / 2, size.height / 2);
 
-    for (int i = 0; i < _dotCount; i++) {
-      final double angle = 2 * pi * i / _dotCount;
-      final double dx = center.dx + radius * cos(angle);
-      final double dy = center.dy + radius * sin(angle);
+    for (int i = 0; i < dotCount; i++) {
+      final double angle = 2 * pi * i / dotCount;
+      final double dx = center.dx + radius * 0.7 * cos(angle);
+      final double dy = center.dy + radius * 0.7 * sin(angle);
 
-      final double progress = (animationValue + i / _dotCount) % 1.0;
+      // Create fade delay based on position
+      final double progress = (animationValue + i / dotCount) % 1.0;
       final double opacity = (1.0 - progress).clamp(0.0, 1.0);
 
-      canvas.drawCircle(
-        Offset(dx, dy),
-        dotSize,
-        Paint()..color = dotColor.withOpacity(opacity),
-      );
+      final paint = Paint()
+        ..color = dotColor.withOpacity(opacity)
+        ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(Offset(dx, dy), dotRadius, paint);
     }
   }
 
   @override
-  bool shouldRepaint(covariant _DotSpinnerPainter oldDelegate) =>
-      oldDelegate.animationValue != animationValue;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

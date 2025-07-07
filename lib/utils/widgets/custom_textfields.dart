@@ -7,7 +7,7 @@ import 'package:community_app/utils/helpers/validations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 
 class CustomTextField extends StatefulWidget {
@@ -217,7 +217,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
             autovalidateMode: widget.isAutoValidate ? AutovalidateMode.onUserInteraction : null,
             validator: widget.skipValidation
                 ? null
-                : widget.validator ?? (value) => Validations.validateEmail(context, value),
+                : widget.validator ?? (value) => Validations.requiredField(context, value),
             decoration: _buildInputDecoration(),
           ),
         ),
@@ -246,7 +246,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
   }
 
   InputDecoration _buildInputDecoration() {
-    final color = widget.isEnable ? (widget.backgroundColor ?? AppColors.background) : AppColors.textSecondary;
+    final color = widget.isEnable ? (widget.backgroundColor ?? AppColors.white.withOpacity(0.8)) : AppColors.textSecondary;
     return InputDecoration(
       filled: true,
       fillColor: color,
@@ -262,7 +262,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
       enabledBorder: AppStyles.fieldBorder,
       disabledBorder: AppStyles.fieldBorder,
       errorBorder: AppStyles.errorFieldBorder,
-      focusedBorder: AppStyles.fieldBorder,
+      focusedBorder: AppStyles.focusedFieldBorder,
       focusedErrorBorder: AppStyles.errorFieldBorder,
       errorStyle: AppFonts.text14.regular.red.style,
     );
