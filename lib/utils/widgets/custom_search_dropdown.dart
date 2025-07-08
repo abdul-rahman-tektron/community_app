@@ -346,7 +346,7 @@ class _CustomSearchDropdownState<T> extends State<CustomSearchDropdown<T>> with 
                 child: Container(
                   width: size.width,
                   decoration: BoxDecoration(
-                    color: AppColors.background,
+                    color: AppColors.white,
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: [
                       BoxShadow(
@@ -511,7 +511,7 @@ class _CustomSearchDropdownState<T> extends State<CustomSearchDropdown<T>> with 
               filled: true,
               fillColor: isDisabled
                   ? AppColors.textSecondary
-                  : AppColors.background,
+                  : AppColors.white.withOpacity(0.8),
               suffixIcon: Padding(
                 padding: const EdgeInsets.only(right: 10.0, left: 10.0),
                 child: Row(
@@ -548,7 +548,7 @@ class _CustomSearchDropdownState<T> extends State<CustomSearchDropdown<T>> with 
               ),
               border: _defaultBorder(),
               enabledBorder: _defaultBorder(),
-              focusedBorder: _defaultBorder(),
+              focusedBorder: _defaultFocusedBorder(),
               errorBorder: AppStyles.errorFieldBorder,
               focusedErrorBorder: AppStyles.errorFieldBorder,
               disabledBorder: _defaultBorder(),
@@ -562,6 +562,10 @@ class _CustomSearchDropdownState<T> extends State<CustomSearchDropdown<T>> with 
 
   OutlineInputBorder _defaultBorder() {
     return AppStyles.fieldBorder;
+  }
+
+  OutlineInputBorder _defaultFocusedBorder() {
+    return AppStyles.focusedFieldBorder;
   }
 }
 

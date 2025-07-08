@@ -11,4 +11,5 @@ class AppColors {
   static const textPrimary = Color(0xFF000000);
   static const textSecondary = Color(0xFF757575);
   static const error = Color(0xFFB00020);
+  static const polylineColor = Color(0xFF00008B);
 }

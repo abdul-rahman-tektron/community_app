@@ -186,7 +186,7 @@ class VendorRegistrationTradingScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _IconOption(
+                    IconOption(
                       icon: LucideIcons.camera,
                       label: 'Camera',
                       onTap: () async {
@@ -195,7 +195,7 @@ class VendorRegistrationTradingScreen extends StatelessWidget {
                         if (file != null) onPicked(file);
                       },
                     ),
-                    _IconOption(
+                    IconOption(
                       icon: LucideIcons.image,
                       label: 'Gallery',
                       onTap: () async {
@@ -233,12 +233,12 @@ class VendorRegistrationTradingScreen extends StatelessWidget {
   }
 }
 
-class _IconOption extends StatelessWidget {
+class IconOption extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
 
-  const _IconOption({
+  const IconOption({super.key,
     required this.icon,
     required this.label,
     required this.onTap,

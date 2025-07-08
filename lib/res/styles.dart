@@ -23,4 +23,12 @@ class AppStyles {
     borderRadius: BorderRadius.circular(10),
     borderSide: const BorderSide(color: AppColors.error),
   );
+
+  static BoxDecoration commonDecoration = BoxDecoration(
+    color: AppColors.white,
+    borderRadius: BorderRadius.circular(10),
+    boxShadow: const [
+      BoxShadow(color: Colors.black12, blurRadius: 7),
+    ],
+  );
 }

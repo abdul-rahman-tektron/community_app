@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:community_app/modules/customer/registration/registration_handler.dart';
+import 'package:community_app/modules/customer/tracking/tracking_screen.dart';
 import 'package:community_app/modules/vendor/registration/registration_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:community_app/modules/auth/login/login_screen.dart';
@@ -8,9 +9,9 @@ import 'package:community_app/modules/common/error_screen.dart';
 import 'package:community_app/modules/common/network_error_screen.dart';
 import 'package:community_app/modules/common/location/location_screen.dart';
 import 'package:community_app/modules/customer/bottom_bar/bottom_screen.dart';
-import 'package:community_app/modules/customer/registration/registration_address.dart';
-import 'package:community_app/modules/customer/registration/registration_personal.dart';
-import 'package:community_app/modules/vendor/registration/registration_personal.dart';
+
+import '../../modules/customer/new_services/new_services_screen.dart';
+
 
 class AppRoutes {
   static const String login = '/login';
@@ -24,10 +25,10 @@ class AppRoutes {
   static const String vendorRegistrationTrading = '/vendor-registration-trading';
   static const String vendorRegistrationBank = '/vendor-registration-bank';
   static const String mapLocation = '/map-location';
+  static const String tracking = '/tracking';
   static const String customerBottomBar = '/customer-bottom-bar';
   static const String ownerTenantBottomBar = '/owner-tenant-bottom-bar';
-  static const String applyPass = '/apply-pass';
-  static const String pdfViewer = '/pdf-viewer';
+  static const String newServices = '/new_services';
   static const String networkError = '/network-error';
   static const String notFound = '/not-found';
 }
@@ -54,6 +55,12 @@ class AppRouter {
       case AppRoutes.customerBottomBar:
         final currentIndex = settings.arguments as int;
         screen = CustomerBottomScreen(currentIndex: currentIndex,);
+        break;
+        case AppRoutes.newServices:
+        screen = NewServicesScreen();
+        break;
+        case AppRoutes.tracking:
+        screen = TrackingScreen();
         break;
       case AppRoutes.networkError:
         screen = const NetworkErrorScreen();

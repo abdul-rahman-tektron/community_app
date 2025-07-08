@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:community_app/core/generated_locales/l10n.dart';
+import 'package:community_app/utils/enums.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 
 extension LocalizationX on BuildContext {
@@ -42,5 +44,28 @@ extension FileBase64Extension on File {
   Future<String> toBase64() async {
     final bytes = await readAsBytes();
     return base64Encode(bytes);
+  }
+}
+
+extension DateFormatExtension on DateTime {
+  String formatDateTime({bool withTime = false}) {
+    final pattern = withTime ? 'dd/MM/yyyy, hh:mm a' : 'dd/MM/yyyy';
+    return DateFormat(pattern).format(this);
+  }
+
+  String formatDate() => DateFormat('dd MMM yyyy').format(this); // e.g. 08 Jul 2025
+  String formatTime() => DateFormat('hh:mm a').format(this); // e.g. 03:45 PM
+}
+
+extension UpcomingServiceStatusExtension on UpcomingServiceStatus {
+  String get displayName {
+    switch (this) {
+      case UpcomingServiceStatus.tracking:
+        return "Tracking";
+      case UpcomingServiceStatus.inProgress:
+        return "In Progress";
+      case UpcomingServiceStatus.completed:
+        return "Completed";
+    }
   }
 }

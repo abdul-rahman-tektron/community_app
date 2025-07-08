@@ -139,7 +139,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   String _formatDateTime(DateTime? date) {
     if (date == null) return '';
-    final pattern = widget.needTime ? 'dd/MM/yyyy, hh:mm a' : 'dd/MM/yyyy';
+    final pattern = widget.needTime ? 'M/d/yyyy h:mm a' : 'M/d/yyyy';
     return DateFormat(pattern).format(date);
   }
 
@@ -173,7 +173,30 @@ class _CustomTextFieldState extends State<CustomTextField> {
         final time = await showTimePicker(
           context: context,
           initialTime: TimeOfDay.fromDateTime(_selectedDate ?? DateTime.now()),
+          builder: (context, child) => Theme(
+            data: Theme.of(context).copyWith(
+              timePickerTheme: TimePickerThemeData(
+                backgroundColor: Colors.white,
+                hourMinuteTextColor: Colors.black,
+                dayPeriodColor: AppColors.primary,
+                dialHandColor: AppColors.primary,
+                dialBackgroundColor: Colors.grey.shade200,
+                entryModeIconColor: AppColors.primary,
+              ),
+              colorScheme: ColorScheme.light(
+                primary: AppColors.primary,
+                onPrimary: Colors.white,
+                onSurface: Colors.black,
+              ),
+              textButtonTheme: TextButtonThemeData(
+                style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+              ),
+            ),
+            child: child!,
+          ),
         );
+
+
         if (time != null) {
           finalDateTime = DateTime(picked.year, picked.month, picked.day, time.hour, time.minute);
         }

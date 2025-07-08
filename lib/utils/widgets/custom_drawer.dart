@@ -8,10 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class CommonDrawer extends StatelessWidget {
+class CustomDrawer extends StatelessWidget {
   final Function(int)? onItemSelected;
 
-  const CommonDrawer({super.key, this.onItemSelected});
+  const CustomDrawer({super.key, this.onItemSelected});
 
   @override
   Widget build(BuildContext context) {

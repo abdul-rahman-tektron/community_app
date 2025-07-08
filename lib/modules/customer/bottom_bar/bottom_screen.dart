@@ -32,8 +32,8 @@ class CustomerBottomScreen extends StatelessWidget {
       child: SafeArea(
         child: Scaffold(
           backgroundColor: AppColors.background,
-          appBar: CommonAppBar(),
-          drawer: CommonDrawer(),
+          appBar: CustomAppBar(),
+          drawer: CustomDrawer(),
           body: bottomBarNotifier.currentScreen,
           bottomNavigationBar: CustomBottomNavBar(
             currentIndex: bottomBarNotifier.currentIndex,

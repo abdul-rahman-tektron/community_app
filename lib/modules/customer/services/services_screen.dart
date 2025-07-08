@@ -1,7 +1,10 @@
 import 'package:community_app/modules/customer/services/services_notifier.dart';
-import 'package:community_app/utils/widgets/custom_app_bar.dart';
-import 'package:community_app/utils/widgets/custom_buttons.dart';
+import 'package:community_app/modules/customer/services/widgets/new_service_button.dart';
+import 'package:community_app/modules/customer/services/widgets/previous_services.dart';
+import 'package:community_app/modules/customer/services/widgets/upcoming_services.dart';
+import 'package:community_app/utils/router/routes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 class ServicesScreen extends StatelessWidget {
@@ -23,11 +26,26 @@ class ServicesScreen extends StatelessWidget {
     return SafeArea(
       child: Scaffold(
         body: Padding(
-          padding: const EdgeInsets.all(15),
-          child: Column(
-            children: [
-              CustomButton(text: "New Service", onPressed: () {},),
-            ],
+          padding: const EdgeInsets.only(top: 15.0),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                NewServiceButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(AppRoutes.newServices);
+                  },
+                ),
+                20.verticalSpace,
+                UpcomingServicesWidget(
+                  upcomingServices: servicesNotifier.upcomingServices,
+                ),
+                20.verticalSpace,
+                PreviousServicesWidget(
+                  previousServices: servicesNotifier.previousServices,
+                ),
+              ],
+            ),
           ),
         ),
       ),

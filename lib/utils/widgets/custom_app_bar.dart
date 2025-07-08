@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const CommonAppBar({super.key});
+class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const CustomAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,6 +15,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
         onTap: () => Scaffold.of(context).openDrawer(),
         child: Icon(LucideIcons.logs, color: AppColors.textPrimary, size: 25.r),
       ),
+      scrolledUnderElevation: 0,
       centerTitle: true,
       title: Image.asset(AppImages.logo, height: 50),
       actionsPadding: const EdgeInsets.symmetric(horizontal: 14.0),

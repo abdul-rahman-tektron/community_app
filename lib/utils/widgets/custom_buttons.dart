@@ -114,7 +114,7 @@ class CustomUploadButton extends StatelessWidget {
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor ?? AppColors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radius ?? 50),
           side: const BorderSide(color: AppColors.primary, width: 1),
@@ -123,8 +123,8 @@ class CustomUploadButton extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon ?? LucideIcons.paperclip, color: AppColors.primary),
-          5.horizontalSpace,
+          Icon(icon ?? LucideIcons.upload, color: AppColors.primary),
+          8.horizontalSpace,
           Text(text, style: textStyle ?? AppFonts.text14.medium.white.style),
         ],
       ),

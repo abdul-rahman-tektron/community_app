@@ -12,6 +12,7 @@ class NewServicesNotifier extends BaseChangeNotifier {
   // Controllers
   final issueController = TextEditingController();
   final categoryController = TextEditingController();
+  final priorityController = TextEditingController();
   final mobileNumberController = TextEditingController();
   final mobileController = TextEditingController();
   final expectedDateController = TextEditingController(); // For display
@@ -20,7 +21,8 @@ class NewServicesNotifier extends BaseChangeNotifier {
   String? _category;
   String? _priority;
   DateTime? _expectedDateTime;
-  File? _uploadedPhoto;
+  File? _uploadedFile;
+  String? _uploadedFileName;
 
   // Dropdown data
   final List<String> categoryDropdownData = [
@@ -40,7 +42,7 @@ class NewServicesNotifier extends BaseChangeNotifier {
     'Low',
     'Medium',
     'High',
-    'Urgent'
+    'Emergency'
   ];
 
   // Methods
@@ -78,14 +80,6 @@ class NewServicesNotifier extends BaseChangeNotifier {
     }
   }
 
-  Future<void> uploadPhoto({bool fromCamera = false}) async {
-    final file = await FileUploadHelper.pickImage(fromCamera: fromCamera);
-    if (file != null) {
-      uploadedPhoto = file;
-      notifyListeners();
-    }
-  }
-
   Future<void> submitServiceRequest(BuildContext context) async {
     try {
       if (category == null || priority == null || issueController.text.isEmpty || mobileController.text.isEmpty || expectedDateTime == null) {
@@ -105,6 +99,17 @@ class NewServicesNotifier extends BaseChangeNotifier {
       print(e);
       print(stackTrace);
       notifyListeners();
+    }
+  }
+
+  Future<void> pickImageOrVideo() async {
+    final file = await FileUploadHelper.pickImageOrVideo();
+    if (file != null) {
+      uploadedFile = file;
+      uploadedFileName = file.path.split('/').last;
+    } else {
+      uploadedFile = null;
+      uploadedFileName = null;
     }
   }
 
@@ -142,10 +147,19 @@ class NewServicesNotifier extends BaseChangeNotifier {
     }
   }
 
-  File? get uploadedPhoto => _uploadedPhoto;
-  set uploadedPhoto(File? value) {
-    if (_uploadedPhoto != value) {
-      _uploadedPhoto = value;
+  File? get uploadedFile => _uploadedFile;
+  set uploadedFile(File? value) {
+    if (_uploadedFile != value) {
+      _uploadedFile = value;
+      notifyListeners();
+    }
+  }
+
+  String? get uploadedFileName => _uploadedFileName;
+
+  set uploadedFileName(String? value) {
+    if (_uploadedFileName != value) {
+      _uploadedFileName = value;
       notifyListeners();
     }
   }
