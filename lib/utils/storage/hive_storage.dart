@@ -38,6 +38,15 @@ class HiveStorageService {
     return _box.get(HiveKeys.userCategory);
   }
 
+  //
+  static Future<void> setUserData(String flow) async {
+    await _box.put(HiveKeys.userData, flow);
+  }
+
+  static String? getUserData() {
+    return _box.get(HiveKeys.userData);
+  }
+
   /// Remove specific key
   static Future<void> remove(String key) async {
     await _box.delete(key);

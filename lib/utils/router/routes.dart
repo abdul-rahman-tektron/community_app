@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:community_app/modules/customer/registration/registration_handler.dart';
 import 'package:community_app/modules/customer/tracking/tracking_screen.dart';
+import 'package:community_app/modules/vendor/bottom_bar/bottom_bar_screen.dart';
 import 'package:community_app/modules/vendor/registration/registration_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:community_app/modules/auth/login/login_screen.dart';
@@ -11,7 +12,6 @@ import 'package:community_app/modules/common/location/location_screen.dart';
 import 'package:community_app/modules/customer/bottom_bar/bottom_screen.dart';
 
 import '../../modules/customer/new_services/new_services_screen.dart';
-
 
 class AppRoutes {
   static const String login = '/login';
@@ -27,6 +27,7 @@ class AppRoutes {
   static const String mapLocation = '/map-location';
   static const String tracking = '/tracking';
   static const String customerBottomBar = '/customer-bottom-bar';
+  static const String vendorBottomBar = '/vendor-bottom-bar';
   static const String ownerTenantBottomBar = '/owner-tenant-bottom-bar';
   static const String newServices = '/new_services';
   static const String networkError = '/network-error';
@@ -54,12 +55,16 @@ class AppRouter {
         break;
       case AppRoutes.customerBottomBar:
         final currentIndex = settings.arguments as int;
-        screen = CustomerBottomScreen(currentIndex: currentIndex,);
+        screen = CustomerBottomScreen(currentIndex: currentIndex);
         break;
-        case AppRoutes.newServices:
+      case AppRoutes.vendorBottomBar:
+        final currentIndex = settings.arguments as int;
+        screen = VendorBottomScreen(currentIndex: currentIndex);
+        break;
+      case AppRoutes.newServices:
         screen = NewServicesScreen();
         break;
-        case AppRoutes.tracking:
+      case AppRoutes.tracking:
         screen = TrackingScreen();
         break;
       case AppRoutes.networkError:

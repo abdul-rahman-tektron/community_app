@@ -98,9 +98,9 @@ class LoginScreen extends StatelessWidget {
         children: [
           CustomTextField(
             controller: loginNotifier.userNameController,
-            fieldName: context.locale.emailOrPhone,
+            fieldName: "User ID",
             showAsterisk: false,
-            validator: (value) => Validations.validateEmail(context, value),
+            validator: (value) => Validations.validateUserID(context, value),
           ),
           15.verticalSpace,
           CustomTextField(

@@ -10,17 +10,22 @@ import 'package:community_app/utils/widgets/custom_textfields.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:provider/provider.dart';
 
 class VendorRegistrationPersonalScreen extends StatelessWidget {
-  final VendorRegistrationNotifier registrationNotifier;
-  const VendorRegistrationPersonalScreen({super.key, required this.registrationNotifier});
+  const VendorRegistrationPersonalScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return _buildBody(context);
+    return Consumer<VendorRegistrationNotifier>(
+      builder: (context, vendorRegistrationNotifier, child) {
+        return _buildBody(context, vendorRegistrationNotifier);
+      },
+    );
   }
 
-  Widget _buildBody(BuildContext context) {
+  Widget _buildBody(BuildContext context, VendorRegistrationNotifier vendorRegistrationNotifier) {
     final personalKey = GlobalKey<FormState>();
     return SafeArea(
       child: Scaffold(
@@ -28,10 +33,7 @@ class VendorRegistrationPersonalScreen extends StatelessWidget {
           child: Form(
             key: personalKey,
             child: Column(
-              children: [
-                _imageView(context),
-                _mainContent(context, personalKey),
-              ],
+              children: [_imageView(context), _mainContent(context, personalKey, vendorRegistrationNotifier)],
             ),
           ),
         ),
@@ -48,11 +50,10 @@ class VendorRegistrationPersonalScreen extends StatelessWidget {
         image: DecorationImage(
           image: AssetImage(AppImages.loginImage),
           fit: BoxFit.cover,
-          colorFilter:
-          ColorFilter.mode(Colors.black.withOpacity(0.6), BlendMode.darken),
+          colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.6), BlendMode.darken),
         ),
       ),
-      child: Stack(children: [_buildLogo(), _buildBottomText(context)]),
+      child: Stack(children: [_buildLogo(), _buildBackButton(context), _buildBottomText(context)]),
     );
   }
 
@@ -70,17 +71,38 @@ class VendorRegistrationPersonalScreen extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(context.locale.welcomeToCommunityApp,
-              style: AppFonts.text20.semiBold.white.style),
+          Text(context.locale.welcomeToCommunityApp, style: AppFonts.text20.semiBold.white.style),
           10.verticalSpace,
-          Text(context.locale.connectingResidents,
-              style: AppFonts.text16.regular.white.style),
+          Text(context.locale.connectingResidents, style: AppFonts.text16.regular.white.style),
         ],
       ),
     );
   }
 
-  Widget _mainContent(BuildContext context, GlobalKey<FormState> personalKey) {
+  Widget _buildBackButton(BuildContext context) {
+    return Align(
+      alignment: Alignment.topRight,
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context, rootNavigator: true).pop();
+        },
+        child: Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(LucideIcons.arrowLeft),
+        ),
+      ),
+    );
+  }
+
+  Widget _mainContent(
+    BuildContext context,
+    GlobalKey<FormState> personalKey,
+    VendorRegistrationNotifier vendorRegistrationNotifier,
+  ) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 15.w),
       child: Column(
@@ -88,48 +110,51 @@ class VendorRegistrationPersonalScreen extends StatelessWidget {
         children: [
           Text("Create Your Account", style: AppFonts.text24.semiBold.style),
           5.verticalSpace,
-          Text("One account, endless possibilities.",
-              textAlign: TextAlign.center, style: AppFonts.text16.regular.style),
+          Text(
+            "One account, endless possibilities.",
+            textAlign: TextAlign.center,
+            style: AppFonts.text16.regular.style,
+          ),
           20.verticalSpace,
           CustomTextField(
-            controller: registrationNotifier.nameController,
+            controller: vendorRegistrationNotifier.nameController,
             fieldName: context.locale.fullName,
             showAsterisk: true,
             validator: (value) => Validations.validateName(context, value),
           ),
           15.verticalSpace,
           CustomTextField(
-            controller: registrationNotifier.emailController,
+            controller: vendorRegistrationNotifier.emailController,
             fieldName: context.locale.email,
             showAsterisk: true,
             validator: (value) => Validations.validateEmail(context, value),
           ),
           15.verticalSpace,
           CustomTextField(
-            controller: registrationNotifier.userIdController,
+            controller: vendorRegistrationNotifier.userIdController,
             fieldName: "User ID",
             showAsterisk: true,
-            validator: (value) => Validations.requiredField(context, value),
+            validator: (value) => Validations.validateUserID(context, value),
           ),
           15.verticalSpace,
           CustomTextField(
-            controller: registrationNotifier.contact1Controller,
+            controller: vendorRegistrationNotifier.contact1Controller,
             fieldName: "Contact Number 1",
             showAsterisk: true,
             keyboardType: TextInputType.phone,
-            validator: (value) => Validations.validateMobile(context, value),
+            validator: (value) => Validations.validateContact1(context, value),
           ),
           15.verticalSpace,
           CustomTextField(
-            controller: registrationNotifier.contact2Controller,
+            controller: vendorRegistrationNotifier.contact2Controller,
             fieldName: "Contact Number 2",
             showAsterisk: true,
             keyboardType: TextInputType.phone,
-            validator: (value) => Validations.validateMobile(context, value),
+            validator: (value) => Validations.validateContact2(context, value),
           ),
           15.verticalSpace,
           CustomTextField(
-            controller: registrationNotifier.passwordController,
+            controller: vendorRegistrationNotifier.passwordController,
             fieldName: context.locale.password,
             showAsterisk: true,
             isPassword: true,
@@ -163,7 +188,7 @@ class VendorRegistrationPersonalScreen extends StatelessWidget {
             style: AppFonts.text16.semiBold.black.style,
             recognizer: TapGestureRecognizer()
               ..onTap = () {
-                Navigator.of(context).pop();
+                Navigator.of(rootNavigator: true, context).pop();
               },
           ),
         ],

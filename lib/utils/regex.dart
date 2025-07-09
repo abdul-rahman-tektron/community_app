@@ -5,7 +5,7 @@ class RegexPatterns {
   static const email = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
 
   /// 10-digit phone number (adjust as needed for international)
-  static const phone = r'^\d{10}$';
+  static const String phone = r'^\d{8,14}$';
 
   /// Strong password (min 8 chars, at least 1 letter, 1 number)
   static const password = r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$';

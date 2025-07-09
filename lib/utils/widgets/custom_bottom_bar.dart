@@ -1,31 +1,52 @@
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
-import 'package:community_app/utils/helpers/screen_size.dart';
+import 'package:community_app/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
+  final UserRole userRole;
   final Function(int) onTap;
 
   CustomBottomNavBar({
     super.key,
     required this.currentIndex,
+    required this.userRole,
     required this.onTap,
   });
 
-  final List<IconData> _icons = [
+  // Customer (tenant or owner)
+  final List<IconData> _customerIcons = [
     LucideIcons.layoutDashboard,
     LucideIcons.search,
     LucideIcons.brushCleaning,
   ];
 
-  final List<String> _labels = [
+  final List<String> _customerLabels = [
     "Dashboard",
     "Explore",
     "Services",
   ];
+
+  // Vendor
+  final List<IconData> _vendorIcons = [
+    LucideIcons.layoutDashboard,
+    LucideIcons.badgePercent,
+    LucideIcons.brushCleaning,
+  ];
+
+  final List<String> _vendorLabels = [
+    "Dashboard",
+    "Quotation",
+    "Jobs",
+  ];
+
+  bool get isCustomer => userRole == UserRole.tenant || userRole == UserRole.owner;
+
+  List<IconData> get _icons => isCustomer ? _customerIcons : _vendorIcons;
+  List<String> get _labels => isCustomer ? _customerLabels : _vendorLabels;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +69,8 @@ class CustomBottomNavBar extends StatelessWidget {
                   duration: const Duration(milliseconds: 300),
                   padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                   decoration: BoxDecoration(
-                    gradient: isSelected ? LinearGradient(
+                    gradient: isSelected
+                        ? LinearGradient(
                       colors: [
                         AppColors.primary,
                         AppColors.primary.withOpacity(0.9),
@@ -61,7 +83,8 @@ class CustomBottomNavBar extends StatelessWidget {
                       begin: Alignment.bottomLeft,
                       end: Alignment.topRight,
                       stops: const [0.0, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0],
-                    ) : null,
+                    )
+                        : null,
                     borderRadius: BorderRadius.circular(50),
                   ),
                   child: Row(

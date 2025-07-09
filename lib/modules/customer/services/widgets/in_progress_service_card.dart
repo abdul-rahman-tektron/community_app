@@ -55,8 +55,8 @@ class InProgressServiceCard extends StatelessWidget {
       children: [
         _iconBox(
           icon: LucideIcons.clockFading,
-          bgColor: const Color(0xffeff7ef),
-          iconColor: Colors.green,
+          bgColor: const Color(0xFFE6E6E6),
+          iconColor: Colors.grey,
         ),
         10.horizontalSpace,
         Expanded(

@@ -62,7 +62,7 @@ class CompletedServiceCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(color: const Color(0xffeff7ef), borderRadius: BorderRadius.circular(5)),
-      child: const Icon(LucideIcons.clockFading, color: Colors.green, size: 20),
+      child: const Icon(LucideIcons.check, color: Colors.green, size: 20),
     );
   }
 

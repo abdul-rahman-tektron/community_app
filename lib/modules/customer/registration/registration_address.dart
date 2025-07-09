@@ -14,20 +14,23 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:provider/provider.dart';
 
 class CustomerRegistrationAddressScreen extends StatelessWidget {
-  final CustomerRegistrationNotifier registrationNotifier;
   const CustomerRegistrationAddressScreen({
-    super.key,
-    required this.registrationNotifier,
+    super.key
   });
 
   @override
   Widget build(BuildContext context) {
-    return buildBody(context);
+    return Consumer<CustomerRegistrationNotifier>(
+      builder: (context, customerRegistrationNotifier, child) {
+        return buildBody(context, customerRegistrationNotifier);
+      },
+    );
   }
 
-  Widget buildBody(BuildContext context) {
+  Widget buildBody(BuildContext context, CustomerRegistrationNotifier customerChangeNotifier) {
     final addressKey = GlobalKey<FormState>();
     return SafeArea(
       child: Scaffold(
@@ -37,7 +40,7 @@ class CustomerRegistrationAddressScreen extends StatelessWidget {
             child: Column(
               children: [
                 imageView(context),
-                mainContent(context, addressKey),
+                mainContent(context, addressKey, customerChangeNotifier),
               ],
             ),
           ),
@@ -58,7 +61,7 @@ class CustomerRegistrationAddressScreen extends StatelessWidget {
           colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.6), BlendMode.darken),
         ),
       ),
-      child: Stack(children: [_buildLogo(), _buildBottomText(context)]),
+      child: Stack(children: [_buildLogo(), _buildBackButton(context), _buildBottomText(context)]),
     );
   }
 
@@ -66,6 +69,25 @@ class CustomerRegistrationAddressScreen extends StatelessWidget {
     return Align(
       alignment: Alignment.topLeft,
       child: Image.asset(width: 100.w, AppImages.tektronLogo, fit: BoxFit.contain),
+    );
+  }
+
+  Widget _buildBackButton(BuildContext context) {
+    return Align(
+      alignment: Alignment.topRight,
+      child: InkWell(
+        onTap: () {
+          Navigator.pop(context);
+        },
+        child: Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(LucideIcons.arrowLeft),
+        ),
+      ),
     );
   }
 
@@ -84,7 +106,7 @@ class CustomerRegistrationAddressScreen extends StatelessWidget {
     );
   }
 
-  Widget mainContent(BuildContext context, GlobalKey<FormState> addressKey) {
+  Widget mainContent(BuildContext context, GlobalKey<FormState> addressKey, CustomerRegistrationNotifier customerChangeNotifier) {
     // Use the notifier directly since state is inside it
 
 
@@ -98,13 +120,14 @@ class CustomerRegistrationAddressScreen extends StatelessWidget {
           CustomSearchDropdown<String>(
             fieldName: "Community",
             hintText: "Enter Community",
-            controller: registrationNotifier.communityController,
-            items: registrationNotifier.dummyCommunityList,
+            controller: customerChangeNotifier.communityController,
+            items: customerChangeNotifier.dummyCommunityList,
             currentLang: 'en', // You need to inject language if needed
             itemLabel: (item, lang) => item, // Simplified for example
             onSelected: (String? menu) {
-              registrationNotifier.setCommunity(menu);
+              customerChangeNotifier.setCommunity(menu);
             },
+            validator: (value) => Validations.validateCommunity(context, value),
           ),
           15.verticalSpace,
           Row(
@@ -112,10 +135,10 @@ class CustomerRegistrationAddressScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: CustomTextField(
-                  controller: registrationNotifier.addressController,
+                  controller: customerChangeNotifier.addressController,
                   fieldName: "Address",
                   showAsterisk: true,
-                  validator: (value) => Validations.validateName(context, value),
+                  validator: (value) => Validations.validateAddress(context, value),
                 ),
               ),
               10.horizontalSpace,
@@ -123,10 +146,10 @@ class CustomerRegistrationAddressScreen extends StatelessWidget {
                 onTap: () async {
                   final result = await Navigator.of(context, rootNavigator: true).pushNamed(AppRoutes.mapLocation);
                   if (result != null && result is MapData) {
-                    registrationNotifier.addressController.text = result.address;
-                    registrationNotifier.buildingController.text = result.building;
-                    registrationNotifier.blockController.text = result.block;
-                    registrationNotifier.setLatLng(result.latitude, result.longitude);
+                    customerChangeNotifier.addressController.text = result.address;
+                    customerChangeNotifier.buildingController.text = result.building;
+                    customerChangeNotifier.blockController.text = result.block;
+                    customerChangeNotifier.setLatLng(result.latitude, result.longitude);
                   }
                 },
                 child: Container(
@@ -143,24 +166,26 @@ class CustomerRegistrationAddressScreen extends StatelessWidget {
           ),
           15.verticalSpace,
           CustomTextField(
-            controller: registrationNotifier.buildingController,
+            controller: customerChangeNotifier.buildingController,
             fieldName: "Building",
             showAsterisk: true,
+            validator: (value) => Validations.validateBuilding(context, value),
           ),
           15.verticalSpace,
           CustomTextField(
-            controller: registrationNotifier.blockController,
+            controller: customerChangeNotifier.blockController,
             fieldName: "Block",
             showAsterisk: true,
+            validator: (value) => Validations.validateBlock(context, value),
           ),
           40.verticalSpace,
-          privacyPolicyWidget(context),
+          privacyPolicyWidget(context, customerChangeNotifier),
           10.verticalSpace,
           CustomButton(
-            text: context.locale.next,
+            text: context.locale.signUp,
             onPressed: () {
               if(addressKey.currentState!.validate()) {
-                registrationNotifier.performRegistration(context);
+                customerChangeNotifier.performRegistration(context);
               }
             },
           ),
@@ -171,11 +196,11 @@ class CustomerRegistrationAddressScreen extends StatelessWidget {
     );
   }
 
-  Widget privacyPolicyWidget(BuildContext context) {
+  Widget privacyPolicyWidget(BuildContext context, CustomerRegistrationNotifier customerChangeNotifier) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
-        registrationNotifier.togglePrivacyPolicy();
+        customerChangeNotifier.togglePrivacyPolicy();
       },
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 5.h),
@@ -188,14 +213,19 @@ class CustomerRegistrationAddressScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border.all(color: AppColors.primary, width: 1.5),
                 borderRadius: BorderRadius.circular(6),
-                color: registrationNotifier.acceptedPrivacyPolicy ? AppColors.white : Colors.transparent,
+                color: customerChangeNotifier.acceptedPrivacyPolicy ? AppColors.white : Colors.transparent,
               ),
-              child: registrationNotifier.acceptedPrivacyPolicy
+              child: customerChangeNotifier.acceptedPrivacyPolicy
                   ? Icon(LucideIcons.check, size: 17, color: Colors.black)
                   : null,
             ),
             12.horizontalSpace,
-            Text(context.locale.rememberMe, style: AppFonts.text14.regular.style),
+            Expanded(
+              child: Text(
+                  "By creating this accounts means you agree to the Terms and Conditions, and our Privacy Policy",
+                style: AppFonts.text14.regular.style,
+              ),
+            ),
           ],
         ),
       ),

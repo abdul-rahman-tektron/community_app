@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 class CustomerRegistrationNotifier extends BaseChangeNotifier {
   CustomerRegistrationNotifier() {
-    // Initialize controllers
+
   }
 
   final nameController = TextEditingController();
@@ -63,7 +63,10 @@ class CustomerRegistrationNotifier extends BaseChangeNotifier {
         block: blockController.text.trim(),
         latitude: latitude.toString(),
         longitude: longitude.toString(),
-        customerId: 2,
+        type: "C",
+        customerType: "T",
+        typeId: 1,
+        createdBy: nameController.text.trim(),
       );
 
       final result = await AuthRepository().apiCustomerRegister(request);

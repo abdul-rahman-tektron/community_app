@@ -40,7 +40,7 @@ class TrackingServiceCard extends StatelessWidget {
         children: [
           TextSpan(
             text: "Service ID: ",
-            style: AppFonts.text16.semiBold.style,
+            style: AppFonts.text16.regular.style,
           ),
           TextSpan(
             text: "#${service.id}",
@@ -85,12 +85,12 @@ class TrackingServiceCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
-        color: const Color(0xffeff7ef),
+        color: const Color(0xFFE6E6E6),
         borderRadius: BorderRadius.circular(5),
       ),
       child: const Icon(
         LucideIcons.clockFading,
-        color: Colors.green,
+        color: Colors.grey,
         size: 20,
       ),
     );
@@ -100,7 +100,7 @@ class TrackingServiceCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Estimated Arrival:", style: AppFonts.text14.semiBold.style),
+        Text("Estimated Arrival:", style: AppFonts.text14.regular.style),
         SizedBox(height: 4.h),
         Text(arrival, style: AppFonts.text14.regular.style),
       ],

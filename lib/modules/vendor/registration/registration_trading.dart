@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:community_app/core/model/map/map_data.dart';
-import 'package:community_app/modules/customer/registration/registration_notifier.dart';
 import 'package:community_app/modules/vendor/registration/registration_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
@@ -12,26 +10,28 @@ import 'package:community_app/utils/helpers/screen_size.dart';
 import 'package:community_app/utils/helpers/validations.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
-import 'package:community_app/utils/widgets/custom_search_dropdown.dart';
 import 'package:community_app/utils/widgets/custom_textfields.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:provider/provider.dart';
 
 class VendorRegistrationTradingScreen extends StatelessWidget {
-  final VendorRegistrationNotifier registrationNotifier;
   const VendorRegistrationTradingScreen({
     super.key,
-    required this.registrationNotifier,
   });
 
   @override
   Widget build(BuildContext context) {
-    return buildBody(context);
+    return Consumer<VendorRegistrationNotifier>(
+      builder: (context, vendorRegistrationNotifier, child) {
+        return buildBody(context, vendorRegistrationNotifier);
+      },
+    );
   }
 
-  Widget buildBody(BuildContext context) {
+  Widget buildBody(BuildContext context, VendorRegistrationNotifier vendorRegistrationNotifier) {
     final addressKey = GlobalKey<FormState>();
     return SafeArea(
       child: Scaffold(
@@ -41,7 +41,7 @@ class VendorRegistrationTradingScreen extends StatelessWidget {
             child: Column(
               children: [
                 imageView(context),
-                mainContent(context, addressKey),
+                mainContent(context, addressKey, vendorRegistrationNotifier),
               ],
             ),
           ),
@@ -62,7 +62,7 @@ class VendorRegistrationTradingScreen extends StatelessWidget {
           colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.6), BlendMode.darken),
         ),
       ),
-      child: Stack(children: [_buildLogo(), _buildBottomText(context)]),
+      child: Stack(children: [_buildLogo(), _buildBackButton(context), _buildBottomText(context)]),
     );
   }
 
@@ -70,6 +70,25 @@ class VendorRegistrationTradingScreen extends StatelessWidget {
     return Align(
       alignment: Alignment.topLeft,
       child: Image.asset(width: 100.w, AppImages.tektronLogo, fit: BoxFit.contain),
+    );
+  }
+
+  Widget _buildBackButton(BuildContext context) {
+    return Align(
+      alignment: Alignment.topRight,
+      child: InkWell(
+        onTap: () {
+          Navigator.pop(context);
+        },
+        child: Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(LucideIcons.arrowLeft),
+        ),
+      ),
     );
   }
 
@@ -88,7 +107,7 @@ class VendorRegistrationTradingScreen extends StatelessWidget {
     );
   }
 
-  Widget mainContent(BuildContext context, GlobalKey<FormState> addressKey) {
+  Widget mainContent(BuildContext context, GlobalKey<FormState> addressKey, VendorRegistrationNotifier vendorRegistrationNotifier) {
     // Use the notifier directly since state is inside it
 
 
@@ -100,16 +119,17 @@ class VendorRegistrationTradingScreen extends StatelessWidget {
           Text("Trading Details", style: AppFonts.text24.semiBold.style),
           20.verticalSpace,
           CustomTextField(
-            controller: registrationNotifier.tradeLicenseIdController,
+            controller: vendorRegistrationNotifier.tradeLicenseIdController,
             fieldName: "Trade License number",
-            validator: (value) => Validations.validateName(context, value),
+            validator: (value) => Validations.validateTradeLicense(context, value),
           ),
           15.verticalSpace,
           CustomTextField(
-            controller: registrationNotifier.tradeLicenseExpiryDateController,
+            controller: vendorRegistrationNotifier.tradeLicenseExpiryDateController,
             fieldName: "Trade License Expiry Date",
             keyboardType: TextInputType.datetime,
             initialDate: DateTime.now(),
+            validator: (value) => Validations.validateTradeLicenseExpiry(context, value),
           ),
           15.verticalSpace,
           Row(
@@ -117,8 +137,8 @@ class VendorRegistrationTradingScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  registrationNotifier.uploadedLicenseFile != null
-                      ? registrationNotifier.uploadedFileName ?? ""
+                  vendorRegistrationNotifier.uploadedLicenseFile != null
+                      ? vendorRegistrationNotifier.uploadedFileName ?? ""
                       : 'No file selected',
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -129,7 +149,7 @@ class VendorRegistrationTradingScreen extends StatelessWidget {
                 icon: LucideIcons.paperclip,
                 textStyle: AppFonts.text14.regular.style,
                 onPressed: () {
-                  uploadImageWithDialog(context, registrationNotifier);
+                  uploadImageWithDialog(context, vendorRegistrationNotifier);
                 },
               ),
             ],
@@ -224,7 +244,7 @@ class VendorRegistrationTradingScreen extends StatelessWidget {
             text: "Sign in",
             style: AppFonts.text16.semiBold.black.style,
             recognizer: TapGestureRecognizer()..onTap = () {
-              Navigator.of(context).pop();
+              Navigator.of(rootNavigator: true, context).pop();
             },
           ),
         ],

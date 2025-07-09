@@ -1,18 +1,12 @@
-import 'dart:io';
-
 import 'package:community_app/modules/customer/new_services/new_services_notifier.dart';
-import 'package:community_app/modules/vendor/registration/registration_trading.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
-import 'package:community_app/utils/helpers/file_upload_helper.dart';
-import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_search_dropdown.dart';
 import 'package:community_app/utils/widgets/custom_textfields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class NewServicesScreen extends StatelessWidget {

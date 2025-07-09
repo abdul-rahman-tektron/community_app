@@ -12,20 +12,23 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:provider/provider.dart';
 
 class VendorRegistrationBankScreen extends StatelessWidget {
-  final VendorRegistrationNotifier registrationNotifier;
   const VendorRegistrationBankScreen({
     super.key,
-    required this.registrationNotifier,
   });
 
   @override
   Widget build(BuildContext context) {
-    return buildBody(context);
+    return Consumer<VendorRegistrationNotifier>(
+      builder: (context, vendorRegistrationNotifier, child) {
+        return buildBody(context, vendorRegistrationNotifier);
+      },
+    );
   }
 
-  Widget buildBody(BuildContext context) {
+  Widget buildBody(BuildContext context, VendorRegistrationNotifier vendorRegistrationNotifier) {
     final addressKey = GlobalKey<FormState>();
     return SafeArea(
       child: Scaffold(
@@ -35,7 +38,7 @@ class VendorRegistrationBankScreen extends StatelessWidget {
             child: Column(
               children: [
                 imageView(context),
-                mainContent(context, addressKey),
+                mainContent(context, addressKey, vendorRegistrationNotifier),
               ],
             ),
           ),
@@ -56,7 +59,7 @@ class VendorRegistrationBankScreen extends StatelessWidget {
           colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.6), BlendMode.darken),
         ),
       ),
-      child: Stack(children: [_buildLogo(), _buildBottomText(context)]),
+      child: Stack(children: [_buildLogo(), _buildBackButton(context), _buildBottomText(context)]),
     );
   }
 
@@ -82,7 +85,26 @@ class VendorRegistrationBankScreen extends StatelessWidget {
     );
   }
 
-  Widget mainContent(BuildContext context, GlobalKey<FormState> addressKey) {
+  Widget _buildBackButton(BuildContext context) {
+    return Align(
+      alignment: Alignment.topRight,
+      child: InkWell(
+        onTap: () {
+          Navigator.pop(context);
+        },
+        child: Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(LucideIcons.arrowLeft),
+        ),
+      ),
+    );
+  }
+
+  Widget mainContent(BuildContext context, GlobalKey<FormState> addressKey, VendorRegistrationNotifier vendorRegistrationNotifier) {
     // Use the notifier directly since state is inside it
 
 
@@ -94,33 +116,36 @@ class VendorRegistrationBankScreen extends StatelessWidget {
           Text("Bank Details", style: AppFonts.text24.semiBold.style),
           20.verticalSpace,
           CustomTextField(
-            controller: registrationNotifier.bankNameController,
+            controller: vendorRegistrationNotifier.bankNameController,
             fieldName: "Bank Name",
-            validator: (value) => Validations.validateName(context, value),
+            validator: (value) => Validations.validateBank(context, value),
           ),
           15.verticalSpace,
           CustomTextField(
-            controller: registrationNotifier.branchNameController,
+            controller: vendorRegistrationNotifier.branchNameController,
             fieldName: "Branch",
+            validator: (value) => Validations.validateBranch(context, value),
           ),
           15.verticalSpace,
           CustomTextField(
-            controller: registrationNotifier.accountNumberController,
+            controller: vendorRegistrationNotifier.accountNumberController,
             fieldName: "Account Number",
+            validator: (value) => Validations.validateAccountNumber(context, value),
           ),
           15.verticalSpace,
           CustomTextField(
-            controller: registrationNotifier.iBanNumberController,
+            controller: vendorRegistrationNotifier.iBanNumberController,
             fieldName: "iBan Number",
+            validator: (value) => Validations.validateIBanNumber(context, value),
           ),
           40.verticalSpace,
-          privacyPolicyWidget(context),
+          privacyPolicyWidget(context, vendorRegistrationNotifier),
           15.verticalSpace,
           CustomButton(
-            text: "Submit",
+            text: "Sign up",
             onPressed: () {
               if(addressKey.currentState!.validate()) {
-                registrationNotifier.performRegistration(context);
+                vendorRegistrationNotifier.performRegistration(context);
               }
             },
           ),
@@ -131,11 +156,11 @@ class VendorRegistrationBankScreen extends StatelessWidget {
     );
   }
 
-  Widget privacyPolicyWidget(BuildContext context) {
+  Widget privacyPolicyWidget(BuildContext context, VendorRegistrationNotifier vendorRegistrationNotifier) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
-        registrationNotifier.togglePrivacyPolicy();
+        vendorRegistrationNotifier.togglePrivacyPolicy();
       },
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 5.h),
@@ -148,9 +173,9 @@ class VendorRegistrationBankScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border.all(color: AppColors.primary, width: 1.5),
                 borderRadius: BorderRadius.circular(6),
-                color: registrationNotifier.acceptedPrivacyPolicy ? AppColors.white : Colors.transparent,
+                color: vendorRegistrationNotifier.acceptedPrivacyPolicy ? AppColors.white : Colors.transparent,
               ),
-              child: registrationNotifier.acceptedPrivacyPolicy
+              child: vendorRegistrationNotifier.acceptedPrivacyPolicy
                   ? Icon(LucideIcons.check, size: 17, color: Colors.black)
                   : null,
             ),
@@ -172,7 +197,7 @@ class VendorRegistrationBankScreen extends StatelessWidget {
             text: "Sign in",
             style: AppFonts.text16.semiBold.black.style,
             recognizer: TapGestureRecognizer()..onTap = () {
-              Navigator.of(context).pop();
+              Navigator.of(rootNavigator: true, context).pop();
             },
           ),
         ],

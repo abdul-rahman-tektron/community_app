@@ -23,10 +23,9 @@ class SelectLocationMap extends StatelessWidget {
             appBar: AppBar(title: const Text('Select Location')),
             body: Stack(
               children: [
-                // Google Map fills entire screen
                 GoogleMap(
                   initialCameraPosition: const CameraPosition(
-                    target: LatLng(25.2048, 55.2708), // Dubai default
+                    target: LatLng(25.2048, 55.2708),
                     zoom: 12,
                   ),
                   markers: locationNotifier.selectedPosition != null
@@ -43,9 +42,10 @@ class SelectLocationMap extends StatelessWidget {
                       placeName: "Custom Location",
                     );
                   },
+                  onMapCreated: locationNotifier.setMapController,
                 ),
 
-                // Search bar positioned at top
+                // Search Bar
                 Positioned(
                   top: 15.h,
                   left: 15.w,
@@ -57,12 +57,10 @@ class SelectLocationMap extends StatelessWidget {
                       textEditingController: locationNotifier.locationController,
                       googleAPIKey: ApiConstants.apiKey,
                       debounceTime: 800,
-                      countries: const ["ae"], // Adjust country code(s)
+                      countries: const ["ae"],
                       isLatLngRequired: true,
                       placeType: PlaceType.address,
-                      formSubmitCallback: () {
-
-                      },
+                      formSubmitCallback: () {},
                       inputDecoration: InputDecoration(
                         hintText: "Search your address",
                         border: OutlineInputBorder(
@@ -88,7 +86,23 @@ class SelectLocationMap extends StatelessWidget {
                   ),
                 ),
 
-                // Info card positioned at bottom
+                // Floating button for current location
+                Positioned(
+                  bottom: 100.h,
+                  right: 5.w,
+                  child: FloatingActionButton(
+                    heroTag: 'currentLocationBtn',
+                    backgroundColor: Colors.white,
+                    mini: true,
+                    elevation: 3,
+                    onPressed: () {
+                      locationNotifier.fetchCurrentLocation();
+                    },
+                    child: const Icon(Icons.my_location, color: Colors.black87),
+                  ),
+                ),
+
+                // Info card
                 if (locationNotifier.selectedPosition != null)
                   Positioned(
                     bottom: 20.h,
@@ -124,14 +138,11 @@ class SelectLocationMap extends StatelessWidget {
                             "Lng: ${locationNotifier.selectedPosition!.longitude.toStringAsFixed(6)}",
                             style: AppFonts.text14.regular.style,
                           ),
-                          if (locationNotifier.building != null &&
-                              locationNotifier.building!.isNotEmpty)
+                          if (locationNotifier.building?.isNotEmpty ?? false)
                             Text("Building: ${locationNotifier.building}"),
-                          if (locationNotifier.block != null &&
-                              locationNotifier.block!.isNotEmpty)
+                          if (locationNotifier.block?.isNotEmpty ?? false)
                             Text("Block: ${locationNotifier.block}"),
-                          if (locationNotifier.community != null &&
-                              locationNotifier.community!.isNotEmpty)
+                          if (locationNotifier.community?.isNotEmpty ?? false)
                             Text("Community: ${locationNotifier.community}"),
                           SizedBox(height: 12.h),
                           CustomButton(

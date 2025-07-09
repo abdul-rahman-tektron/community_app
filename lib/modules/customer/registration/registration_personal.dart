@@ -1,4 +1,5 @@
 import 'package:community_app/modules/customer/registration/registration_notifier.dart';
+import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/images.dart';
 import 'package:community_app/utils/extensions.dart';
@@ -10,37 +11,37 @@ import 'package:community_app/utils/widgets/custom_textfields.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class CustomerRegistrationPersonalScreen extends StatelessWidget {
-  final CustomerRegistrationNotifier registrationNotifier;
-  const CustomerRegistrationPersonalScreen({super.key, required this.registrationNotifier});
+  CustomerRegistrationPersonalScreen({super.key});
+
+  final _personalKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    return _buildBody(context);
+    return Consumer<CustomerRegistrationNotifier>(
+      builder: (context, customerRegistrationNotifier, child) {
+        return buildBody(context, customerRegistrationNotifier);
+      },
+    );
   }
 
-  Widget _buildBody(BuildContext context) {
-    final personalKey = GlobalKey<FormState>();
+  Widget buildBody(BuildContext context, CustomerRegistrationNotifier customerChangeNotifier) {
     return SafeArea(
       child: Scaffold(
         body: SingleChildScrollView(
           child: Form(
-            key: personalKey,
-            child: Column(
-              children: [
-                _imageView(context),
-                _mainContent(context, personalKey),
-              ],
-            ),
+            key: _personalKey,
+            child: Column(children: [_buildImageHeader(context), _buildFormSection(context, customerChangeNotifier)]),
           ),
         ),
       ),
     );
   }
 
-  Widget _imageView(BuildContext context) {
+  Widget _buildImageHeader(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(15.w),
       width: ScreenSize.width,
@@ -49,91 +50,66 @@ class CustomerRegistrationPersonalScreen extends StatelessWidget {
         image: DecorationImage(
           image: AssetImage(AppImages.loginImage),
           fit: BoxFit.cover,
-          colorFilter:
-          ColorFilter.mode(Colors.black.withOpacity(0.6), BlendMode.darken),
+          colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.6), BlendMode.darken),
         ),
       ),
-      child: Stack(children: [_buildLogo(), _buildBottomText(context)]),
-    );
-  }
-
-  Widget _buildLogo() {
-    return Align(
-      alignment: Alignment.topLeft,
-      child: Image.asset(width: 100.w, AppImages.tektronLogo, fit: BoxFit.contain),
-    );
-  }
-
-  Widget _buildBottomText(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomLeft,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Text(context.locale.welcomeToCommunityApp,
-              style: AppFonts.text20.semiBold.white.style),
-          10.verticalSpace,
-          Text(context.locale.connectingResidents,
-              style: AppFonts.text16.regular.white.style),
+          Align(
+            alignment: Alignment.topLeft,
+            child: Image.asset(AppImages.tektronLogo, width: 100.w, fit: BoxFit.contain),
+          ),
+          Align(alignment: Alignment.bottomLeft, child: _buildHeaderText(context)),
+          _buildBackButton(context),
         ],
       ),
     );
   }
+  Widget _buildBackButton(BuildContext context) {
+    return Align(
+      alignment: Alignment.topRight,
+      child: InkWell(
+        onTap: () {
+          Navigator.of(rootNavigator: true, context).pop();
+        },
+        child: Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(LucideIcons.arrowLeft),
+        ),
+      ),
+    );
+  }
 
-  Widget _mainContent(BuildContext context, GlobalKey<FormState> personalKey) {
+  Widget _buildHeaderText(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(context.locale.welcomeToCommunityApp, style: AppFonts.text20.semiBold.white.style),
+        10.verticalSpace,
+        Text(context.locale.connectingResidents, style: AppFonts.text16.regular.white.style),
+      ],
+    );
+  }
+
+  Widget _buildFormSection(BuildContext context, CustomerRegistrationNotifier customerChangeNotifier) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 15.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text("Create Your Account", style: AppFonts.text24.semiBold.style),
-          5.verticalSpace,
-          Text("One account, endless possibilities.",
-              textAlign: TextAlign.center, style: AppFonts.text16.regular.style),
+          _buildTitleSection(),
           20.verticalSpace,
-          CustomTextField(
-            controller: registrationNotifier.nameController,
-            fieldName: context.locale.fullName,
-            showAsterisk: true,
-            validator: (value) => Validations.validateName(context, value),
-          ),
-          15.verticalSpace,
-          CustomTextField(
-            controller: registrationNotifier.emailController,
-            fieldName: context.locale.email,
-            showAsterisk: true,
-            validator: (value) => Validations.validateEmail(context, value),
-          ),
-          15.verticalSpace,
-          CustomTextField(
-            controller: registrationNotifier.userIdController,
-            fieldName: "User ID",
-            showAsterisk: true,
-            validator: (value) => Validations.requiredField(context, value),
-          ),
-          15.verticalSpace,
-          CustomTextField(
-            controller: registrationNotifier.mobileController,
-            fieldName: context.locale.mobileNumber,
-            showAsterisk: true,
-            keyboardType: TextInputType.phone,
-            validator: (value) => Validations.validateMobile(context, value),
-          ),
-          15.verticalSpace,
-          CustomTextField(
-            controller: registrationNotifier.passwordController,
-            fieldName: context.locale.password,
-            showAsterisk: true,
-            isPassword: true,
-            validator: (value) => Validations.validatePassword(context, value),
-          ),
+          _buildFormFields(context, customerChangeNotifier),
           40.verticalSpace,
           CustomButton(
             text: context.locale.next,
             onPressed: () {
-              // Implement validation method in RegistrationNotifier if needed
-              if (personalKey.currentState!.validate()) {
+              if (_personalKey.currentState!.validate()) {
                 Navigator.of(context).pushNamed(AppRoutes.customerRegistrationAddress);
               }
             },
@@ -142,6 +118,59 @@ class CustomerRegistrationPersonalScreen extends StatelessWidget {
           _alreadyHaveAnAccount(context),
         ],
       ),
+    );
+  }
+
+  Widget _buildTitleSection() {
+    return Column(
+      children: [
+        Text("Create Your Account", style: AppFonts.text24.semiBold.style),
+        5.verticalSpace,
+        Text("One account, endless possibilities.", textAlign: TextAlign.center, style: AppFonts.text16.regular.style),
+      ],
+    );
+  }
+
+  Widget _buildFormFields(BuildContext context, CustomerRegistrationNotifier customerChangeNotifier) {
+    return Column(
+      children: [
+        CustomTextField(
+          controller: customerChangeNotifier.nameController,
+          fieldName: context.locale.fullName,
+          showAsterisk: true,
+          validator: (value) => Validations.validateName(context, value),
+        ),
+        15.verticalSpace,
+        CustomTextField(
+          controller: customerChangeNotifier.emailController,
+          fieldName: context.locale.email,
+          showAsterisk: true,
+          validator: (value) => Validations.validateEmail(context, value),
+        ),
+        15.verticalSpace,
+        CustomTextField(
+          controller: customerChangeNotifier.userIdController,
+          fieldName: "User ID",
+          showAsterisk: true,
+          validator: (value) => Validations.validateUserID(context, value),
+        ),
+        15.verticalSpace,
+        CustomTextField(
+          controller: customerChangeNotifier.mobileController,
+          fieldName: context.locale.mobileNumber,
+          showAsterisk: true,
+          keyboardType: TextInputType.phone,
+          validator: (value) => Validations.validateMobile(context, value),
+        ),
+        15.verticalSpace,
+        CustomTextField(
+          controller: customerChangeNotifier.passwordController,
+          fieldName: context.locale.password,
+          showAsterisk: true,
+          isPassword: true,
+          validator: (value) => Validations.validatePassword(context, value),
+        ),
+      ],
     );
   }
 

@@ -15,20 +15,23 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:provider/provider.dart';
 
 class VendorRegistrationAddressScreen extends StatelessWidget {
-  final VendorRegistrationNotifier registrationNotifier;
   const VendorRegistrationAddressScreen({
     super.key,
-    required this.registrationNotifier,
   });
 
   @override
   Widget build(BuildContext context) {
-    return buildBody(context);
+    return Consumer<VendorRegistrationNotifier>(
+      builder: (context, vendorRegistrationNotifier, child) {
+        return buildBody(context, vendorRegistrationNotifier);
+      },
+    );
   }
 
-  Widget buildBody(BuildContext context) {
+  Widget buildBody(BuildContext context, VendorRegistrationNotifier vendorRegistrationNotifier) {
     final addressKey = GlobalKey<FormState>();
     return SafeArea(
       child: Scaffold(
@@ -38,7 +41,7 @@ class VendorRegistrationAddressScreen extends StatelessWidget {
             child: Column(
               children: [
                 imageView(context),
-                mainContent(context, addressKey),
+                mainContent(context, addressKey, vendorRegistrationNotifier),
               ],
             ),
           ),
@@ -59,7 +62,7 @@ class VendorRegistrationAddressScreen extends StatelessWidget {
           colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.6), BlendMode.darken),
         ),
       ),
-      child: Stack(children: [_buildLogo(), _buildBottomText(context)]),
+      child: Stack(children: [_buildLogo(), _buildBackButton(context), _buildBottomText(context)]),
     );
   }
 
@@ -67,6 +70,25 @@ class VendorRegistrationAddressScreen extends StatelessWidget {
     return Align(
       alignment: Alignment.topLeft,
       child: Image.asset(width: 100.w, AppImages.tektronLogo, fit: BoxFit.contain),
+    );
+  }
+
+  Widget _buildBackButton(BuildContext context) {
+    return Align(
+      alignment: Alignment.topRight,
+      child: InkWell(
+        onTap: () {
+          Navigator.pop(context);
+        },
+        child: Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(LucideIcons.arrowLeft),
+        ),
+      ),
     );
   }
 
@@ -85,7 +107,7 @@ class VendorRegistrationAddressScreen extends StatelessWidget {
     );
   }
 
-  Widget mainContent(BuildContext context, GlobalKey<FormState> addressKey) {
+  Widget mainContent(BuildContext context, GlobalKey<FormState> addressKey, VendorRegistrationNotifier vendorRegistrationNotifier) {
     // Use the notifier directly since state is inside it
 
 
@@ -101,10 +123,10 @@ class VendorRegistrationAddressScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: CustomTextField(
-                  controller: registrationNotifier.addressController,
+                  controller: vendorRegistrationNotifier.addressController,
                   fieldName: "Address",
                   showAsterisk: true,
-                  validator: (value) => Validations.validateName(context, value),
+                  validator: (value) => Validations.validateAddress(context, value),
                 ),
               ),
               10.horizontalSpace,
@@ -112,10 +134,10 @@ class VendorRegistrationAddressScreen extends StatelessWidget {
                 onTap: () async {
                   final result = await Navigator.of(context, rootNavigator: true).pushNamed(AppRoutes.mapLocation);
                   if (result != null && result is MapData) {
-                    registrationNotifier.addressController.text = result.address;
-                    registrationNotifier.buildingController.text = result.building;
-                    registrationNotifier.blockController.text = result.block;
-                    registrationNotifier.setLatLng(result.latitude, result.longitude);
+                    vendorRegistrationNotifier.addressController.text = result.address;
+                    vendorRegistrationNotifier.buildingController.text = result.building;
+                    vendorRegistrationNotifier.blockController.text = result.block;
+                    vendorRegistrationNotifier.setLatLng(result.latitude, result.longitude);
                   }
                 },
                 child: Container(
@@ -132,15 +154,17 @@ class VendorRegistrationAddressScreen extends StatelessWidget {
           ),
           15.verticalSpace,
           CustomTextField(
-            controller: registrationNotifier.buildingController,
+            controller: vendorRegistrationNotifier.buildingController,
             fieldName: "Building",
             showAsterisk: true,
+            validator: (value) => Validations.validateBuilding(context, value),
           ),
           15.verticalSpace,
           CustomTextField(
-            controller: registrationNotifier.blockController,
+            controller: vendorRegistrationNotifier.blockController,
             fieldName: "Block",
             showAsterisk: true,
+            validator: (value) => Validations.validateBlock(context, value),
           ),
           40.verticalSpace,
           CustomButton(
@@ -158,11 +182,11 @@ class VendorRegistrationAddressScreen extends StatelessWidget {
     );
   }
 
-  Widget privacyPolicyWidget(BuildContext context) {
+  Widget privacyPolicyWidget(BuildContext context, VendorRegistrationNotifier vendorRegistrationNotifier) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
-        registrationNotifier.togglePrivacyPolicy();
+        vendorRegistrationNotifier.togglePrivacyPolicy();
       },
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 5.h),
@@ -175,9 +199,9 @@ class VendorRegistrationAddressScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border.all(color: AppColors.primary, width: 1.5),
                 borderRadius: BorderRadius.circular(6),
-                color: registrationNotifier.acceptedPrivacyPolicy ? AppColors.white : Colors.transparent,
+                color: vendorRegistrationNotifier.acceptedPrivacyPolicy ? AppColors.white : Colors.transparent,
               ),
-              child: registrationNotifier.acceptedPrivacyPolicy
+              child: vendorRegistrationNotifier.acceptedPrivacyPolicy
                   ? Icon(LucideIcons.check, size: 17, color: Colors.black)
                   : null,
             ),
@@ -199,7 +223,7 @@ class VendorRegistrationAddressScreen extends StatelessWidget {
             text: "Sign in",
             style: AppFonts.text16.semiBold.black.style,
             recognizer: TapGestureRecognizer()..onTap = () {
-              Navigator.of(context).pop();
+              Navigator.of(rootNavigator: true, context).pop();
             },
           ),
         ],

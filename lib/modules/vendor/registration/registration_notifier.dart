@@ -78,6 +78,8 @@ class VendorRegistrationNotifier extends BaseChangeNotifier {
         latitude: latitude.toString(),
         longitude: longitude.toString(),
         name: nameController.text.trim(),
+        alternateContactNo: contact2Controller.text.trim(),
+        createdBy: emailController.text.trim(),
         bankDetail: VendorBankDetail(
           accountNumber: accountNumberController.text.trim(),
           bankName: bankNameController.text.trim(),

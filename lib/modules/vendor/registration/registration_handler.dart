@@ -15,35 +15,31 @@ class VendorRegistrationHandler extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => VendorRegistrationNotifier(),
-      child: Consumer<VendorRegistrationNotifier>(
-        builder: (context, notifier, _) {
-          return Navigator(
-            onGenerateRoute: (settings) {
-              Widget screen;
+      child: Navigator(
+        onGenerateRoute: (settings) {
+          Widget screen;
 
-              switch (settings.name) {
-                case AppRoutes.vendorRegistrationPersonal:
-                  screen = VendorRegistrationPersonalScreen(registrationNotifier: notifier);
-                  break;
-                case AppRoutes.vendorRegistrationAddress:
-                  screen = VendorRegistrationAddressScreen(registrationNotifier: notifier);
-                  break;
-                case AppRoutes.vendorRegistrationTrading:
-                  screen = VendorRegistrationTradingScreen(registrationNotifier: notifier);
-                  break;
-                  case AppRoutes.vendorRegistrationBank:
-                  screen = VendorRegistrationBankScreen(registrationNotifier: notifier);
-                  break;
-                default:
-                  screen = VendorRegistrationPersonalScreen(registrationNotifier: notifier);
-              }
+          switch (settings.name) {
+            case AppRoutes.vendorRegistrationPersonal:
+              screen = VendorRegistrationPersonalScreen();
+              break;
+            case AppRoutes.vendorRegistrationAddress:
+              screen = VendorRegistrationAddressScreen();
+              break;
+            case AppRoutes.vendorRegistrationTrading:
+              screen = VendorRegistrationTradingScreen();
+              break;
+            case AppRoutes.vendorRegistrationBank:
+              screen = VendorRegistrationBankScreen();
+              break;
+            default:
+              screen = VendorRegistrationPersonalScreen();
+          }
 
-              return PageRouteBuilder(
-                pageBuilder: (ctx, anim, secAnim) => screen,
-                transitionsBuilder: defaultPageTransition,
-                transitionDuration: const Duration(milliseconds: 500),
-              );
-            },
+          return PageRouteBuilder(
+            pageBuilder: (ctx, anim, secAnim) => screen,
+            transitionsBuilder: defaultPageTransition,
+            transitionDuration: const Duration(milliseconds: 500),
           );
         },
       ),

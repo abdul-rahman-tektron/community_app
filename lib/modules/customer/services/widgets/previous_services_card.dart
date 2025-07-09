@@ -48,7 +48,7 @@ class PreviousServiceCard extends StatelessWidget {
     return Text.rich(
       TextSpan(
         children: [
-          TextSpan(text: "Service ID: ", style: AppFonts.text16.semiBold.style),
+          TextSpan(text: "Service ID: ", style: AppFonts.text16.regular.style),
           TextSpan(text: "#${service.id}", style: AppFonts.text16.regular.style),
         ],
       ),
@@ -157,7 +157,7 @@ class PreviousServiceCard extends StatelessWidget {
         10.horizontalSpace,
         Expanded(
           child: CustomButton(
-            text: "Get Help",
+            text: "Book Again",
             height: 35,
             backgroundColor: AppColors.white,
             borderColor: AppColors.primary,

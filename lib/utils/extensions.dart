@@ -37,6 +37,21 @@ extension StringExtensions on String {
     final date = toDateTimeFromDdMmYyyy();
     return date.toUtc().toIso8601String();
   }
+
+  UserRole toUserRole() {
+    print("this");
+    print(this);
+    switch (toLowerCase()) {
+      case 'tenant':
+        return UserRole.tenant;
+      case 'owner':
+        return UserRole.owner;
+      case 'vendor':
+        return UserRole.vendor;
+      default:
+        return UserRole.tenant;
+    }
+  }
 }
 
 extension FileBase64Extension on File {

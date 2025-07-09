@@ -9,6 +9,7 @@ import 'package:community_app/core/model/register/vendor_register_request.dart';
 import 'package:community_app/core/remote/network/api_url.dart';
 import 'package:community_app/core/remote/network/base_repository.dart';
 import 'package:community_app/utils/enums.dart';
+import 'package:community_app/utils/storage/hive_storage.dart';
 import 'package:community_app/utils/storage/secure_storage.dart';
 
 class AuthRepository extends BaseRepository {
@@ -31,6 +32,7 @@ class AuthRepository extends BaseRepository {
       final loginTokenResponse = loginResponseFromJson(jsonEncode(response?.data));
       final token = loginTokenResponse.token ?? "";
       await SecureStorageService.setToken(token);
+      await HiveStorageService.setUserData(jsonEncode(loginTokenResponse));
       return loginTokenResponse;
     } else {
       throw ErrorResponse.fromJson(response?.data ?? {});

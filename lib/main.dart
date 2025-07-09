@@ -4,6 +4,7 @@ import 'package:community_app/core/notifier/language_notifier.dart';
 import 'package:community_app/modules/auth/login/login_screen.dart';
 import 'package:community_app/modules/auth/user_role_selection/user_role_selection_screen.dart';
 import 'package:community_app/modules/customer/bottom_bar/bottom_screen.dart';
+import 'package:community_app/modules/vendor/bottom_bar/bottom_bar_screen.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/themes.dart';
 import 'package:community_app/utils/helpers/screen_size.dart';
@@ -94,7 +95,7 @@ class MyApp extends StatelessWidget {
                   GlobalCupertinoLocalizations.delegate,
                 ],
                 onGenerateRoute: AppRouter.onGenerateRoute,
-                home: token != null ?  CustomerBottomScreen() : const UserRoleSelectionScreen(),
+                home: token != null ?  VendorBottomScreen() : const UserRoleSelectionScreen(),
                 theme: AppThemes.lightTheme(languageCode: langNotifier.locale.languageCode),
                 builder: (context, child) {
                   ScreenSize.init(context);

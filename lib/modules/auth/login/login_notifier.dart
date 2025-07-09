@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/core/model/login/login_request.dart';
+import 'package:community_app/core/model/login/login_response.dart';
 import 'package:community_app/core/remote/services/auth_repository.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:community_app/utils/router/routes.dart';
@@ -85,15 +86,17 @@ class LoginNotifier extends BaseChangeNotifier {
 
       final result = await AuthRepository().apiUserLogin(request);
 
-      await _handleLoginSuccess(result, context);
-    } catch (e) {
+      await _handleLoginSuccess(result as LoginResponse, context);
+    } catch (e, stackTrace) {
       ToastHelper.showError('An error occurred. Please try again.');
       loginError = 'An error occurred';
+      print(e);
+      print(stackTrace);
       notifyListeners();
     }
   }
 
-  Future<void> _handleLoginSuccess(dynamic result, BuildContext context) async {
+  Future<void> _handleLoginSuccess(LoginResponse result, BuildContext context) async {
     // if (isChecked) {
     //   await SecureStorageService.setRememberMe(jsonEncode({
     //     'userName': userNameController.text,
@@ -104,7 +107,11 @@ class LoginNotifier extends BaseChangeNotifier {
     // }
 
     ToastHelper.showSuccess('Login Successful');
-    Navigator.pushReplacementNamed(context, AppRoutes.ownerTenantBottomBar);
+    if(result.type == "C") {
+      Navigator.pushReplacementNamed(context, AppRoutes.vendorBottomBar, arguments: 0);
+    } else {
+      Navigator.pushReplacementNamed(context, AppRoutes.vendorBottomBar, arguments: 0);
+    }
   }
 
   void disposeControllers() {

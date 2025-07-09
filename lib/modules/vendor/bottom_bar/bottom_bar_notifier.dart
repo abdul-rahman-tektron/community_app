@@ -1,16 +1,15 @@
 import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/modules/customer/dashboard/dashboard_screen.dart';
-import 'package:community_app/modules/customer/explore/explore_screen.dart';
-import 'package:community_app/modules/customer/services/services_screen.dart';
-import 'package:community_app/utils/enums.dart';
+import 'package:community_app/modules/vendor/dashboard/dashboard_screen.dart';
+import 'package:community_app/modules/vendor/jobs/jobs_screen.dart';
+import 'package:community_app/modules/vendor/quotation/quotation_screen.dart';
 import 'package:flutter/material.dart';
 
-class BottomBarNotifier extends BaseChangeNotifier {
+class VendorBottomBarNotifier extends BaseChangeNotifier {
   int _currentIndex = 0;
 
   int get currentIndex => _currentIndex;
 
-  BottomBarNotifier(int? currentIndex) {
+  VendorBottomBarNotifier(int? currentIndex) {
     initNotifier();
     _currentIndex = currentIndex ?? 0;
   }
@@ -18,16 +17,15 @@ class BottomBarNotifier extends BaseChangeNotifier {
   Future<void> initNotifier() async {
     await loadUserRole();
   }
-
   void changeTab(int index) {
     _currentIndex = index;
     notifyListeners();
   }
 
   final List<Widget> _screens = [
-    CustomerDashboardScreen(),
-    ExploreScreen(),
-    ServicesScreen(),
+    VendorDashboardScreen(),
+    QuotationScreen(),
+    JobsScreen(),
   ];
 
   Widget get currentScreen => _screens[_currentIndex];

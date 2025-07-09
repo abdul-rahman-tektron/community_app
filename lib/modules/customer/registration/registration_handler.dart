@@ -14,29 +14,25 @@ class CustomerRegistrationHandler extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => CustomerRegistrationNotifier(),
-      child: Consumer<CustomerRegistrationNotifier>(
-        builder: (context, notifier, _) {
-          return Navigator(
-            onGenerateRoute: (settings) {
-              Widget screen;
+      child: Navigator(
+        onGenerateRoute: (settings) {
+          Widget screen;
 
-              switch (settings.name) {
-                case AppRoutes.customerRegistrationPersonal:
-                  screen = CustomerRegistrationPersonalScreen(registrationNotifier: notifier);
-                  break;
-                case AppRoutes.customerRegistrationAddress:
-                  screen = CustomerRegistrationAddressScreen(registrationNotifier: notifier);
-                  break;
-                default:
-                  screen = CustomerRegistrationPersonalScreen(registrationNotifier: notifier);
-              }
+          switch (settings.name) {
+            case AppRoutes.customerRegistrationPersonal:
+              screen = CustomerRegistrationPersonalScreen();
+              break;
+            case AppRoutes.customerRegistrationAddress:
+              screen = CustomerRegistrationAddressScreen();
+              break;
+            default:
+              screen = CustomerRegistrationPersonalScreen();
+          }
 
-              return PageRouteBuilder(
-                pageBuilder: (ctx, anim, secAnim) => screen,
-                transitionsBuilder: defaultPageTransition,
-                transitionDuration: const Duration(milliseconds: 500),
-              );
-            },
+          return PageRouteBuilder(
+            pageBuilder: (ctx, anim, secAnim) => screen,
+            transitionsBuilder: defaultPageTransition,
+            transitionDuration: const Duration(milliseconds: 500),
           );
         },
       ),

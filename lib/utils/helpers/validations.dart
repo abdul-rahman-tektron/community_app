@@ -16,9 +16,9 @@ class Validations {
     if (value == null || value.trim().isEmpty) {
       return context.locale.emailRequired;
     }
-    if (!RegExp(RegexPatterns.email).hasMatch(value.trim())) {
-      return context.locale.invalidEmail;
-    }
+    // if (!RegExp(RegexPatterns.email).hasMatch(value.trim())) {
+    //   return context.locale.invalidEmail;
+    // }
     return null;
   }
 
@@ -42,9 +42,111 @@ class Validations {
     return null;
   }
 
+  static String? validateContact1(BuildContext context, String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Contact Number 1 is required";
+    }
+    if (!RegExp(RegexPatterns.phone).hasMatch(value.trim())) {
+      return context.locale.invalidMobile;
+    }
+    return null;
+  }
+
+  static String? validateContact2(BuildContext context, String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Contact Number 2 is required";
+    }
+    if (!RegExp(RegexPatterns.phone).hasMatch(value.trim())) {
+      return context.locale.invalidMobile;
+    }
+    return null;
+  }
+
+  static String? validateUserID(BuildContext context, String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "User ID is required";
+    }
+    return null;
+  }
+
+  static String? validateCommunity(BuildContext context, String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Community is required";
+    }
+    return null;
+  }
+
+  static String? validateAddress(BuildContext context, String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Address is required";
+    }
+    return null;
+  }
+
+  static String? validateBuilding(BuildContext context, String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Building is required";
+    }
+    return null;
+  }
+
+  static String? validateBlock(BuildContext context, String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Block is required";
+    }
+    return null;
+  }
+
+  static String? validateTradeLicense(BuildContext context, String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Trade License Number is required";
+    }
+    if (!RegExp(RegexPatterns.alphanumeric).hasMatch(value.trim())) {
+      return "Invalid Trade License Number";
+    }
+
+    return null;
+  }
+
+  static String? validateTradeLicenseExpiry(BuildContext context, String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Trade License Expiry is required";
+    }
+
+    return null;
+  }
+
   static String? validateName(BuildContext context, String? value) {
     if (value == null || value.trim().isEmpty) {
       return context.locale.fullName;
+    }
+    return null;
+  }
+
+  static String? validateBank(BuildContext context, String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Bank Name is required";
+    }
+    return null;
+  }
+
+  static String? validateBranch(BuildContext context, String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Branch is required";
+    }
+    return null;
+  }
+
+  static String? validateAccountNumber(BuildContext context, String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Account Number is required";
+    }
+    return null;
+  }
+
+  static String? validateIBanNumber(BuildContext context, String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "iBan Number is required";
     }
     return null;
   }

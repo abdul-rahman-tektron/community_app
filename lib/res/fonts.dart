@@ -30,6 +30,7 @@ class AppFonts {
   static const Color white = AppColors.white;
   static const Color grey = AppColors.textSecondary;
   static const Color red = AppColors.error;
+  static const Color blue = AppColors.blueColor;
 }
 
 class _FontSizeStyles {
@@ -65,6 +66,7 @@ class _TextStyleBuilder {
   _TextStyleBuilder get white => _copyWithColor(AppFonts.white);
   _TextStyleBuilder get grey => _copyWithColor(AppFonts.grey);
   _TextStyleBuilder get red => _copyWithColor(AppFonts.red);
+  _TextStyleBuilder get blue => _copyWithColor(AppFonts.blue);
 
   _TextStyleBuilder _copyWithColor(Color color) {
     return _TextStyleBuilder(size: size, weight: weight, color: color);
