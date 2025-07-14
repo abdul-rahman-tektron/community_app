@@ -36,7 +36,7 @@ class ServicesScreen extends StatelessWidget {
                     Navigator.of(context).pushNamed(AppRoutes.newServices);
                   },
                 ),
-                20.verticalSpace,
+                25.verticalSpace,
                 UpcomingServicesWidget(
                   upcomingServices: servicesNotifier.upcomingServices,
                 ),

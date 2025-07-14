@@ -26,7 +26,7 @@ class UpcomingServicesWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildHeadingWithGradientUnderline(context),
-        15.verticalSpace,
+        20.verticalSpace,
         ...UpcomingServiceStatus.values.map((status) {
           final services = grouped[status]!;
           if (services.isEmpty) return const SizedBox.shrink();
@@ -44,7 +44,7 @@ class UpcomingServicesWidget extends StatelessWidget {
                     return CompletedServiceCard(service: service);
                 }
               }),
-              15.verticalSpace,
+              20.verticalSpace,
             ],
           );
         }),

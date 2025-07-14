@@ -67,6 +67,7 @@ class _TextStyleBuilder {
   _TextStyleBuilder get grey => _copyWithColor(AppFonts.grey);
   _TextStyleBuilder get red => _copyWithColor(AppFonts.red);
   _TextStyleBuilder get blue => _copyWithColor(AppFonts.blue);
+  _TextStyleBuilder get primary => _copyWithColor(AppColors.primary);
 
   _TextStyleBuilder _copyWithColor(Color color) {
     return _TextStyleBuilder(size: size, weight: weight, color: color);

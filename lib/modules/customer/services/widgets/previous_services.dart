@@ -20,7 +20,7 @@ class PreviousServicesWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildHeadingWithGradientUnderline(context),
-        15.verticalSpace,
+        20.verticalSpace,
         ..._buildCardListWithSpacing(),
         15.verticalSpace,
       ],
@@ -82,7 +82,7 @@ class PreviousServicesWidget extends StatelessWidget {
     for (int i = 0; i < previousServices.length; i++) {
       widgets.add(PreviousServiceCard(service: previousServices[i]));
       if (i != previousServices.length - 1) {
-        widgets.add(15.verticalSpace); // Spacing between cards
+        widgets.add(20.verticalSpace); // Spacing between cards
       }
     }
 

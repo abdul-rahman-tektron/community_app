@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:community_app/core/model/dropdown/community_dropdown_response.dart';
+import 'package:community_app/core/model/dropdown/service_dropdown_response.dart';
 import 'package:community_app/core/model/error/error_response.dart';
-import 'package:community_app/core/model/login/login_request.dart';
-import 'package:community_app/core/model/login/login_response.dart';
-import 'package:community_app/core/model/register/customer_register_request.dart';
-import 'package:community_app/core/model/register/vendor_register_request.dart';
+import 'package:community_app/core/model/job/new_job_request.dart';
 import 'package:community_app/core/remote/network/api_url.dart';
 import 'package:community_app/core/remote/network/base_repository.dart';
 import 'package:community_app/res/api_constants.dart';
@@ -19,6 +18,64 @@ class ServiceRepository extends BaseRepository {
   static final ServiceRepository _singleInstance = ServiceRepository._internal();
 
   factory ServiceRepository() => _singleInstance;
+
+  //api: Service Dropdown Api
+  Future<Object?> apiServiceDropdown() async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.get,
+      pathUrl: ApiUrls.pathServiceDropdown,
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final serviceDropdownResponse = serviceDropdownResponseFromJson(jsonEncode(response?.data));
+
+      return serviceDropdownResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+  //api: Community Dropdown Api
+  Future<Object?> apiCommunityDropdown() async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.get,
+      pathUrl: ApiUrls.pathCommunityDropdown,
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final communityDropdownResponse = communityDropdownResponseFromJson(jsonEncode(response?.data));
+
+      return communityDropdownResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+  //api: Community Dropdown Api
+  Future<Object?> apiNewJob(CreateJobRequest requestParams) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.post,
+      pathUrl: ApiUrls.pathCreateJob,
+      body: jsonEncode(requestParams.toJson()),
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final communityDropdownResponse = communityDropdownResponseFromJson(jsonEncode(response?.data));
+
+      return communityDropdownResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
 
   // New method to get Google Directions API response
   Future<Map<String, dynamic>> getRouteWithTraffic({

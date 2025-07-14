@@ -19,7 +19,7 @@ class TrackingServiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 15),
-      padding: EdgeInsets.all(12),
+      padding: EdgeInsets.all(15),
       decoration: AppStyles.commonDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

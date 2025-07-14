@@ -2,11 +2,15 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/core/model/error/error_response.dart';
 import 'package:community_app/core/model/login/login_request.dart';
 import 'package:community_app/core/model/login/login_response.dart';
+import 'package:community_app/core/model/remember_me/remember_me_model.dart';
 import 'package:community_app/core/remote/services/auth_repository.dart';
+import 'package:community_app/res/strings.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:community_app/utils/router/routes.dart';
+import 'package:community_app/utils/storage/hive_storage.dart';
 import 'package:community_app/utils/storage/secure_storage.dart';
 import 'package:flutter/material.dart';
 
@@ -32,22 +36,11 @@ class LoginNotifier extends BaseChangeNotifier {
   }
 
   Future<void> _init() async {
-    await _loadRememberMeData();
+    await rememberMeData();
   }
 
   Future<void> initNotifier() async {
     await loadUserRole();
-  }
-
-  Future<void> _loadRememberMeData() async {
-    // String? data = await SecureStorageService.getRememberMe();
-    // if (data != null) {
-    //   final json = jsonDecode(data);
-    //   userNameController.text = json['userName'] ?? '';
-    //   passwordController.text = json['password'] ?? '';
-    //   isChecked = true;
-    //   notifyListeners();
-    // }
   }
 
   void toggleRememberMe(bool? value) {
@@ -75,44 +68,79 @@ class LoginNotifier extends BaseChangeNotifier {
     return false;
   }
 
+  // Load remember me data from storage
+  Future<void> rememberMeData() async {
+    String? data = HiveStorageService.getRememberMe();
+    if (data != null) {
+      RememberMeModel rememberMeModel = RememberMeModel.fromJson(jsonDecode(data));
+      userNameController.text = rememberMeModel.userName;
+      passwordController.text = rememberMeModel.password;
+      isChecked = true;
+    }
+  }
+
+  Future<void> _handleRememberMe() async {
+    if (isChecked) {
+      final rememberData = RememberMeModel(
+        userName: userNameController.text,
+        password: passwordController.text,
+      );
+      HiveStorageService.setRememberMe(jsonEncode(rememberData));
+    } else {
+      await HiveStorageService.remove(AppStrings.rememberMeKey);
+    }
+  }
+
+
   Future<void> performLogin(BuildContext context) async {
     if (!validateAndSave()) return;
 
-    try {
-      final request = LoginRequest(
-        email: userNameController.text.trim(),
-        password: passwordController.text.trim(),
-      );
+    final request = LoginRequest(
+      email: userNameController.text.trim(),
+      password: passwordController.text.trim(),
+    );
 
+    try {
       final result = await AuthRepository().apiUserLogin(request);
 
-      await _handleLoginSuccess(result as LoginResponse, context);
+      if (result is LoginResponse) {
+        await _handleLoginSuccess(result, context);
+      } else if (result is ErrorResponse) {
+        ToastHelper.showError(result.title ?? 'Login failed.');
+        loginError = result.title ?? 'Login failed';
+        notifyListeners();
+      }
     } catch (e, stackTrace) {
-      ToastHelper.showError('An error occurred. Please try again.');
-      loginError = 'An error occurred';
-      print(e);
-      print(stackTrace);
+      ToastHelper.showError('An unexpected error occurred.');
+      loginError = 'Unexpected error';
+      debugPrint('Login Exception: $e');
+      debugPrint('StackTrace: $stackTrace');
       notifyListeners();
     }
   }
 
-  Future<void> _handleLoginSuccess(LoginResponse result, BuildContext context) async {
-    // if (isChecked) {
-    //   await SecureStorageService.setRememberMe(jsonEncode({
-    //     'userName': userNameController.text,
-    //     'password': passwordController.text,
-    //   }));
-    // } else {
-    //   await SecureStorageService.removeRememberMe();
-    // }
 
-    ToastHelper.showSuccess('Login Successful');
-    if(result.type == "C") {
-      Navigator.pushReplacementNamed(context, AppRoutes.vendorBottomBar, arguments: 0);
+  Future<void> _handleLoginSuccess(LoginResponse result, BuildContext context) async {
+    _handleRememberMe();
+
+    ToastHelper.showSuccess('Login successful');
+
+    // Navigate to role-based home (example shown here)
+    if(result.type == "V") {
+      Navigator.pushReplacementNamed(
+        context,
+        AppRoutes.vendorBottomBar,
+        arguments: 0,
+      );
     } else {
-      Navigator.pushReplacementNamed(context, AppRoutes.vendorBottomBar, arguments: 0);
+      Navigator.pushReplacementNamed(
+        context,
+        AppRoutes.customerBottomBar,
+        arguments: 0,
+      );
     }
   }
+
 
   void disposeControllers() {
     userNameController.dispose();

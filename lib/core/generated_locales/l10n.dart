@@ -70,10 +70,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Welcome to Community App`
+  /// `Welcome to X10 solutions`
   String get welcomeToCommunityApp {
     return Intl.message(
-      'Welcome to Community App',
+      'Welcome to X10 solutions',
       name: 'welcomeToCommunityApp',
       desc: '',
       args: [],

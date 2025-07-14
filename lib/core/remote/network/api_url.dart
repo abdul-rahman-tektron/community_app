@@ -10,4 +10,9 @@ class ApiUrls {
   static final pathLogin = "/Auth/login";
   static final pathCustomerRegister = "/Customer/create";
   static final pathVendorRegister = "/Vendor/register";
+
+  //Services
+  static final pathServiceDropdown = "/Service";
+  static final pathCommunityDropdown = "/Community";
+  static final pathCreateJob = "/Job/create";
 }

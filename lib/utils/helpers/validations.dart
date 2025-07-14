@@ -116,6 +116,16 @@ class Validations {
     return null;
   }
 
+  static String? validateConfirmPassword(BuildContext context, String? oldValue, String? newValue) {
+    if (newValue == null || newValue.isEmpty) {
+      return "Password Field is required";
+    }
+    if (oldValue != newValue) {
+      return "Password mismatch";
+    }
+    return null;
+  }
+
   static String? validateName(BuildContext context, String? value) {
     if (value == null || value.trim().isEmpty) {
       return context.locale.fullName;

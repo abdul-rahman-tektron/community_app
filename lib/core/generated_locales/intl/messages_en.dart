@@ -63,7 +63,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "vendor": MessageLookupByLibrary.simpleMessage("Vendor"),
         "welcome": MessageLookupByLibrary.simpleMessage("Welcome to the App"),
         "welcomeToCommunityApp":
-            MessageLookupByLibrary.simpleMessage("Welcome to Community App"),
+            MessageLookupByLibrary.simpleMessage("Welcome to X10 solutions"),
         "yourRoleHelpsUs": MessageLookupByLibrary.simpleMessage(
             "Your role helps us provide the right experience for you.")
       };

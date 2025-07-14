@@ -1,14 +1,20 @@
 import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/core/model/dropdown/community_dropdown_response.dart';
 import 'package:community_app/core/model/login/login_request.dart';
 import 'package:community_app/core/model/register/customer_register_request.dart';
 import 'package:community_app/core/remote/services/auth_repository.dart';
+import 'package:community_app/core/remote/services/service_repository.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 
 class CustomerRegistrationNotifier extends BaseChangeNotifier {
   CustomerRegistrationNotifier() {
+    initApi();
+  }
 
+  Future<void> initApi() async {
+    apiCommunityDropdown();
   }
 
   final nameController = TextEditingController();
@@ -21,21 +27,17 @@ class CustomerRegistrationNotifier extends BaseChangeNotifier {
   final buildingController = TextEditingController();
   final blockController = TextEditingController();
 
-  final dummyCommunityList = [
-    'Downtown Dubai',
-    'Jumeirah Village Circle',
-    'Dubai Marina',
-    'Business Bay',
-    'Palm Jumeirah',
-  ];
+  List<CommunityDropdownData> communityDropdownData = [];
 
-  String? community;
+  String? _selectedCommunity;
+  String? _selectedCommunityId;
   bool acceptedPrivacyPolicy = false;
   double? latitude;
   double? longitude;
 
-  void setCommunity(String? value) {
-    community = value;
+  void setCommunity(CommunityDropdownData? value) {
+    selectedCommunity = value?.name ?? "";
+    selectedCommunityId = value?.communityId.toString() ?? "";
     notifyListeners();
   }
 
@@ -56,7 +58,7 @@ class CustomerRegistrationNotifier extends BaseChangeNotifier {
         email: emailController.text.trim(),
         mobile: mobileController.text.trim(),
         password: passwordController.text.trim(),
-        communityId: 0,
+        communityId: int.parse(selectedCommunityId ?? "0"),
         userId: userIdController.text.trim(),
         address: addressController.text.trim(),
         building: buildingController.text.trim(),
@@ -89,6 +91,22 @@ class CustomerRegistrationNotifier extends BaseChangeNotifier {
     notifyListeners();
   }
 
+  //Community dropdown Api call
+  Future<void> apiCommunityDropdown() async {
+    try {
+      final result = await ServiceRepository().apiCommunityDropdown();
+
+      if (result is List<CommunityDropdownData>) {
+        communityDropdownData = result;
+        notifyListeners();
+      } else {
+        debugPrint("Unexpected result type from apiServiceDropDown");
+      }
+    } catch (e) {
+      debugPrint("Error in apiServiceDropdown: $e");
+    }
+  }
+
   @override
   void dispose() {
     nameController.dispose();
@@ -100,5 +118,22 @@ class CustomerRegistrationNotifier extends BaseChangeNotifier {
     buildingController.dispose();
     blockController.dispose();
     super.dispose();
+  }
+
+  //Getter and Setter
+  String? get selectedCommunity => _selectedCommunity;
+  set selectedCommunity(String? value) {
+    if (_selectedCommunity != value) {
+      _selectedCommunity = value;
+      notifyListeners();
+    }
+  }
+
+  String? get selectedCommunityId => _selectedCommunityId;
+  set selectedCommunityId(String? value) {
+    if (_selectedCommunityId != value) {
+      _selectedCommunityId = value;
+      notifyListeners();
+    }
   }
 }

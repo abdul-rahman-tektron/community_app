@@ -1,8 +1,10 @@
+import 'package:community_app/core/model/login/login_response.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/images.dart';
 import 'package:community_app/utils/helpers/screen_size.dart';
 import 'package:community_app/utils/router/routes.dart';
+import 'package:community_app/utils/storage/hive_storage.dart';
 import 'package:community_app/utils/storage/secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -15,24 +17,30 @@ class CustomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      width: ScreenSize.width * 0.8,
-      backgroundColor: AppColors.background,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
-      child: Column(
-        children: [
-          _buildLogo(),
-          10.verticalSpace,
-          _buildGradientDivider(),
-          _buildUserDetails(),
-          _buildGradientDivider(),
-          15.verticalSpace,
-          Expanded(child: _buildMenuList(context)),
-          _buildLogoutButton(context),
-          15.verticalSpace,
-        ],
+    return buildBody(context);
+  }
+
+  Widget buildBody(BuildContext context) {
+    return SafeArea(
+      child: Drawer(
+        width: ScreenSize.width * 0.8,
+        backgroundColor: AppColors.background,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+        ),
+        child: Column(
+          children: [
+            _buildLogo(),
+            10.verticalSpace,
+            _buildGradientDivider(),
+            _buildUserDetails(),
+            _buildGradientDivider(),
+            15.verticalSpace,
+            Expanded(child: _buildMenuList(context)),
+            _buildLogoutButton(context),
+            15.verticalSpace,
+          ],
+        ),
       ),
     );
   }
@@ -41,7 +49,7 @@ class CustomDrawer extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Image.asset(
-        AppImages.logo,
+        AppImages.tektronixLogo,
         height: 60,
         fit: BoxFit.contain,
       ),
@@ -49,6 +57,9 @@ class CustomDrawer extends StatelessWidget {
   }
 
   Widget _buildUserDetails() {
+    final String? userJson = HiveStorageService.getUserData();
+    final LoginResponse? user = userJson != null ? loginResponseFromJson(userJson) : null;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
       child: Row(
@@ -67,13 +78,17 @@ class CustomDrawer extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Mohammed John Doe',
-                    style: AppFonts.text16.bold.black.style,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis),
+                Text(
+                  user?.name?.toString() ?? 'Guest User',
+                  style: AppFonts.text16.bold.black.style,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 4.verticalSpace,
-                Text('johndoe@example.com',
-                    style: AppFonts.text12.regular.grey.style),
+                Text(
+                  user?.email ?? 'No email',
+                  style: AppFonts.text12.regular.grey.style,
+                ),
               ],
             ),
           ),
@@ -107,8 +122,7 @@ class CustomDrawer extends StatelessWidget {
       [LucideIcons.layoutDashboard, "Dashboard", 0],
       [LucideIcons.search, "Explore", 1],
       [LucideIcons.brushCleaning, "Services", 2],
-      [LucideIcons.userRound, "Edit Profile", 3],
-      [LucideIcons.lockKeyhole, "Change Password", 4],
+      [LucideIcons.settings, "Settings", 3],
     ];
 
     return ListView.builder(
@@ -132,7 +146,6 @@ class CustomDrawer extends StatelessWidget {
       leading: Icon(icon, size: 25, color: AppColors.textPrimary),
       title: Text(title, style: AppFonts.text16.medium.style),
       onTap: () {
-        Navigator.pop(context);
         _handleNavigation(context, value);
       },
     );
@@ -162,12 +175,18 @@ class CustomDrawer extends StatelessWidget {
 
   void _handleNavigation(BuildContext context, int value) {
     Navigator.pop(context);
-    if (value >= 0 && value <= 4) {
+    if (value >= 0 && value <= 2) {
+      Navigator.pop(context);
       Navigator.pushNamedAndRemoveUntil(
         context,
         AppRoutes.customerBottomBar,
         arguments: value,
             (route) => false,
+      );
+    } else if (value == 3) {
+      Navigator.pushNamed(
+        context,
+        AppRoutes.settings
       );
     } else if (value == 7) {
       logoutFunctionality(context);
@@ -176,6 +195,7 @@ class CustomDrawer extends StatelessWidget {
 
   Future<void> logoutFunctionality(BuildContext context) async {
     await SecureStorageService.clearData();
+    await HiveStorageService.clearOnLogout();
     Navigator.pushNamedAndRemoveUntil(
       context,
       AppRoutes.login,

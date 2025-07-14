@@ -7,3 +7,7 @@ enum UserRole { tenant, owner, vendor }
 enum LanguageCode { en , ar }
 
 enum UpcomingServiceStatus { tracking, inProgress, completed }
+
+enum SortType { price, rating, bestDeals }
+
+enum DistanceFilter { near1Km, near5Km, near10Km }

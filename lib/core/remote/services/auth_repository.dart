@@ -9,6 +9,7 @@ import 'package:community_app/core/model/register/vendor_register_request.dart';
 import 'package:community_app/core/remote/network/api_url.dart';
 import 'package:community_app/core/remote/network/base_repository.dart';
 import 'package:community_app/utils/enums.dart';
+import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:community_app/utils/storage/hive_storage.dart';
 import 'package:community_app/utils/storage/secure_storage.dart';
 
@@ -28,16 +29,23 @@ class AuthRepository extends BaseRepository {
       headers: buildHeaders(),
     );
 
-    if (response?.statusCode == HttpStatus.ok) {
-      final loginTokenResponse = loginResponseFromJson(jsonEncode(response?.data));
-      final token = loginTokenResponse.token ?? "";
-      await SecureStorageService.setToken(token);
+    final statusCode = response?.statusCode;
+    final data = response?.data;
+
+    if (statusCode == HttpStatus.ok) {
+      final loginTokenResponse = loginResponseFromJson(jsonEncode(data));
+      await SecureStorageService.setToken(loginTokenResponse.token ?? "");
       await HiveStorageService.setUserData(jsonEncode(loginTokenResponse));
       return loginTokenResponse;
-    } else {
-      throw ErrorResponse.fromJson(response?.data ?? {});
     }
+
+    if (statusCode == HttpStatus.unauthorized) {
+      return ErrorResponse(title: "Invalid credentials");
+    }
+
+    return ErrorResponse.fromJson(data ?? {});
   }
+
 
   //api: Customer Register
   Future<Object?> apiCustomerRegister(CustomerRegisterRequest requestParams) async {

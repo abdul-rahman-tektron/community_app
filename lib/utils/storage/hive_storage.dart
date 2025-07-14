@@ -38,6 +38,15 @@ class HiveStorageService {
     return _box.get(HiveKeys.userCategory);
   }
 
+  //Set Remember Me Data
+  static Future<void> setRememberMe(String flow) async {
+    await _box.put(HiveKeys.rememberMe, flow);
+  }
+
+  static String? getRememberMe() {
+    return _box.get(HiveKeys.rememberMe);
+  }
+
   //
   static Future<void> setUserData(String flow) async {
     await _box.put(HiveKeys.userData, flow);
@@ -56,4 +65,30 @@ class HiveStorageService {
   static Future<void> clear() async {
     await _box.clear();
   }
+
+  static Future<void> clearOnLogout() async {
+    // List of keys you want to preserve even after logout
+    final List<String> preserveKeys = [
+      HiveKeys.rememberMe,
+      // Add more keys in future as needed
+    ];
+
+    // Temporary storage of values for preserved keys
+    final Map<String, dynamic> preservedData = {};
+
+    for (final key in preserveKeys) {
+      if (_box.containsKey(key)) {
+        preservedData[key] = _box.get(key);
+      }
+    }
+
+    // Clear all data
+    await _box.clear();
+
+    // Restore preserved values
+    for (final entry in preservedData.entries) {
+      await _box.put(entry.key, entry.value);
+    }
+  }
+
 }

@@ -1,7 +1,17 @@
 import 'dart:ui';
+import 'package:community_app/modules/customer/change_password/change_password_screen.dart';
+import 'package:community_app/modules/customer/delete_account/delete_account_screen.dart';
+import 'package:community_app/modules/customer/edit_profile/edit_profile_screen.dart';
+import 'package:community_app/modules/customer/new_services/booking_complete.dart';
+import 'package:community_app/modules/customer/new_services/new_service_confirmation.dart';
+import 'package:community_app/modules/customer/quotation_list/quotation_list_screen.dart';
 import 'package:community_app/modules/customer/registration/registration_handler.dart';
+import 'package:community_app/modules/customer/saved_cards/saved_cards_screen.dart';
+import 'package:community_app/modules/customer/settings/settings_screen.dart';
+import 'package:community_app/modules/customer/top_vendors/top_vendors_screen.dart';
 import 'package:community_app/modules/customer/tracking/tracking_screen.dart';
 import 'package:community_app/modules/vendor/bottom_bar/bottom_bar_screen.dart';
+import 'package:community_app/modules/vendor/quotation/quotation_screen.dart';
 import 'package:community_app/modules/vendor/registration/registration_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:community_app/modules/auth/login/login_screen.dart';
@@ -30,6 +40,15 @@ class AppRoutes {
   static const String vendorBottomBar = '/vendor-bottom-bar';
   static const String ownerTenantBottomBar = '/owner-tenant-bottom-bar';
   static const String newServices = '/new_services';
+  static const String newServicesConfirmation = '/new_services_confirmation';
+  static const String topVendors = '/top_vendors';
+  static const String quotationList = '/quotation_list';
+  static const String bookingConfirmation = '/booking-confirmation';
+  static const String settings = '/settings';
+  static const String changePassword = '/change-password';
+  static const String deleteAccount = '/delete-account';
+  static const String editProfile = '/edit-profile';
+  static const String savedCards = '/saved-cards';
   static const String networkError = '/network-error';
   static const String notFound = '/not-found';
 }
@@ -64,8 +83,43 @@ class AppRouter {
       case AppRoutes.newServices:
         screen = NewServicesScreen();
         break;
+
+      case AppRoutes.newServicesConfirmation:
+        final serviceId = settings.arguments as String;
+        screen = ServiceRequestConfirmationScreen(serviceId: serviceId);
+        break;
       case AppRoutes.tracking:
         screen = TrackingScreen();
+        break;
+        case AppRoutes.topVendors:
+        screen = TopVendorsScreen();
+        break;
+      case AppRoutes.quotationList:
+        screen = QuotationListScreen();
+        break;
+
+        case AppRoutes.bookingConfirmation:
+          final bookingId = settings.arguments as String;
+        screen = BookingConfirmationScreen(bookingId: bookingId);
+        break;
+
+        case AppRoutes.settings:
+        screen = SettingsScreen();
+        break;
+
+        case AppRoutes.changePassword:
+        screen = ChangePasswordScreen();
+        break;
+
+        case AppRoutes.deleteAccount:
+        screen = DeleteAccountScreen();
+        break;
+
+        case AppRoutes.editProfile:
+        screen = EditProfileScreen();
+        break;
+        case AppRoutes.savedCards:
+        screen = SavedCardsScreen();
         break;
       case AppRoutes.networkError:
         screen = const NetworkErrorScreen();

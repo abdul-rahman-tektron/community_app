@@ -26,6 +26,15 @@ extension StringExtensions on String {
     }
   }
 
+  /// Parses a date string in `dd/MM/yyyy hh:mm a` format and returns a DateTime
+  DateTime toDateTimeFromDdMmYyyyHhMmA() {
+    try {
+      return DateFormat('dd/MM/yyyy hh:mm a').parseStrict(this.trim());
+    } catch (e) {
+      throw FormatException('Invalid date format: $this');
+    }
+  }
+
   /// Parses and converts to `yyyy-MM-dd` string
   String toIsoDateFromDdMmYyyy() {
     final date = toDateTimeFromDdMmYyyy();

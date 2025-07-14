@@ -1,3 +1,4 @@
+import 'package:community_app/core/model/dropdown/community_dropdown_response.dart';
 import 'package:community_app/core/model/map/map_data.dart';
 import 'package:community_app/modules/customer/registration/registration_notifier.dart';
 import 'package:community_app/res/colors.dart';
@@ -117,14 +118,14 @@ class CustomerRegistrationAddressScreen extends StatelessWidget {
         children: [
           Text("Address Details", style: AppFonts.text24.semiBold.style),
           20.verticalSpace,
-          CustomSearchDropdown<String>(
+          CustomSearchDropdown<CommunityDropdownData>(
             fieldName: "Community",
             hintText: "Enter Community",
             controller: customerChangeNotifier.communityController,
-            items: customerChangeNotifier.dummyCommunityList,
+            items: customerChangeNotifier.communityDropdownData,
             currentLang: 'en', // You need to inject language if needed
-            itemLabel: (item, lang) => item, // Simplified for example
-            onSelected: (String? menu) {
+            itemLabel: (item, lang) => item.name!, // Simplified for example
+            onSelected: (CommunityDropdownData? menu) {
               customerChangeNotifier.setCommunity(menu);
             },
             validator: (value) => Validations.validateCommunity(context, value),

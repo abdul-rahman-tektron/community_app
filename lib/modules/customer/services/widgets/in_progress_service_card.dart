@@ -39,7 +39,7 @@ class InProgressServiceCard extends StatelessWidget {
         children: [
           TextSpan(
             text: "Service ID: ",
-            style: AppFonts.text16.semiBold.style,
+            style: AppFonts.text16.regular.style,
           ),
           TextSpan(
             text: "#${service.id}",

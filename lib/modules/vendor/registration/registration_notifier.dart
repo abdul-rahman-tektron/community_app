@@ -34,24 +34,12 @@ class VendorRegistrationNotifier extends BaseChangeNotifier {
 
   File? _uploadedLicenseFile;
 
-  final dummyCommunityList = [
-    'Downtown Dubai',
-    'Jumeirah Village Circle',
-    'Dubai Marina',
-    'Business Bay',
-    'Palm Jumeirah',
-  ];
 
-  String? _community;
   String? _uploadedFileName;
   bool _acceptedPrivacyPolicy = false;
   double? _latitude;
   double? _longitude;
 
-  void setCommunity(String? value) {
-    community = value;
-    notifyListeners();
-  }
 
   void togglePrivacyPolicy() {
     acceptedPrivacyPolicy = !acceptedPrivacyPolicy;
@@ -70,7 +58,7 @@ class VendorRegistrationNotifier extends BaseChangeNotifier {
         email: emailController.text.trim(),
         mobile: contact1Controller.text.trim(),
         password: passwordController.text.trim(),
-        communityId: 1,
+          communityId: 0,
         userId: userIdController.text.trim(),
         address: addressController.text.trim(),
         building: buildingController.text.trim(),
@@ -158,15 +146,6 @@ class VendorRegistrationNotifier extends BaseChangeNotifier {
   set uploadedLicenseFile(File? value) {
     if (_uploadedLicenseFile != value) {
       _uploadedLicenseFile = value;
-      notifyListeners();
-    }
-  }
-
-  String? get community => _community;
-
-  set community(String? value) {
-    if (_community != value) {
-      _community = value;
       notifyListeners();
     }
   }

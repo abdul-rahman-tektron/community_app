@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:community_app/core/generated_locales/l10n.dart';
+import 'package:community_app/core/model/login/login_response.dart';
 import 'package:community_app/core/notifier/language_notifier.dart';
 import 'package:community_app/modules/auth/login/login_screen.dart';
 import 'package:community_app/modules/auth/user_role_selection/user_role_selection_screen.dart';
@@ -46,8 +47,13 @@ Future<void> main() async {
     await SecureStorageService.init();
 
     final token = await SecureStorageService.getToken();
+    final userJson = HiveStorageService.getUserData();
+    LoginResponse? user;
+    if (userJson != null) {
+      user = loginResponseFromJson(userJson);
+    }
 
-    runApp(MyApp(token: token,));
+    runApp(MyApp(token: token, user: user));
   }, (error, stackTrace) {
     // TODO: integrate error reporting (e.g., Crashlytics)
     debugPrint('Unhandled error: $error');
@@ -57,9 +63,10 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
   final String? token;
+  final LoginResponse? user;
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-  const MyApp({super.key, required this.token});
+  const MyApp({super.key, required this.token, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +89,7 @@ class MyApp extends StatelessWidget {
               child: MaterialApp(
                 debugShowCheckedModeBanner: false,
                 navigatorKey: navigatorKey,
-                title: 'Community App',
+                title: 'X10 solutions',
                 locale: langNotifier.locale,
                 supportedLocales: const [
                   Locale('en'),
@@ -95,7 +102,9 @@ class MyApp extends StatelessWidget {
                   GlobalCupertinoLocalizations.delegate,
                 ],
                 onGenerateRoute: AppRouter.onGenerateRoute,
-                home: token != null ?  VendorBottomScreen() : const UserRoleSelectionScreen(),
+                home: user != null
+                    ? (user!.type == "V" ? VendorBottomScreen() : CustomerBottomScreen())
+                    : const UserRoleSelectionScreen(),
                 theme: AppThemes.lightTheme(languageCode: langNotifier.locale.languageCode),
                 builder: (context, child) {
                   ScreenSize.init(context);

@@ -17,7 +17,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       scrolledUnderElevation: 0,
       centerTitle: true,
-      title: Image.asset(AppImages.logo, height: 50),
+      title: Image.asset(AppImages.tektronixLogo, height: 50),
       actionsPadding: const EdgeInsets.symmetric(horizontal: 14.0),
       actions: [
         InkWell(

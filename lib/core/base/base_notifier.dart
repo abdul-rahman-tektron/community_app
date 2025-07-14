@@ -1,3 +1,4 @@
+import 'package:community_app/core/model/login/login_response.dart';
 import 'package:community_app/utils/enums.dart';
 import 'package:community_app/utils/storage/hive_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -13,6 +14,9 @@ abstract class BaseChangeNotifier with ChangeNotifier {
   String get userRole => _userRole;
   bool get isLoading => _isLoading;
   LoadingState get loadingState => _loadingState;
+
+  LoginResponse? _userData;
+  LoginResponse? get userData => _userData;
 
 
   // ----- Setters with Notification -----
@@ -41,6 +45,14 @@ abstract class BaseChangeNotifier with ChangeNotifier {
     final role = HiveStorageService.getUserCategory();
     if (role != null) {
       _userRole = role;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadUserData() async {
+    final userJson = HiveStorageService.getUserData();
+    if (userJson != null) {
+      _userData = loginResponseFromJson(userJson);
       notifyListeners();
     }
   }

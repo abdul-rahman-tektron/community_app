@@ -5,6 +5,7 @@ import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/helpers/validations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -37,6 +38,8 @@ class CustomTextField extends StatefulWidget {
   final bool needTime;
   final bool isAutoValidate;
   final bool showAsterisk;
+  final Icon? prefix;
+  final List<TextInputFormatter>? inputFormatters;
 
   const CustomTextField({
     super.key,
@@ -66,6 +69,8 @@ class CustomTextField extends StatefulWidget {
     this.needTime = false,
     this.isAutoValidate = true,
     this.showAsterisk = true,
+    this.prefix,
+    this.inputFormatters,
   });
 
   @override
@@ -139,7 +144,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   String _formatDateTime(DateTime? date) {
     if (date == null) return '';
-    final pattern = widget.needTime ? 'M/d/yyyy h:mm a' : 'M/d/yyyy';
+    final pattern = widget.needTime ? 'dd/MM/yyyy h:mm a' : 'dd/MM/yyyy';
     return DateFormat(pattern).format(date);
   }
 
@@ -238,6 +243,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
             onTap: widget.keyboardType == TextInputType.datetime ? () => _selectDate(context) : null,
             style: textColor,
             autovalidateMode: widget.isAutoValidate ? AutovalidateMode.onUserInteraction : null,
+            inputFormatters: widget.inputFormatters,
             validator: widget.skipValidation
                 ? null
                 : widget.validator ?? (value) => Validations.requiredField(context, value),
@@ -280,9 +286,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
           onTap: _toggleVisibility,
           child: _obscureText ? Icon(LucideIcons.eye   ) : Icon(LucideIcons.eyeOff))
           : null,
-      hintStyle: widget.hintStyle ?? AppFonts.text16.regular.style,
+      hintStyle: widget.hintStyle ?? AppFonts.text14.regular.grey.style,
       border: AppStyles.fieldBorder,
       enabledBorder: AppStyles.fieldBorder,
+      prefixIcon: widget.prefix,
       disabledBorder: AppStyles.fieldBorder,
       errorBorder: AppStyles.errorFieldBorder,
       focusedBorder: AppStyles.focusedFieldBorder,
