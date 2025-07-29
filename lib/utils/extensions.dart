@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:community_app/core/generated_locales/l10n.dart';
+import 'package:community_app/res/colors.dart';
 import 'package:community_app/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+
+import '../modules/vendor/quotation/widgets/quotation_details/quotation_details_notifier.dart';
 
 extension LocalizationX on BuildContext {
   AppLocalizations get locale => AppLocalizations.of(this)!;
@@ -45,6 +48,11 @@ extension StringExtensions on String {
   String toFullIsoStringFromDdMmYyyy() {
     final date = toDateTimeFromDdMmYyyy();
     return date.toUtc().toIso8601String();
+  }
+
+  String toCapitalize() {
+    if (isEmpty) return '';
+    return this[0].toUpperCase() + substring(1).toLowerCase();
   }
 
   UserRole toUserRole() {
@@ -90,6 +98,30 @@ extension UpcomingServiceStatusExtension on UpcomingServiceStatus {
         return "In Progress";
       case UpcomingServiceStatus.completed:
         return "Completed";
+    }
+  }
+}
+
+extension QuotationStatusExtension on QuotationStatus {
+  String get name {
+    switch (this) {
+      case QuotationStatus.awaitingApproval:
+        return 'awaiting approval';
+      case QuotationStatus.approved:
+        return 'approved';
+      case QuotationStatus.rejected:
+        return 'rejected';
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case QuotationStatus.awaitingApproval:
+        return Colors.orange;
+      case QuotationStatus.approved:
+        return Colors.green;
+      case QuotationStatus.rejected:
+        return AppColors.error;
     }
   }
 }

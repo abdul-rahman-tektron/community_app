@@ -1,4 +1,4 @@
-import 'package:community_app/core/model/map/map_data.dart';
+import 'package:community_app/core/model/customer/map/map_data.dart';
 import 'package:community_app/modules/common/location/location_notifier.dart';
 import 'package:community_app/res/api_constants.dart';
 import 'package:community_app/res/fonts.dart';

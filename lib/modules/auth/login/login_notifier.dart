@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/error/error_response.dart';
-import 'package:community_app/core/model/login/login_request.dart';
-import 'package:community_app/core/model/login/login_response.dart';
-import 'package:community_app/core/model/remember_me/remember_me_model.dart';
+import 'package:community_app/core/model/common/error/error_response.dart';
+import 'package:community_app/core/model/common/login/login_request.dart';
+import 'package:community_app/core/model/common/login/login_response.dart';
+import 'package:community_app/core/model/common/remember_me/remember_me_model.dart';
 import 'package:community_app/core/remote/services/auth_repository.dart';
 import 'package:community_app/res/strings.dart';
+import 'package:community_app/utils/enums.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/storage/hive_storage.dart';
@@ -121,22 +122,25 @@ class LoginNotifier extends BaseChangeNotifier {
 
 
   Future<void> _handleLoginSuccess(LoginResponse result, BuildContext context) async {
+
     _handleRememberMe();
 
     ToastHelper.showSuccess('Login successful');
 
     // Navigate to role-based home (example shown here)
     if(result.type == "V") {
+      HiveStorageService.setUserCategory(UserRole.vendor.name);
       Navigator.pushReplacementNamed(
         context,
         AppRoutes.vendorBottomBar,
         arguments: 0,
       );
     } else {
+      HiveStorageService.setUserCategory(UserRole.tenant.name);
       Navigator.pushReplacementNamed(
         context,
         AppRoutes.customerBottomBar,
-        arguments: 0,
+        arguments: {'currentIndex': 0},
       );
     }
   }

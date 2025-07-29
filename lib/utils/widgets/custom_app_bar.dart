@@ -5,30 +5,50 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const CustomAppBar({super.key});
+  final bool showDrawer;
+  const CustomAppBar({super.key, this.showDrawer = false});
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: AppColors.backgroundSecondary,
-      leading: InkWell(
-        onTap: () => Scaffold.of(context).openDrawer(),
-        child: Icon(LucideIcons.logs, color: AppColors.textPrimary, size: 25.r),
+      toolbarHeight: 80, // replaces preferredSize
+      leadingWidth: 60,
+      backgroundColor: AppColors.primary,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 15.0),
+        child: showDrawer ? InkWell(
+            onTap: () => Scaffold.of(context).openDrawer(),
+            child: Icon(LucideIcons.logs, color: AppColors.white, size: 25.r)
+        ) : _buildBackButton(context),
       ),
-      scrolledUnderElevation: 0,
       centerTitle: true,
-      title: Image.asset(AppImages.tektronixLogo, height: 50),
-      actionsPadding: const EdgeInsets.symmetric(horizontal: 14.0),
+      title: Image.asset(AppImages.logo, height: 60),
       actions: [
-        InkWell(
-          child: Icon(LucideIcons.bell, color: AppColors.textPrimary, size: 25.r),
-          onTap: () {},
+        Padding(
+          padding: const EdgeInsets.only(right: 14.0),
+          child: Icon(LucideIcons.bell, color: AppColors.white, size: 25.r),
         ),
       ],
     );
   }
 
+  Widget _buildBackButton(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        Navigator.pop(context);
+      },
+      child: Container(
+        padding: EdgeInsets.all(1),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.white),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(LucideIcons.arrowLeft, color: AppColors.white, size: 20.r),
+      ),
+    );
+  }
+
   @override
-  // TODO: implement preferredSize
-  Size get preferredSize => const Size.fromHeight(65.0);
+  Size get preferredSize => const Size.fromHeight(80.0);
 }
+

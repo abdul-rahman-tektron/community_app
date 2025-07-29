@@ -1,5 +1,4 @@
 import 'package:community_app/modules/customer/registration/registration_notifier.dart';
-import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/images.dart';
 import 'package:community_app/utils/extensions.dart';
@@ -34,7 +33,9 @@ class CustomerRegistrationPersonalScreen extends StatelessWidget {
         body: SingleChildScrollView(
           child: Form(
             key: _personalKey,
-            child: Column(children: [_buildImageHeader(context), _buildFormSection(context, customerChangeNotifier)]),
+            child: Column(children: [
+              // _buildImageHeader(context),
+              _buildFormSection(context, customerChangeNotifier)]),
           ),
         ),
       ),
@@ -57,7 +58,7 @@ class CustomerRegistrationPersonalScreen extends StatelessWidget {
         children: [
           Align(
             alignment: Alignment.topLeft,
-            child: Image.asset(AppImages.tektronLogo, width: 100.w, fit: BoxFit.contain),
+            child: Image.asset(AppImages.logo, width: 100.w, fit: BoxFit.contain),
           ),
           Align(alignment: Alignment.bottomLeft, child: _buildHeaderText(context)),
           _buildBackButton(context),
@@ -110,7 +111,7 @@ class CustomerRegistrationPersonalScreen extends StatelessWidget {
             text: context.locale.next,
             onPressed: () {
               if (_personalKey.currentState!.validate()) {
-                Navigator.of(context).pushNamed(AppRoutes.customerRegistrationAddress);
+                customerChangeNotifier.nextStep();
               }
             },
           ),

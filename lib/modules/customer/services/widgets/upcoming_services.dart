@@ -53,7 +53,7 @@ class UpcomingServicesWidget extends StatelessWidget {
   }
 
   Widget _buildHeadingWithGradientUnderline(BuildContext context) {
-    final text = "Ongoing Services";
+    final text = "Ongoing Jobs";
     final style = AppFonts.text20.semiBold.style;
 
     return Padding(

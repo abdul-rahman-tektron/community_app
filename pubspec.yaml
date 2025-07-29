@@ -60,6 +60,9 @@ dependencies:
   file_picker: 10.1.9
   image_picker: 1.1.2
   permission_handler: 12.0.0+1
+  horizontal_stepper_flutter: ^1.0.3
+  video_player: ^2.10.0
+  photo_view: ^0.15.0
 
   #Map
   google_maps_flutter: 2.12.2
@@ -74,6 +77,10 @@ dependencies:
   #Routing
   go_router: 15.1.2
 
+  # Testing
+  image: ^4.5.4
+  path_provider: ^2.1.5
+  share_plus: ^11.0.0
 
 dev_dependencies:
   flutter_test:
@@ -112,6 +119,7 @@ flutter:
     - assets/images/place_holder/
     - assets/animations/lottie/
     - assets/locales/
+    - assets/video/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

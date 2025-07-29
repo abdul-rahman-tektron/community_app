@@ -44,9 +44,9 @@ class DeleteAccountScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ...contentWidget(context, deleteAccountNotifier),
-                10.verticalSpace,
+                20.verticalSpace,
                 emailAddressTextField(context, deleteAccountNotifier),
-                15.verticalSpace,
+                25.verticalSpace,
                 deleteAndCancelButtons(context, deleteAccountNotifier),
               ],
             ),
@@ -57,6 +57,8 @@ class DeleteAccountScreen extends StatelessWidget {
   }
 
   List<Widget> contentWidget(BuildContext context, DeleteAccountNotifier deleteAccountNotifier) {
+    final userEmail = deleteAccountNotifier.userData?.email ?? "";
+
     return [
       Text(
         "Delete Account",
@@ -64,39 +66,36 @@ class DeleteAccountScreen extends StatelessWidget {
       ),
       15.verticalSpace,
       Text(
-        "Do you want to permanently delete your account?",
+        "You're about to delete your account and all associated data.",
         style: AppFonts.text16.regular.style,
       ),
       10.verticalSpace,
       Text(
-        "This action cannot be undone.",
+        "This action is irreversible and will remove your profile, history, and preferences permanently.",
         style: AppFonts.text16.regular.style,
       ),
+      10.verticalSpace,
       Text.rich(
         TextSpan(
           children: [
             TextSpan(
-              text: "This will permanently delete ",
+              text: "Please confirm by typing ",
               style: AppFonts.text16.regular.style,
             ),
             TextSpan(
-              text: deleteAccountNotifier.userData?.email ?? "",
-              style: AppFonts.text16.regular.red.style, // Change the color here
+              text: userEmail,
+              style: AppFonts.text16.regular.red.style,
             ),
             TextSpan(
-              text: " account",
+              text: " below.",
               style: AppFonts.text16.regular.style,
             ),
           ],
         ),
       ),
-      10.verticalSpace,
-      Text(
-        "Please type ${deleteAccountNotifier.userData?.email ?? ""} to confirm.",
-        style: AppFonts.text16.regular.style,
-      ),
     ];
   }
+
 
   Widget emailAddressTextField(
     BuildContext context,

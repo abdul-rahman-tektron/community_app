@@ -4,6 +4,7 @@ import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/images.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/enums.dart';
+import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_search_dropdown.dart';
 import 'package:community_app/utils/widgets/custom_textfields.dart';
@@ -14,80 +15,81 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class ExploreScreen extends StatelessWidget {
-  const ExploreScreen({super.key});
+  final String? initialCategory;
+
+  const ExploreScreen({super.key, this.initialCategory});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => ExploreNotifier(),
+      create: (_) => ExploreNotifier(initialCategory: initialCategory),
       child: Consumer<ExploreNotifier>(
         builder: (_, exploreNotifier, __) {
-          return SafeArea(
-            child: Scaffold(
-              body: Column(
+          return buildBody(context, exploreNotifier);
+        },
+      ),
+    );
+  }
+
+  Widget buildBody(BuildContext context, ExploreNotifier exploreNotifier) {
+    return SafeArea(
+      child: Scaffold(
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Row(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: CustomTextField(
-                            controller: exploreNotifier.searchController,
-                            fieldName: "",
-                            titleVisibility: false,
-                            prefix: Icon(LucideIcons.search),
-                            hintText: "Search",
-                            skipValidation: true,
-                          ),
-                        ),
-                        15.horizontalSpace,
-                        InkWell(
-                          onTap: () {
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              backgroundColor: AppColors.white,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                              ),
-                              builder: (_) => buildFilterSheet(context, exploreNotifier),
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(13),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Icon(LucideIcons.listFilter, color: AppColors.white),
-                          ),
-                        ),
-                      ],
+                  Expanded(
+                    child: CustomTextField(
+                      controller: exploreNotifier.searchController,
+                      fieldName: "Search",
+                      prefix: Icon(LucideIcons.search),
+                      skipValidation: true,
                     ),
                   ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: GridView.builder(
-                        itemCount: exploreNotifier.filteredServices.length,
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 20,
-                          mainAxisSpacing: 20,
-                          childAspectRatio: 0.75,
+                  15.horizontalSpace,
+                  InkWell(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: AppColors.white,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                         ),
-                        itemBuilder: (context, index) {
-                          final service = exploreNotifier.filteredServices[index];
-                          return _buildServiceCard(service);
-                        },
-                      ),
+                        builder: (_) => buildFilterSheet(context, exploreNotifier),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(13),
+                      decoration: BoxDecoration(color: AppColors.secondary, borderRadius: BorderRadius.circular(10)),
+                      child: Icon(LucideIcons.listFilter, color: AppColors.white),
                     ),
                   ),
                 ],
               ),
             ),
-          );
-        },
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: GridView.builder(
+                  itemCount: exploreNotifier.filteredServices.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 20,
+                    childAspectRatio: 0.75,
+                  ),
+                  itemBuilder: (context, index) {
+                    final service = exploreNotifier.filteredServices[index];
+                    return _buildServiceCard(context, service);
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -139,29 +141,29 @@ class ExploreScreen extends StatelessWidget {
                               padding: const EdgeInsets.only(right: 10), // space between chips
                               child: meta.togglable
                                   ? _sortToggleChip(
-                                context: context,
-                                label: meta.label,
-                                icon: meta.icon,
-                                sortType: meta.type,
-                                currentSort: localSortOption,
-                                onChanged: (newSort) {
-                                  setState(() {
-                                    localSortOption = newSort;
-                                  });
-                                },
-                              )
+                                      context: context,
+                                      label: meta.label,
+                                      icon: meta.icon,
+                                      sortType: meta.type,
+                                      currentSort: localSortOption,
+                                      onChanged: (newSort) {
+                                        setState(() {
+                                          localSortOption = newSort;
+                                        });
+                                      },
+                                    )
                                   : _sortSimpleChip(
-                                context: context,
-                                label: meta.label,
-                                icon: meta.icon,
-                                sortType: meta.type,
-                                currentSort: localSortOption,
-                                onChanged: (newSort) {
-                                  setState(() {
-                                    localSortOption = newSort;
-                                  });
-                                },
-                              ),
+                                      context: context,
+                                      label: meta.label,
+                                      icon: meta.icon,
+                                      sortType: meta.type,
+                                      currentSort: localSortOption,
+                                      onChanged: (newSort) {
+                                        setState(() {
+                                          localSortOption = newSort;
+                                        });
+                                      },
+                                    ),
                             );
                           }).toList(),
                         ),
@@ -183,8 +185,6 @@ class ExploreScreen extends StatelessWidget {
                     itemLabel: (item, lang) => item,
                     onSelected: (String? menu) {
                       setState(() {
-                        print("menu");
-                        print(menu);
                         exploreNotifier.selectedCategory = menu ?? 'All';
                       });
                     },
@@ -246,9 +246,7 @@ class ExploreScreen extends StatelessWidget {
                         selectedColor: AppColors.primary,
                         backgroundColor: AppColors.white,
                         checkmarkColor: AppColors.white,
-                        labelStyle: TextStyle(
-                          color: isSelected ? Colors.white : Colors.black,
-                        ),
+                        labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.black),
                       );
                     }).toList(),
                   ),
@@ -374,50 +372,57 @@ class ExploreScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildServiceCard(ServiceItem service) {
-    return Container(
-      decoration: AppStyles.commonDecoration,
-      child: Column(
-        children: [
-          /// Image - 45% height
-          Expanded(
-            flex: 45,
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
-              child: SizedBox.expand(
-                child: Image.asset(AppImages.loginImage, fit: BoxFit.cover),
+  Widget _buildServiceCard(BuildContext context, ServiceItem service) {
+    return InkWell(
+      onTap: () {
+        Navigator.pushNamed(context, AppRoutes.serviceDetails);
+      },
+      child: Container(
+        decoration: AppStyles.commonDecoration,
+        child: Column(
+          children: [
+            /// Image - 45% height
+            Expanded(
+              flex: 45,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
+                child: SizedBox.expand(child: Image.asset(AppImages.loginImage, fit: BoxFit.cover)),
               ),
             ),
-          ),
-          /// Content - 55% height
-          Expanded(
-            flex: 55,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(service.service, style: AppFonts.text14.semiBold.style, maxLines: 1),
-                  4.verticalSpace,
-                  Text(service.vendorName, style: AppFonts.text14.medium.style, maxLines: 1, overflow: TextOverflow.ellipsis,),
-                  4.verticalSpace,
-                  Text("AED ${service.price.toStringAsFixed(0)}", style: AppFonts.text16.semiBold.style),
-                  const Spacer(),
-                  Row(
-                    children: [
-                      RatingsHelper(rating: service.rating),
-                      4.horizontalSpace,
-                      Text(service.rating.toString(), style: AppFonts.text12.regular.style),
-                    ],
-                  ),
-                ],
+
+            /// Content - 55% height
+            Expanded(
+              flex: 55,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(service.service, style: AppFonts.text14.semiBold.style, maxLines: 1),
+                    4.verticalSpace,
+                    Text(
+                      service.vendorName,
+                      style: AppFonts.text14.medium.style,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    4.verticalSpace,
+                    Text("AED ${service.price.toStringAsFixed(0)}", style: AppFonts.text16.semiBold.style),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        RatingsHelper(rating: service.rating),
+                        4.horizontalSpace,
+                        Text(service.rating.toString(), style: AppFonts.text12.regular.style),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
-
 }
-

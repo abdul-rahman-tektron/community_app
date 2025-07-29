@@ -34,7 +34,7 @@ class VendorBottomScreen extends StatelessWidget {
       child: SafeArea(
         child: Scaffold(
           backgroundColor: AppColors.background,
-          appBar: CustomAppBar(),
+          appBar: CustomAppBar(showDrawer: true),
           drawer: CustomDrawer(),
           body: vendorBottomBarNotifier.currentScreen,
           bottomNavigationBar: CustomBottomNavBar(

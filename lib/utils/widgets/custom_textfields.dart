@@ -166,7 +166,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
             onPrimary: Colors.white,
             onSurface: Colors.black,
           ),
-          textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: AppColors.primary)),
+          textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(foregroundColor: AppColors.primary)),
         ),
         child: child!,
       ),
@@ -174,6 +175,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
     if (picked != null) {
       DateTime finalDateTime = picked;
+
       if (widget.needTime) {
         final time = await showTimePicker(
           context: context,
@@ -201,11 +203,29 @@ class _CustomTextFieldState extends State<CustomTextField> {
           ),
         );
 
-
         if (time != null) {
-          finalDateTime = DateTime(picked.year, picked.month, picked.day, time.hour, time.minute);
+          DateTime selectedDateTime = DateTime(
+            picked.year,
+            picked.month,
+            picked.day,
+            time.hour,
+            time.minute,
+          );
+
+          final now = DateTime.now();
+
+          // **If same day & time is in the past → set to current time**
+          if (picked.year == now.year &&
+              picked.month == now.month &&
+              picked.day == now.day &&
+              selectedDateTime.isBefore(now)) {
+            selectedDateTime = now;
+          }
+
+          finalDateTime = selectedDateTime;
         }
       }
+
       setState(() {
         _selectedDate = finalDateTime;
         final text = _formatDateTime(_selectedDate);
@@ -217,42 +237,33 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final showTitle = widget.titleVisibility ?? true;
     final textColor = !widget.isEnable
         ? AppFonts.text14.regular.grey.style
         : AppFonts.text14.regular.style;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (showTitle) _buildTitle(context),
-        if (showTitle) const SizedBox(height: 5),
-        CompositedTransformTarget(
-          link: _layerLink,
-          child: TextFormField(
-            controller: widget.controller,
-            focusNode: _focusNode,
-            obscureText: widget.isPassword && _obscureText,
-            obscuringCharacter: '*',
-            textInputAction: widget.textInputAction,
-            keyboardType: widget.keyboardType,
-            readOnly: !widget.isEditable || widget.keyboardType == TextInputType.datetime,
-            enabled: widget.isEnable,
-            onChanged: widget.onChanged,
-            maxLines: widget.isMaxLines == true ? 4 : 1,
-            onTap: widget.keyboardType == TextInputType.datetime ? () => _selectDate(context) : null,
-            style: textColor,
-            autovalidateMode: widget.isAutoValidate ? AutovalidateMode.onUserInteraction : null,
-            inputFormatters: widget.inputFormatters,
-            validator: widget.skipValidation
-                ? null
-                : widget.validator ?? (value) => Validations.requiredField(context, value),
-            decoration: _buildInputDecoration(),
-          ),
-        ),
-      ],
+    return TextFormField(
+      controller: widget.controller,
+      focusNode: _focusNode,
+      obscureText: widget.isPassword && _obscureText,
+      obscuringCharacter: '*',
+      textInputAction: widget.textInputAction,
+      keyboardType: widget.keyboardType,
+      readOnly: !widget.isEditable || widget.keyboardType == TextInputType.datetime,
+      enabled: widget.isEnable,
+      onChanged: widget.onChanged,
+      maxLines: widget.isMaxLines == true ? 3 : 1,
+      onTap: widget.keyboardType == TextInputType.datetime ? () => _selectDate(context) : null,
+      style: textColor,
+      autovalidateMode: widget.isAutoValidate ? AutovalidateMode.onUserInteraction : null,
+      inputFormatters: widget.inputFormatters,
+      validator: widget.skipValidation
+          ? null
+          : widget.validator ?? (value) => Validations.requiredField(context, value),
+      decoration: _buildInputDecoration(),
     );
   }
+
+
 
   Widget _buildTitle(BuildContext context) {
     return Row(
@@ -275,21 +286,30 @@ class _CustomTextFieldState extends State<CustomTextField> {
   }
 
   InputDecoration _buildInputDecoration() {
-    final color = widget.isEnable ? (widget.backgroundColor ?? AppColors.white.withOpacity(0.8)) : AppColors.textSecondary;
+    final color = widget.isEnable
+        ? (widget.backgroundColor ?? AppColors.white.withOpacity(0.8))
+        : Colors.black.withOpacity(0.04);
+
     return InputDecoration(
       filled: true,
       fillColor: color,
-      contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 12),
+      contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+      labelText: widget.fieldName, // Floating label
       hintText: widget.hintText,
-      suffixIcon: widget.isPassword && !widget.hidePassIcon ?
-      InkWell(
-          onTap: _toggleVisibility,
-          child: _obscureText ? Icon(LucideIcons.eye   ) : Icon(LucideIcons.eyeOff))
-          : null,
+      labelStyle: AppFonts.text14.regular.grey.style,
       hintStyle: widget.hintStyle ?? AppFonts.text14.regular.grey.style,
-      border: AppStyles.fieldBorder,
-      enabledBorder: AppStyles.fieldBorder,
+      suffixIcon: widget.isPassword && !widget.hidePassIcon
+          ? InkWell(
+          onTap: _toggleVisibility,
+          child: _obscureText
+              ? Icon(LucideIcons.eye)
+              : Icon(LucideIcons.eyeOff))
+          : null,
       prefixIcon: widget.prefix,
+      floatingLabelStyle: AppFonts.text16.regular.style,
+      border: AppStyles.fieldBorder,
+      alignLabelWithHint: true,
+      enabledBorder: AppStyles.fieldBorder,
       disabledBorder: AppStyles.fieldBorder,
       errorBorder: AppStyles.errorFieldBorder,
       focusedBorder: AppStyles.focusedFieldBorder,

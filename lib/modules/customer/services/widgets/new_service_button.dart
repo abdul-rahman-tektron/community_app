@@ -11,7 +11,7 @@ class NewServiceButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15.0),
       child: CustomButton(
-        text: "New Service",
+        text: "New Jobs",
         onPressed: onPressed,
       ),
     );

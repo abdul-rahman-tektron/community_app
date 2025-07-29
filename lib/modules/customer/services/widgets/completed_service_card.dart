@@ -3,6 +3,7 @@ import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/extensions.dart';
+import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_linear_progress_indicator.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,7 @@ class CompletedServiceCard extends StatelessWidget {
           10.verticalSpace,
           _buildProgressRow(),
           10.verticalSpace,
-          _buildCheckProgressButton(),
+          _buildCheckProgressButton(context),
           20.verticalSpace,
           _buildProgressBar(),
         ],
@@ -39,7 +40,7 @@ class CompletedServiceCard extends StatelessWidget {
     return Text.rich(
       TextSpan(
         children: [
-          TextSpan(text: "Service ID: ", style: AppFonts.text16.regular.style),
+          TextSpan(text: "Job ID: ", style: AppFonts.text16.regular.style),
           TextSpan(text: "#${service.id}", style: AppFonts.text16.regular.style),
         ],
       ),
@@ -66,10 +67,12 @@ class CompletedServiceCard extends StatelessWidget {
     );
   }
 
-  Widget _buildCheckProgressButton() {
+  Widget _buildCheckProgressButton(BuildContext context) {
     return CustomButton(text: "Check Progress", backgroundColor: AppColors.white,
         borderColor: AppColors.primary,
-        textStyle: AppFonts.text14.regular.style,onPressed: () {}, height: 35);
+        textStyle: AppFonts.text14.regular.style,onPressed: () {
+          Navigator.pushNamed(context, AppRoutes.jobVerification);
+        }, height: 35);
   }
 
   Widget _buildProgressText(String progress) {

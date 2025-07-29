@@ -7,28 +7,37 @@ import 'package:flutter/material.dart';
 
 class BottomBarNotifier extends BaseChangeNotifier {
   int _currentIndex = 0;
+  String? _selectedCategory;
 
   int get currentIndex => _currentIndex;
+  String? get selectedCategory => _selectedCategory;
 
-  BottomBarNotifier(int? currentIndex) {
+  BottomBarNotifier(int? currentIndex, [String? initialCategory]) {
     initNotifier();
     _currentIndex = currentIndex ?? 0;
+    _selectedCategory = initialCategory;
   }
 
   Future<void> initNotifier() async {
     await loadUserRole();
   }
 
-  void changeTab(int index) {
+  void changeTab(int index, {String? category}) {
     _currentIndex = index;
+    _selectedCategory = category;
     notifyListeners();
   }
 
-  final List<Widget> _screens = [
-    CustomerDashboardScreen(),
-    ExploreScreen(),
-    ServicesScreen(),
-  ];
-
-  Widget get currentScreen => _screens[_currentIndex];
+  Widget get currentScreen {
+    return [
+      CustomerDashboardScreen(
+        onCategoryTap: (category) {
+          changeTab(1, category: category.name); // pass category name
+        },
+      ),
+      ExploreScreen(initialCategory: _selectedCategory), // Pass the selected category here too
+      ServicesScreen(),
+    ][_currentIndex];
+  }
 }
+

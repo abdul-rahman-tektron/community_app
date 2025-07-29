@@ -1,4 +1,4 @@
-import 'package:community_app/core/model/login/login_response.dart';
+import 'package:community_app/core/model/common/login/login_response.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/images.dart';
@@ -47,10 +47,15 @@ class CustomDrawer extends StatelessWidget {
 
   Widget _buildLogo() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.all(5),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        shape: BoxShape.circle,
+      ),
       child: Image.asset(
-        AppImages.tektronixLogo,
-        height: 60,
+        AppImages.logo,
+        height: 100,
         fit: BoxFit.contain,
       ),
     );
@@ -105,9 +110,9 @@ class CustomDrawer extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             Colors.transparent,
-            AppColors.primary.withOpacity(0.5),
-            AppColors.primary,
-            AppColors.primary.withOpacity(0.5),
+            AppColors.secondary.withOpacity(0.5),
+            AppColors.secondary,
+            AppColors.secondary.withOpacity(0.5),
             Colors.transparent,
           ],
           begin: Alignment.centerLeft,
@@ -121,7 +126,7 @@ class CustomDrawer extends StatelessWidget {
     final items = [
       [LucideIcons.layoutDashboard, "Dashboard", 0],
       [LucideIcons.search, "Explore", 1],
-      [LucideIcons.brushCleaning, "Services", 2],
+      [LucideIcons.brushCleaning, "Jobs", 2],
       [LucideIcons.settings, "Settings", 3],
     ];
 
@@ -156,7 +161,7 @@ class CustomDrawer extends StatelessWidget {
       onTap: () => logoutFunctionality(context),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 40),
-        padding: const EdgeInsets.symmetric( vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           color: AppColors.error,
           borderRadius: BorderRadius.circular(8),
@@ -180,7 +185,7 @@ class CustomDrawer extends StatelessWidget {
       Navigator.pushNamedAndRemoveUntil(
         context,
         AppRoutes.customerBottomBar,
-        arguments: value,
+          arguments: {'currentIndex': value},
             (route) => false,
       );
     } else if (value == 3) {

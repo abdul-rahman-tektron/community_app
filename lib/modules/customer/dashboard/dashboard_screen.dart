@@ -3,6 +3,7 @@ import 'package:community_app/modules/customer/dashboard/dashboard_notifier.dart
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
+import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,7 +11,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class CustomerDashboardScreen extends StatelessWidget {
-  const CustomerDashboardScreen({super.key});
+  final void Function(ServiceCategory category)? onCategoryTap;
+  const CustomerDashboardScreen({super.key, this.onCategoryTap});
 
   @override
   Widget build(BuildContext context) {
@@ -23,18 +25,6 @@ class CustomerDashboardScreen extends StatelessWidget {
               child: SingleChildScrollView(
                 child: Stack(
                   children: [
-                    // Positioned(
-                    //   top: -35.h,
-                    //   left: -35.w,
-                    //   child: Container(
-                    //     height: 230.h,
-                    //     width: 230.w,
-                    //     decoration: BoxDecoration(
-                    //         color: AppColors.primary,
-                    //         shape: BoxShape.circle
-                    //     ),
-                    //   ),
-                    // ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -42,7 +32,8 @@ class CustomerDashboardScreen extends StatelessWidget {
                         _buildPromotionsCard(context, notifier),
                         _buildPromoDots(notifier),
                         15.verticalSpace,
-                        _buildServiceCounts(notifier),
+                        // _buildServiceCounts(notifier),
+                        _buildQuickStatsGrid(notifier),
                         20.verticalSpace,
                         _buildHeader("Categories"),
                         15.verticalSpace,
@@ -50,7 +41,7 @@ class CustomerDashboardScreen extends StatelessWidget {
                         20.verticalSpace,
                         _buildHeader("Quick Access"),
                         25.verticalSpace,
-                        _buildQuickActions(notifier),
+                        _buildQuickActions(context, notifier),
                         30.verticalSpace,
                       ],
                     ),
@@ -157,16 +148,22 @@ class CustomerDashboardScreen extends StatelessWidget {
         itemCount: notifier.categories.length,
         itemBuilder: (context, index) {
           final category = notifier.categories[index];
+          final iconColor = notifier.chipIconColors[index % notifier.chipIconColors.length];
 
           return Padding(
             padding: EdgeInsets.only(
               top: 10,
               left: index == 0 ? 0 : 12,
-              right: index == notifier.categories.length - 1 ? 0 : 0,
               bottom: 10,
             ),
             child: GestureDetector(
-              onTap: () => notifier.selectCategory(category),
+              onTap: () {
+                if (onCategoryTap != null) {
+                  onCategoryTap!(category);
+                } else {
+                  notifier.selectCategory(context, category);
+                }
+              },
               child: Container(
                 width: 100.h,
                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -174,11 +171,7 @@ class CustomerDashboardScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      category.icon,
-                      color: AppColors.primary,
-                      size: 28,
-                    ),
+                    Icon(category.icon, color: AppColors.secondary, size: 28),
                     10.verticalSpace,
                     Text(
                       category.name,
@@ -200,11 +193,56 @@ class CustomerDashboardScreen extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 15),
       child: Row(
         children: [
-          _buildCountCard('Ongoing \nServices', notifier.ongoingCount, Colors.orange, LucideIcons.minus),
+          _buildCountCard('Ongoing \nJobs', notifier.ongoingCount, Colors.orange, LucideIcons.minus),
           15.horizontalSpace,
-          _buildCountCard('Completed \nServices', notifier.completedCount, Colors.green, LucideIcons.check),
+          _buildCountCard('Completed \nJobs', notifier.completedCount, Colors.green, LucideIcons.check),
         ],
       ),
+    );
+  }
+
+  Widget _buildQuickStatsGrid(CustomerDashboardNotifier notifier) {
+    return GridView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: notifier.quickStats.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 2 / 1,
+        crossAxisSpacing: 12.w,
+        mainAxisSpacing: 12.h,
+      ),
+      itemBuilder: (context, index) {
+        final stat = notifier.quickStats[index];
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+          decoration: AppStyles.commonDecoration,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 36.w,
+                height: 36.w,
+                decoration: BoxDecoration(color: stat.iconBgColor, borderRadius: BorderRadius.circular(8.r)),
+                child: Icon(stat.icon, color: stat.iconColor, size: 20.w),
+              ),
+              15.horizontalSpace,
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(stat.count.toString(), style: AppFonts.text18.semiBold.style, overflow: TextOverflow.ellipsis),
+                    2.verticalSpace,
+                    Text(stat.label, style: AppFonts.text14.regular.style),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -301,7 +339,9 @@ class CustomerDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickActions(CustomerDashboardNotifier notifier) {
+  Widget _buildQuickActions(BuildContext context, CustomerDashboardNotifier notifier) {
+    final iconColors = notifier.chipIconColors;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: GridView.count(
@@ -310,11 +350,22 @@ class CustomerDashboardScreen extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         mainAxisSpacing: 15,
         crossAxisSpacing: 15,
-        childAspectRatio: 2.5 / 1,
-        children: notifier.quickActions.map((action) {
+        childAspectRatio: 2 / 1,
+        children: List.generate(notifier.quickActions.length, (index) {
+          final action = notifier.quickActions[index];
+          final iconColor = iconColors[index % iconColors.length];
+
           return GestureDetector(
             onTap: () {
-              // TODO: Navigate to respective screen
+              if (action.label == "New Service") {
+                Navigator.pushNamed(context, AppRoutes.newServices);
+              } else if(action.label == "Pending Quotation") {
+                Navigator.pushNamed(context, AppRoutes.quotationList);
+              } else if(action.label == "Track Request") {
+                Navigator.pushNamed(context, AppRoutes.tracking);
+              } else if(action.label == "Make Payment") {
+                Navigator.pushNamed(context, AppRoutes.payment);
+              }
             },
             child: Container(
               decoration: AppStyles.commonDecoration,
@@ -322,7 +373,7 @@ class CustomerDashboardScreen extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(action.icon, size: 30, color: AppColors.primary),
+                    Icon(action.icon, size: 30, color: AppColors.secondary),
                     10.verticalSpace,
                     Text(action.label),
                   ],
@@ -330,7 +381,7 @@ class CustomerDashboardScreen extends StatelessWidget {
               ),
             ),
           );
-        }).toList(),
+        }),
       ),
     );
   }

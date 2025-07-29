@@ -38,7 +38,7 @@ class InProgressServiceCard extends StatelessWidget {
       TextSpan(
         children: [
           TextSpan(
-            text: "Service ID: ",
+            text: "Job ID: ",
             style: AppFonts.text16.regular.style,
           ),
           TextSpan(

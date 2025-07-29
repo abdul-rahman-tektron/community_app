@@ -41,7 +41,7 @@ class BookingConfirmationScreen extends StatelessWidget {
 
   /// Animation (Lottie)
   Widget _buildAnimation() {
-    return Lottie.asset(AppImages.bookingGif, height: 250);
+    return Lottie.asset(AppImages.bookingGif, height: 250, width: 250, fit: BoxFit.cover);
   }
 
   /// "Thank You!" Heading
@@ -120,7 +120,7 @@ class BookingConfirmationScreen extends StatelessWidget {
   Widget _buildViewVendorsButton(BuildContext context) {
     return CustomButton(
       onPressed: () {
-        Navigator.pushNamedAndRemoveUntil(context, AppRoutes.customerBottomBar, (route) => false ,arguments: 2);
+        Navigator.pushNamedAndRemoveUntil(context, AppRoutes.customerBottomBar, (route) => false ,arguments: {'currentIndex': 0},);
       },
       text: 'Back to Services',
     );

@@ -62,14 +62,20 @@ class LoginScreen extends StatelessWidget {
         image: DecorationImage(
           image: AssetImage(AppImages.loginImage),
           fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.6), BlendMode.darken),
+          colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.3), BlendMode.darken),
         ),
       ),
       child: Stack(
         children: [
           Align(
             alignment: Alignment.topLeft,
-            child: Image.asset(width: 100.w, AppImages.tektronLogo, fit: BoxFit.contain),
+            child: Container(
+              padding: EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: Image.asset(width: 75.w, AppImages.logo, fit: BoxFit.contain)),
           ),
           Align(
             alignment: Alignment.bottomLeft,

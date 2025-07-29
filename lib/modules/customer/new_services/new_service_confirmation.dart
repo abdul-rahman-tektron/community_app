@@ -46,16 +46,13 @@ class ServiceRequestConfirmationScreen extends StatelessWidget {
 
   /// "Thank You!" Heading
   Widget _buildThankYouMessage() {
-    return Text(
-      'Thank You!',
-      style: AppFonts.text24.semiBold.style,
-    );
+    return Text('Request sent successfully', style: AppFonts.text24.semiBold.style);
   }
 
   /// Service request confirmation message
   Widget _buildSuccessMessage() {
     return Text(
-      'Your service request has been submitted successfully.',
+      'Your Job request has been submitted to the selected vendors.',
       style: AppFonts.text16.regular.style,
       textAlign: TextAlign.center,
     );
@@ -74,11 +71,8 @@ class ServiceRequestConfirmationScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('Service ID: ', style: AppFonts.text16.regular.style,),
-          Text(
-            id,
-            style: AppFonts.text16.semiBold.blue.style,
-          ),
+          Text('Request ID: ', style: AppFonts.text16.regular.style),
+          Text(id, style: AppFonts.text16.semiBold.blue.style),
         ],
       ),
     );
@@ -89,16 +83,31 @@ class ServiceRequestConfirmationScreen extends StatelessWidget {
     return Column(
       children: [
         Text(
-          'We’re already working behind the scenes to find the best vendor for your request.',
+          'We are now collecting the best quotations for your request. This may take a short while.',
           style: AppFonts.text16.regular.style,
           textAlign: TextAlign.center,
         ),
         15.verticalSpace,
         Text(
-          'This won’t take long. Get ready for top-rated options tailored for your needs!',
+          'You will be notified as soon as vendors respond.',
           style: AppFonts.text16.regular.style,
           textAlign: TextAlign.center,
         ),
+        25.verticalSpace,
+        Text.rich(
+          TextSpan(
+            text: 'You can monitor the progress anytime from the ',
+            style: AppFonts.text16.regular.style,
+            children: [
+              TextSpan(
+                text: 'Dashboard',
+                style: AppFonts.text16.bold.red.style,
+              ),
+              const TextSpan(text: ' section.'),
+            ],
+          ),
+          textAlign: TextAlign.center,
+        )
       ],
     );
   }
@@ -107,9 +116,10 @@ class ServiceRequestConfirmationScreen extends StatelessWidget {
   Widget _buildViewVendorsButton(BuildContext context) {
     return CustomButton(
       onPressed: () {
-        Navigator.pushNamed(context, AppRoutes.topVendors);
+
+        Navigator.pushNamedAndRemoveUntil(context, AppRoutes.customerBottomBar, (route) => false, arguments: {'currentIndex': 0},);
       },
-      text: 'View Top Vendors',
+      text: 'Back To Dashboard',
     );
   }
 }

@@ -30,7 +30,7 @@ class AppFonts {
   static const Color white = AppColors.white;
   static const Color grey = AppColors.textSecondary;
   static const Color red = AppColors.error;
-  static const Color blue = AppColors.blueColor;
+  static const Color blue = AppColors.polylineColor;
 }
 
 class _FontSizeStyles {

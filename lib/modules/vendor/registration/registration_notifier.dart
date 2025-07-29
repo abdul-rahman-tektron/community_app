@@ -1,9 +1,8 @@
 import 'dart:io';
 
 import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/login/login_request.dart';
-import 'package:community_app/core/model/register/customer_register_request.dart';
-import 'package:community_app/core/model/register/vendor_register_request.dart';
+import 'package:community_app/core/model/common/login/login_request.dart';
+import 'package:community_app/core/model/common/register/vendor_register_request.dart';
 import 'package:community_app/core/remote/services/auth_repository.dart';
 import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/helpers/file_upload_helper.dart';
@@ -40,10 +39,34 @@ class VendorRegistrationNotifier extends BaseChangeNotifier {
   double? _latitude;
   double? _longitude;
 
+  int _currentStep = 1;
+
 
   void togglePrivacyPolicy() {
     acceptedPrivacyPolicy = !acceptedPrivacyPolicy;
     notifyListeners();
+  }
+
+  void updateStep(int step) {
+    debugPrint('Updating step to: $step');
+    currentStep = step;
+    notifyListeners();
+  }
+
+  void nextStep() {
+    if (_currentStep <= totalSteps) {
+      updateStep(_currentStep + 1);
+    } else {
+      debugPrint('Already at the last step.');
+    }
+  }
+
+  void previousStep() {
+    if (_currentStep > 0) {
+      updateStep(_currentStep - 1);
+    } else {
+      debugPrint('Already at the first step.');
+    }
   }
 
   Future<void> performRegistration(BuildContext context) async {
@@ -53,7 +76,6 @@ class VendorRegistrationNotifier extends BaseChangeNotifier {
         LoginRequest(email: "admin@example.com", password: "password"),
       );
 
-      print("Object Reached");
       final request = VendorRegisterRequest(
         email: emailController.text.trim(),
         mobile: contact1Controller.text.trim(),
@@ -84,11 +106,7 @@ class VendorRegistrationNotifier extends BaseChangeNotifier {
         ]
       );
 
-      print("Object Reached 1");
-
       final result = await AuthRepository().apiVendorRegister(request);
-
-      print("Object Reached 2");
 
       await _handleRegisterSuccess(result, context);
     } catch (e, stackTrace) {
@@ -182,6 +200,16 @@ class VendorRegistrationNotifier extends BaseChangeNotifier {
   set longitude(double? value) {
     if (_longitude != value) {
       _longitude = value;
+      notifyListeners();
+    }
+  }
+
+  int get totalSteps => 4;
+
+  int get currentStep => _currentStep;
+  set currentStep(int value) {
+    if (_currentStep != value) {
+      _currentStep = value;
       notifyListeners();
     }
   }

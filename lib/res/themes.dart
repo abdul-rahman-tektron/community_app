@@ -13,9 +13,9 @@ class AppThemes {
       fontFamily: languageCode == 'ar' ? AppFonts.arabicFont : AppFonts.primaryFont,
       appBarTheme: AppBarTheme(
         systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: AppColors.backgroundSecondary,
-          statusBarIconBrightness: Brightness.dark, // Android
-          statusBarBrightness: Brightness.light,    // iOS
+          statusBarColor: AppColors.primary,
+          statusBarIconBrightness: Brightness.light, // Android
+          statusBarBrightness: Brightness.light,      // iOS (dark text → black, set to .dark for proper contrast)
         ),
         color: AppColors.backgroundSecondary,
       ),

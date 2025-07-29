@@ -49,14 +49,14 @@ class ChangePasswordScreen extends StatelessWidget {
                 currentPasswordTextField(context, changePasswordNotifier),
                 15.verticalSpace,
                 newPasswordTextField(context, changePasswordNotifier),
-                5.verticalSpace,
+                10.verticalSpace,
                 Align(
                   alignment: Alignment.centerRight,
                   child: PasswordStrengthStars(password: changePasswordNotifier.newPasswordController.text),
                 ),
-                15.verticalSpace,
+                10.verticalSpace,
                 confirmPasswordTextField(context, changePasswordNotifier),
-                15.verticalSpace,
+                30.verticalSpace,
                 saveButton(context, changePasswordNotifier),
               ],
             ),
@@ -70,9 +70,18 @@ class ChangePasswordScreen extends StatelessWidget {
       BuildContext context,
       ChangePasswordNotifier changePasswordNotifier,
       ) {
-    return Text(
-      "Change Password",
-      style: AppFonts.text24.regular.style,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Change Password",
+          style: AppFonts.text24.regular.style,
+        ),
+        10.verticalSpace,
+        Text(
+          "For better security, use a mix of upper/lowercase letters, numbers, and special characters in your new password.",
+          style: AppFonts.text14.regular.style,),
+      ],
     );
   }
 

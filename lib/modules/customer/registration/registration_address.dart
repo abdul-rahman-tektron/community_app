@@ -1,5 +1,6 @@
-import 'package:community_app/core/model/dropdown/community_dropdown_response.dart';
-import 'package:community_app/core/model/map/map_data.dart';
+
+import 'package:community_app/core/model/common/dropdown/community_dropdown_response.dart';
+import 'package:community_app/core/model/customer/map/map_data.dart';
 import 'package:community_app/modules/customer/registration/registration_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
@@ -40,7 +41,7 @@ class CustomerRegistrationAddressScreen extends StatelessWidget {
             key: addressKey,
             child: Column(
               children: [
-                imageView(context),
+                // imageView(context),
                 mainContent(context, addressKey, customerChangeNotifier),
               ],
             ),
@@ -69,7 +70,7 @@ class CustomerRegistrationAddressScreen extends StatelessWidget {
   Widget _buildLogo() {
     return Align(
       alignment: Alignment.topLeft,
-      child: Image.asset(width: 100.w, AppImages.tektronLogo, fit: BoxFit.contain),
+      child: Image.asset(width: 100.w, AppImages.logo, fit: BoxFit.contain),
     );
   }
 

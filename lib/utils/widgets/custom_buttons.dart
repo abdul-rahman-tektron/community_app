@@ -38,13 +38,13 @@ class CustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final resolvedBgColor = onPressed == null
-        ? (backgroundColor ?? AppColors.primary).withOpacity(0.5)
-        : backgroundColor ?? AppColors.primary;
+        ? (backgroundColor ?? AppColors.secondary).withOpacity(0.5)
+        : backgroundColor ?? AppColors.secondary;
 
     final resolvedTextColor =
-    (backgroundColor ?? AppColors.primary) == AppColors.primary
+    (backgroundColor ?? AppColors.secondary) == AppColors.secondary
         ? Colors.white
-        : AppColors.primary;
+        : AppColors.secondary;
 
     return SizedBox(
       width: fullWidth ? double.infinity : null,
@@ -117,13 +117,13 @@ class CustomUploadButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radius ?? 50),
-          side: const BorderSide(color: AppColors.primary, width: 1),
+          side: const BorderSide(color: AppColors.secondary, width: 1),
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon ?? LucideIcons.upload, color: AppColors.primary),
+          Icon(icon ?? LucideIcons.upload, color: AppColors.secondary),
           8.horizontalSpace,
           Text(text, style: textStyle ?? AppFonts.text14.medium.white.style),
         ],

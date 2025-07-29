@@ -1,12 +1,15 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:community_app/core/generated_locales/l10n.dart';
-import 'package:community_app/core/model/login/login_response.dart';
+import 'package:community_app/core/model/common/login/login_response.dart';
 import 'package:community_app/core/notifier/language_notifier.dart';
 import 'package:community_app/modules/auth/login/login_screen.dart';
 import 'package:community_app/modules/auth/user_role_selection/user_role_selection_screen.dart';
 import 'package:community_app/modules/customer/bottom_bar/bottom_screen.dart';
 import 'package:community_app/modules/vendor/bottom_bar/bottom_bar_screen.dart';
+import 'package:community_app/modules/vendor/onboard/onboard_screen.dart';
 import 'package:community_app/res/colors.dart';
+import 'package:community_app/res/images.dart';
 import 'package:community_app/res/themes.dart';
 import 'package:community_app/utils/helpers/screen_size.dart';
 import 'package:community_app/utils/permissions_handler.dart';
@@ -14,12 +17,21 @@ import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/storage/hive_storage.dart';
 import 'package:community_app/utils/storage/secure_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:toastification/toastification.dart';
+
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 Future<void> main() async {
   runZonedGuarded(() async {
@@ -37,10 +49,10 @@ Future<void> main() async {
       DeviceOrientation.portraitDown,
     ]);
 
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: AppColors.backgroundSecondary,
-      statusBarIconBrightness: Brightness.dark,  // Android
-      statusBarBrightness: Brightness.light,     // iOS
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      systemStatusBarContrastEnforced: true,
+      statusBarColor: AppColors.primary,
+      statusBarIconBrightness: Brightness.light, // Android
     ));
 
     // Initialize secure storage
@@ -118,12 +130,159 @@ class MyApp extends StatelessWidget {
                     child: child!,
                   );
                 },
-                // Optionally set home, or let routes handle it
-                // home: token != null ? BottomBarScreen() : const LoginScreen(),
               ),
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class BookingImagePainter extends CustomPainter {
+  final ui.Image backgroundImage;
+  final String name;
+  final String phone;
+
+  BookingImagePainter({
+    required this.backgroundImage,
+    required this.name,
+    required this.phone,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Draw background image (fit to canvas)
+    paintImage(
+      canvas: canvas,
+      rect: Rect.fromLTWH(0, 0, size.width, size.height),
+      image: backgroundImage,
+      fit: BoxFit.cover,
+    );
+
+    // Draw text on top
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: '$name\n$phone',
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+
+    textPainter.layout(
+      minWidth: 0,
+      maxWidth: size.width,
+    );
+
+    // Position text at (100, 150)
+    textPainter.paint(canvas, Offset(160, 85));
+  }
+
+  @override
+  bool shouldRepaint(covariant BookingImagePainter oldDelegate) {
+    return oldDelegate.name != name || oldDelegate.phone != phone || oldDelegate.backgroundImage != backgroundImage;
+  }
+}
+
+// Helper to load asset image as ui.Image
+Future<ui.Image> loadUiImage(String assetPath) async {
+  final data = await rootBundle.load(assetPath);
+  final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+  final frame = await codec.getNextFrame();
+  return frame.image;
+}
+
+class BookingScreen extends StatefulWidget {
+  final String name;
+  final String phone;
+
+  const BookingScreen({required this.name, required this.phone, super.key});
+
+  @override
+  State<BookingScreen> createState() => _BookingScreenState();
+}
+
+class _BookingScreenState extends State<BookingScreen> {
+  ui.Image? _backgroundImage;
+  final GlobalKey _globalKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadImage();
+  }
+
+  Future<void> _loadImage() async {
+    final img = await loadUiImage(AppImages.nameTag);
+    setState(() {
+      _backgroundImage = img;
+    });
+  }
+
+  // Load image asset as ui.Image
+  Future<ui.Image> loadUiImage(String assetPath) async {
+    final data = await rootBundle.load(assetPath);
+    final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+    final frame = await codec.getNextFrame();
+    return frame.image;
+  }
+
+  // Convert CustomPaint widget to PNG Uint8List
+  Future<Uint8List?> _exportToImage() async {
+    try {
+      RenderRepaintBoundary boundary =
+      _globalKey.currentContext?.findRenderObject() as RenderRepaintBoundary;
+
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData =
+      await image.toByteData(format: ui.ImageByteFormat.png);
+      return byteData?.buffer.asUint8List();
+    } catch (e) {
+      print('Error exporting image: $e');
+      return null;
+    }
+  }
+
+  Future<void> _shareImage() async {
+    final imageBytes = await _exportToImage();
+    if (imageBytes == null) return;
+
+    final tempDir = await getTemporaryDirectory();
+    final file = await File('${tempDir.path}/booking_image.png').create();
+    await file.writeAsBytes(imageBytes);
+
+    await Share.shareXFiles([XFile(file.path)], text: 'Booking Details');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Booking Details Image'),
+      ),
+      body: Center(
+        child: _backgroundImage == null
+            ? const CircularProgressIndicator()
+            : RepaintBoundary(
+          key: _globalKey,
+          child: CustomPaint(
+            size: Size(400, 300), // Fixed size or responsive as needed
+            painter: BookingImagePainter(
+              backgroundImage: _backgroundImage!,
+              name: widget.name,
+              phone: widget.phone,
+            ),
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _shareImage,
+        icon: const Icon(Icons.share),
+        label: const Text('Share'),
       ),
     );
   }

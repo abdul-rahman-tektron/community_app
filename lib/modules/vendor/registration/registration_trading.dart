@@ -10,6 +10,7 @@ import 'package:community_app/utils/helpers/screen_size.dart';
 import 'package:community_app/utils/helpers/validations.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
+import 'package:community_app/utils/widgets/custom_popup.dart';
 import 'package:community_app/utils/widgets/custom_textfields.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -40,7 +41,7 @@ class VendorRegistrationTradingScreen extends StatelessWidget {
             key: addressKey,
             child: Column(
               children: [
-                imageView(context),
+                // imageView(context),
                 mainContent(context, addressKey, vendorRegistrationNotifier),
               ],
             ),
@@ -69,7 +70,7 @@ class VendorRegistrationTradingScreen extends StatelessWidget {
   Widget _buildLogo() {
     return Align(
       alignment: Alignment.topLeft,
-      child: Image.asset(width: 100.w, AppImages.tektronLogo, fit: BoxFit.contain),
+      child: Image.asset(width: 100.w, AppImages.logo, fit: BoxFit.contain),
     );
   }
 
@@ -159,7 +160,7 @@ class VendorRegistrationTradingScreen extends StatelessWidget {
             text: context.locale.next,
             onPressed: () {
               if(addressKey.currentState!.validate()) {
-                Navigator.pushNamed(context, AppRoutes.vendorRegistrationBank);
+                vendorRegistrationNotifier.nextStep();
               }
             },
           ),
@@ -181,57 +182,6 @@ class VendorRegistrationTradingScreen extends StatelessWidget {
       print("registrationNotifier.uploadedFileName");
       registrationNotifier.notifyListeners();
     });
-  }
-
-  Future<void> showImageSourceDialog(
-      BuildContext context,
-      Function(File file) onPicked,
-      ) async {
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return Dialog(
-          backgroundColor: AppColors.background,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Select Image Source',
-                  style: AppFonts.text18.bold.style,
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    IconOption(
-                      icon: LucideIcons.camera,
-                      label: 'Camera',
-                      onTap: () async {
-                        Navigator.pop(ctx);
-                        final file = await FileUploadHelper.pickImage(fromCamera: true);
-                        if (file != null) onPicked(file);
-                      },
-                    ),
-                    IconOption(
-                      icon: LucideIcons.image,
-                      label: 'Gallery',
-                      onTap: () async {
-                        Navigator.pop(ctx);
-                        final file = await FileUploadHelper.pickImage(fromCamera: false);
-                        if (file != null) onPicked(file);
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
   }
 
   Widget _alreadyHaveAnAccount(BuildContext context) {

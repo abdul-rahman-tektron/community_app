@@ -33,7 +33,10 @@ class VendorRegistrationPersonalScreen extends StatelessWidget {
           child: Form(
             key: personalKey,
             child: Column(
-              children: [_imageView(context), _mainContent(context, personalKey, vendorRegistrationNotifier)],
+              children: [
+                // _imageView(context),
+                _mainContent(context, personalKey, vendorRegistrationNotifier),
+              ],
             ),
           ),
         ),
@@ -60,7 +63,7 @@ class VendorRegistrationPersonalScreen extends StatelessWidget {
   Widget _buildLogo() {
     return Align(
       alignment: Alignment.topLeft,
-      child: Image.asset(width: 100.w, AppImages.tektronLogo, fit: BoxFit.contain),
+      child: Image.asset(width: 100.w, AppImages.logo, fit: BoxFit.contain),
     );
   }
 
@@ -166,7 +169,7 @@ class VendorRegistrationPersonalScreen extends StatelessWidget {
             onPressed: () {
               // Implement validation method in RegistrationNotifier if needed
               if (personalKey.currentState!.validate()) {
-                Navigator.of(context).pushNamed(AppRoutes.vendorRegistrationAddress);
+                vendorRegistrationNotifier.nextStep();
               }
             },
           ),

@@ -1,14 +1,16 @@
-import 'package:community_app/core/model/dropdown/priority_dropdown_response.dart';
-import 'package:community_app/core/model/dropdown/service_dropdown_response.dart';
+import 'package:community_app/core/model/common/dropdown/priority_dropdown_response.dart';
+import 'package:community_app/core/model/common/dropdown/service_dropdown_response.dart';
 import 'package:community_app/modules/customer/new_services/new_services_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
+import 'package:community_app/utils/widgets/custom_drawer.dart';
 import 'package:community_app/utils/widgets/custom_search_dropdown.dart';
 import 'package:community_app/utils/widgets/custom_textfields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class NewServicesScreen extends StatelessWidget {
@@ -30,6 +32,7 @@ class NewServicesScreen extends StatelessWidget {
     return SafeArea(
       child: Scaffold(
         appBar: CustomAppBar(),
+        drawer: CustomDrawer(),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(15),
@@ -40,7 +43,7 @@ class NewServicesScreen extends StatelessWidget {
                 children: [
                   Text("Need a hand with something?", style: AppFonts.text18.semiBold.style,),
                   5.verticalSpace,
-                  Text("Just share the details—we’ve got you.", style: AppFonts.text16.regular.style,),
+                  Text("Just share the details and we’ve got you.", style: AppFonts.text16.regular.style,),
                   25.verticalSpace,
                   CustomSearchDropdown<ServiceDropdownData>(
                     fieldName: "Service",
@@ -55,9 +58,14 @@ class NewServicesScreen extends StatelessWidget {
                   ),
                   15.verticalSpace,
                   CustomTextField(
-                      controller: newServicesNotifier.expectedDateController, fieldName: "Expected Date and Time", keyboardType: TextInputType.datetime, needTime: true,),
+                    controller: newServicesNotifier.expectedDateController,
+                    fieldName: "Preferred Date and Time",
+                    keyboardType: TextInputType.datetime,
+                    startDate: DateTime.now(),
+                    initialDate: DateTime.now(),
+                    needTime: true,),
                   15.verticalSpace,
-                  CustomTextField(controller: newServicesNotifier.mobileController, fieldName: "Mobile Number",  keyboardType: TextInputType.phone,),
+                  CustomTextField(controller: newServicesNotifier.mobileNumberController, fieldName: "Mobile Number",  keyboardType: TextInputType.phone,),
                   15.verticalSpace,
                   CustomSearchDropdown<PriorityDropdownData>(
                     fieldName: "Priority",
@@ -72,10 +80,53 @@ class NewServicesScreen extends StatelessWidget {
                   ),
                   15.verticalSpace,
                   CustomTextField(controller: newServicesNotifier.remarksController,
-                    fieldName: "Remarks",
+                    fieldName: "Job Description",
                     isMaxLines: true,
-                    hintText: "Enter Remarks",),
-                  25.verticalSpace,
+                    hintText: "Enter Job Description",),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Transform.scale(
+                          scale: 0.9,
+                          child: Switch(
+                            padding: EdgeInsets.zero,
+                            activeColor: AppColors.secondary,
+                            thumbColor: WidgetStateProperty.all(AppColors.white),
+                            trackColor: WidgetStateProperty.resolveWith((states) {
+                              return newServicesNotifier.siteVisitOption == 1
+                                  ? AppColors.secondary
+                                  : AppColors.secondary.withOpacity(0.3);
+                            }),
+                            trackOutlineColor: WidgetStateProperty.all(AppColors.white),
+                            value: newServicesNotifier.siteVisitOption == 1,
+                            onChanged: (bool value) {
+                              newServicesNotifier.setSiteVisitOption(value ? 1 : 0);
+                            },
+                          ),
+                        ),
+                        10.horizontalSpace,
+                        Expanded(
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Site Visit Required? ",
+                                  style: AppFonts.text14.regular.style,
+                                ),
+                                TextSpan(
+                                  text: "*",
+                                  style: AppFonts.text14.regular.style.copyWith(color: AppColors.error),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  10.verticalSpace,
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -84,7 +135,7 @@ class NewServicesScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Issue Photo or Video',
+                              'Upload Attachments',
                               style: AppFonts.text14.regular.style,
                             ),
                             5.verticalSpace,

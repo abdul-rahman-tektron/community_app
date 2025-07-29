@@ -27,7 +27,7 @@ class CustomBottomNavBar extends StatelessWidget {
   final List<String> _customerLabels = [
     "Dashboard",
     "Explore",
-    "Services",
+    "Jobs",
   ];
 
   // Vendor
@@ -118,7 +118,14 @@ class CustomBottomNavBar extends StatelessWidget {
                                   style: AppFonts.text12.semiBold.white.style,
                                 ),
                               )
-                                  : const SizedBox.shrink(key: ValueKey('empty')),
+                                  : Padding(
+                                key: ValueKey(index),
+                                padding: const EdgeInsets.only(left: 6),
+                                child: Text(
+                                  _labels[index],
+                                  style: AppFonts.text12.semiBold.style,
+                                ),
+                              ),
                             ),
                           ],
                         ),

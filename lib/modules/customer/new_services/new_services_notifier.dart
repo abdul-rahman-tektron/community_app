@@ -1,8 +1,9 @@
 import 'dart:io';
 import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/dropdown/priority_dropdown_response.dart';
-import 'package:community_app/core/model/dropdown/service_dropdown_response.dart';
-import 'package:community_app/core/model/job/new_job_request.dart';
+import 'package:community_app/core/model/common/dropdown/priority_dropdown_response.dart';
+import 'package:community_app/core/model/common/dropdown/service_dropdown_response.dart';
+import 'package:community_app/core/model/common/error/common_response.dart';
+import 'package:community_app/core/model/customer/job/new_job_request.dart';
 import 'package:community_app/core/remote/services/service_repository.dart';
 import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/helpers/file_upload_helper.dart';
@@ -12,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class NewServicesNotifier extends BaseChangeNotifier {
-
   final formKey = GlobalKey<FormState>();
 
   // Controllers
@@ -20,7 +20,6 @@ class NewServicesNotifier extends BaseChangeNotifier {
   final serviceController = TextEditingController();
   final priorityController = TextEditingController();
   final mobileNumberController = TextEditingController();
-  final mobileController = TextEditingController();
   final expectedDateController = TextEditingController(); // For display
 
   // Fields
@@ -32,26 +31,16 @@ class NewServicesNotifier extends BaseChangeNotifier {
   File? _uploadedFile;
   String? _uploadedFileName;
 
+  int siteVisitOption = -1;
+
   // Dropdown data
   List<ServiceDropdownData> serviceDropdownData = [];
 
   final List<PriorityDropdownData> priorityDropdownData = [
-    PriorityDropdownData(
-      priorityId: 1,
-      name: 'Low',
-    ),
-    PriorityDropdownData(
-      priorityId: 2,
-      name: 'Medium',
-    ),
-    PriorityDropdownData(
-      priorityId: 3,
-      name: 'High',
-    ),
-    PriorityDropdownData(
-      priorityId: 4,
-      name: 'Emergency',
-    )
+    PriorityDropdownData(priorityId: 1, name: 'Low'),
+    PriorityDropdownData(priorityId: 2, name: 'Medium'),
+    PriorityDropdownData(priorityId: 3, name: 'High'),
+    PriorityDropdownData(priorityId: 4, name: 'Emergency'),
   ];
 
   NewServicesNotifier() {
@@ -61,8 +50,9 @@ class NewServicesNotifier extends BaseChangeNotifier {
   initApi() async {
     await loadUserData();
     await apiServiceDropdown();
-  }
 
+    mobileNumberController.text = userData?.mobile ?? "Test";
+  }
 
   // Methods
   void setCategory(ServiceDropdownData? value) {
@@ -87,10 +77,7 @@ class NewServicesNotifier extends BaseChangeNotifier {
     );
 
     if (date != null) {
-      final time = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.fromDateTime(now),
-      );
+      final time = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(now));
 
       if (time != null) {
         final selected = DateTime(date.year, date.month, date.day, time.hour, time.minute);
@@ -101,19 +88,24 @@ class NewServicesNotifier extends BaseChangeNotifier {
     }
   }
 
+  void setSiteVisitOption(int value) {
+    siteVisitOption = value;
+    notifyListeners();
+  }
+
   Future<void> submitServiceRequest(BuildContext context) async {
     try {
       if (!formKey.currentState!.validate()) {
         return;
       }
 
-      if(uploadedFile == null) {
+      if (uploadedFile == null) {
         ToastHelper.showInfo('Please upload a file');
-        return ;
+        return;
       }
 
-      // await apiCreateJob(context);
-      Navigator.pushNamed(context, AppRoutes.newServicesConfirmation, arguments: "67534670");
+      await apiCreateJob(context);
+      // Navigator.pushNamed(context, AppRoutes.newServicesConfirmation, arguments: "67534670");
     } catch (e, stackTrace) {
       ToastHelper.showError('An error occurred. Please try again.');
       print(e);
@@ -139,40 +131,60 @@ class NewServicesNotifier extends BaseChangeNotifier {
   }
 
   Future<void> apiCreateJob(BuildContext context) async {
-
     try {
-
       final request = CreateJobRequest(
         customerId: userData?.customerId ?? 0,
         jobId: int.parse(selectedServiceId ?? "0"),
+        serviceId: int.parse(selectedServiceId ?? "0"),
         expectedDate: expectedDateController.text.toDateTimeFromDdMmYyyyHhMmA(),
-        contactNumber: mobileController.text,
+        contactNumber: mobileNumberController.text,
         priority: selectedPriority,
         remarks: remarksController.text,
-        status: "Test",
+        status: "Pending",
         createdBy: "Sana",
+        active: true,
         mediaList: [
           JobMediaList(
-            type: "Photo",
+            type: "P",
             fileContent: await uploadedFile?.toBase64() ?? "",
             photoVideoType: "P",
-          )
-        ]
+            customerId: userData?.customerId ?? 0,
+            jobId: 0,
+            from: "C",
+            identity: 0,
+            inRefUID: 0,
+            uid: 0,
+            vendorId: 0,
+          ),
+        ],
       );
 
       final result = await ServiceRepository().apiNewJob(request);
 
+      print("result");
+      print(result);
       await _handleCreatedJobSuccess(result, context);
     } catch (e) {
+      print("result error");
+      print(e);
       ToastHelper.showError('An error occurred. Please try again.');
       notifyListeners();
     }
   }
 
   Future<void> _handleCreatedJobSuccess(dynamic result, BuildContext context) async {
-    Navigator.pushNamed(context, AppRoutes.newServicesConfirmation, arguments: "67534670");
-  }
 
+    CommonResponse resultData = result as CommonResponse;
+
+    Navigator.pushNamed(
+      context,
+      AppRoutes.topVendors,
+      arguments: {
+        'jobId': resultData.data,
+        'serviceId': int.parse(selectedServiceId ?? "0"),
+      },
+    );
+  }
 
   Future<void> pickImageOrVideo() async {
     final file = await FileUploadHelper.pickImageOrVideo();
@@ -189,13 +201,14 @@ class NewServicesNotifier extends BaseChangeNotifier {
   @override
   void dispose() {
     remarksController.dispose();
-    mobileController.dispose();
+    mobileNumberController.dispose();
     expectedDateController.dispose();
     super.dispose();
   }
 
   // Getters & Setters
   String? get selectedService => _selectedService;
+
   set selectedService(String? value) {
     if (_selectedService != value) {
       _selectedService = value;
@@ -204,6 +217,7 @@ class NewServicesNotifier extends BaseChangeNotifier {
   }
 
   String? get selectedServiceId => _selectedServiceId;
+
   set selectedServiceId(String? value) {
     if (_selectedServiceId != value) {
       _selectedServiceId = value;
@@ -212,6 +226,7 @@ class NewServicesNotifier extends BaseChangeNotifier {
   }
 
   String? get selectedPriority => _selectedPriority;
+
   set selectedPriority(String? value) {
     if (_selectedPriority != value) {
       _selectedPriority = value;
@@ -220,6 +235,7 @@ class NewServicesNotifier extends BaseChangeNotifier {
   }
 
   String? get selectedPriorityId => _selectedPriorityId;
+
   set selectedPriorityId(String? value) {
     if (_selectedPriorityId != value) {
       _selectedPriorityId = value;
@@ -228,6 +244,7 @@ class NewServicesNotifier extends BaseChangeNotifier {
   }
 
   DateTime? get expectedDateTime => _expectedDateTime;
+
   set expectedDateTime(DateTime? value) {
     if (_expectedDateTime != value) {
       _expectedDateTime = value;
@@ -236,6 +253,7 @@ class NewServicesNotifier extends BaseChangeNotifier {
   }
 
   File? get uploadedFile => _uploadedFile;
+
   set uploadedFile(File? value) {
     if (_uploadedFile != value) {
       _uploadedFile = value;

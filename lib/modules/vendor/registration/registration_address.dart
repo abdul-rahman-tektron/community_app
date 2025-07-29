@@ -1,5 +1,4 @@
-import 'package:community_app/core/model/map/map_data.dart';
-import 'package:community_app/modules/customer/registration/registration_notifier.dart';
+import 'package:community_app/core/model/customer/map/map_data.dart';
 import 'package:community_app/modules/vendor/registration/registration_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
@@ -9,7 +8,6 @@ import 'package:community_app/utils/helpers/screen_size.dart';
 import 'package:community_app/utils/helpers/validations.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
-import 'package:community_app/utils/widgets/custom_search_dropdown.dart';
 import 'package:community_app/utils/widgets/custom_textfields.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -40,7 +38,7 @@ class VendorRegistrationAddressScreen extends StatelessWidget {
             key: addressKey,
             child: Column(
               children: [
-                imageView(context),
+                // imageView(context),
                 mainContent(context, addressKey, vendorRegistrationNotifier),
               ],
             ),
@@ -69,7 +67,7 @@ class VendorRegistrationAddressScreen extends StatelessWidget {
   Widget _buildLogo() {
     return Align(
       alignment: Alignment.topLeft,
-      child: Image.asset(width: 100.w, AppImages.tektronLogo, fit: BoxFit.contain),
+      child: Image.asset(width: 100.w, AppImages.logo, fit: BoxFit.contain),
     );
   }
 
@@ -171,7 +169,7 @@ class VendorRegistrationAddressScreen extends StatelessWidget {
             text: context.locale.next,
             onPressed: () {
               if(addressKey.currentState!.validate()) {
-                Navigator.of(context).pushNamed(AppRoutes.vendorRegistrationTrading);
+                vendorRegistrationNotifier.nextStep();
               }
             },
           ),

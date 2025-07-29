@@ -48,7 +48,7 @@ class PreviousServiceCard extends StatelessWidget {
     return Text.rich(
       TextSpan(
         children: [
-          TextSpan(text: "Service ID: ", style: AppFonts.text16.regular.style),
+          TextSpan(text: "Job ID: ", style: AppFonts.text16.regular.style),
           TextSpan(text: "#${service.id}", style: AppFonts.text16.regular.style),
         ],
       ),

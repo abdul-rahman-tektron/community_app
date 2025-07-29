@@ -1,4 +1,4 @@
-import 'package:community_app/core/model/login/login_response.dart';
+import 'package:community_app/core/model/common/login/login_response.dart';
 import 'package:community_app/utils/enums.dart';
 import 'package:community_app/utils/storage/hive_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -9,6 +9,7 @@ abstract class BaseChangeNotifier with ChangeNotifier {
   bool _isLoading = false;
   LoadingState _loadingState = LoadingState.idle;
   bool _disposed = false;
+
 
   // ----- Getters -----
   String get userRole => _userRole;

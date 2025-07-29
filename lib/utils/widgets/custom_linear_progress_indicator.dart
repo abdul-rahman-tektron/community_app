@@ -1,3 +1,4 @@
+import 'package:community_app/res/colors.dart';
 import 'package:flutter/material.dart';
 
 class CustomLinearProgressIndicator extends StatelessWidget {
@@ -14,7 +15,7 @@ class CustomLinearProgressIndicator extends StatelessWidget {
     this.segmentCount = 4,
     this.height = 8,
     this.spacing = 4.0,
-    this.fillColor = const Color(0xFF2196F3), // default: green
+    this.fillColor = AppColors.primary, // default: green
     this.backgroundColor = const Color(0xFFE6E6E6), // light grey background
   });
 

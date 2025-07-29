@@ -1,4 +1,4 @@
-import 'package:community_app/core/model/quotation/quotation_model.dart';
+import 'package:community_app/core/model/vendor/quotation_request/quotation_request_list_response.dart';
 import 'package:community_app/modules/customer/quotation_list/quotation_list_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
@@ -19,62 +19,51 @@ class QuotationListScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => QuotationListNotifier(),
       child: Consumer<QuotationListNotifier>(
-        builder: (_, notifier, __) => SafeArea(
-          child: Scaffold(
-            appBar: CustomAppBar(),
-            body: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15.0, right: 15.0, top: 15.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Quotation List", style: AppFonts.text20.semiBold.style),
-                              _buildGradientUnderline("Quotation List", AppFonts.text20.semiBold.style),
-                            ],
-                          ),
-                        ),
-                        _buildBackButton(context),
-                      ],
+        builder: (_, notifier, __) {
+          return SafeArea(
+            child: Scaffold(
+              appBar: CustomAppBar(),
+              body: notifier.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : notifier.jobs.isEmpty
+                  ? const Center(child: Text("No jobs found"))
+                  : SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [_buildHeader()],
                     ),
-                  ),
-                   ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    itemCount: notifier.quotationList.length,
-                    itemBuilder: (ctx, i) => _buildQuotationCard(ctx, notifier, i, notifier.quotationList[i]),
-                  ),
-                ],
+                    ...List.generate(
+                      notifier.jobs.length,
+                          (i) => _buildJobCard(context, notifier, i, notifier.jobs[i]),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 
   Widget _buildBackButton(BuildContext context) {
-    return Align(
-      alignment: Alignment.topRight,
-      child: InkWell(
-        onTap: () {
-          Navigator.pop(context);
-        },
-        child: Container(
-          padding: EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.primary, width: 1.5),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+      child: Align(
+        alignment: Alignment.topRight,
+        child: InkWell(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.primary, width: 1.5),
+            ),
+            child: Icon(LucideIcons.arrowLeft),
           ),
-          child: Icon(LucideIcons.arrowLeft),
         ),
       ),
     );
@@ -92,7 +81,9 @@ class QuotationListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuotationCard(BuildContext context, QuotationListNotifier notifier, int index, QuotationModel model) {
+  Widget _buildJobCard(BuildContext context, QuotationListNotifier notifier, int index, QuotationRequestListData job) {
+    final quotations = job.jobQuotationRequest ?? [];
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
       decoration: AppStyles.commonDecoration,
@@ -100,75 +91,58 @@ class QuotationListScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildVendorInfo(model.vendorName, model.vendorId, model.quotationId),
+          Text('Job ID: ${job.jobId}', style: AppFonts.text14.medium.style),
           _buildUnderline(),
-          _buildQuotationItems(model),
-          _buildServiceCharge(model.serviceCharge),
-          _buildTotalWithVat(model.totalWithVat),
-          _buildSiteVisitRequired(model.siteVisitRequired),
-          _buildCompletionAvailability(model.completionTime, model.availabilityDate, model.availabilityTime),
-          _buildFooterActions(context, notifier, index),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildVendorInfo(String vendorName, String vendorId, String quotationId) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Vendor: $vendorName ($vendorId)', style: AppFonts.text14.medium.style),
-        10.verticalSpace,
-        Row(
-          children: [
-            _iconBadge(LucideIcons.receiptText, Colors.blue, const Color(0xffe7f3f9)),
-            6.horizontalSpace,
-            Text(quotationId, style: AppFonts.text12.regular.grey.style),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuotationItems(QuotationModel model) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Quotation Items:', style: AppFonts.text12.medium.style),
-        8.verticalSpace,
-        ...model.items.map((item) => _quotationItem(
-          item.quantity.toString(),
-          item.name,
-          'AED ${item.totalPrice.toStringAsFixed(2)}',
-        )),
-      ],
-    );
-  }
-
-  Widget _quotationItem(String qty, String name, String price) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Row(
-              children: [
-                _quantityTag(qty),
-                10.horizontalSpace,
-                Text(name, style: AppFonts.text12.regular.style),
-              ],
+          quotations.isEmpty
+              ? Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Center(
+              child: Text(
+                "Quotation not provided yet",
+                style: AppFonts.text14.semiBold.red.style,
+              ),
             ),
+          )
+              : Column(
+            children: quotations.map((model) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildVendorInfo("Sample Vendor", "VND101", model.quotationId?.toString() ?? "-"),
+                  _buildUnderline(),
+                  if (model.hasQuotationResponse == true) ...[
+                    _buildQuotationItemsStatic(),
+                    _buildServiceCharge(50),
+                    _buildTotalWithVat(200),
+                    _buildSiteVisitRequired(true),
+                    _buildCompletionAvailability("2 Days", "12 Jul", "10:00 AM"),
+                    _buildFooterActions(context, notifier, index),
+                  ] else ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Center(
+                        child: Text(
+                          "Quotation not provided yet",
+                          style: AppFonts.text14.semiBold.red.style,
+                        ),
+                      ),
+                    ),
+                  ],
+                  SizedBox(height: 16),
+                ],
+              );
+            }).toList(),
           ),
-          Text(price, style: AppFonts.text12.semiBold.style),
         ],
       ),
     );
   }
+
+  // The rest of your widgets remain unchanged (like _buildVendorInfo, _buildQuotationItemsStatic, etc.)
 
   Widget _buildGradientUnderline(String text, TextStyle style) {
     final textWidth = _getTextWidth(text, style);
-
     return Container(
       height: 2,
       width: textWidth,
@@ -194,18 +168,73 @@ class QuotationListScreen extends StatelessWidget {
       maxLines: 1,
       textDirection: TextDirection.ltr,
     )..layout();
-
     return textPainter.width;
   }
 
   Widget _buildUnderline() {
-
     return Container(
       height: 1,
       margin: EdgeInsets.symmetric(vertical: 10),
       width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.primary,
+      decoration: BoxDecoration(color: AppColors.primary),
+    );
+  }
+
+  Widget _buildQuotationItemsStatic() {
+    final items = [
+      {"qty": "2", "name": "AC Filter", "price": 30},
+      {"qty": "1", "name": "Coolant", "price": 40},
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Quotation Items:', style: AppFonts.text12.medium.style),
+        8.verticalSpace,
+        ...items.map(
+              (item) => _quotationItem(
+            item["qty"].toString(),
+            item["name"].toString(),
+            'AED ${(item["price"] as num).toStringAsFixed(2)}',
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVendorInfo(String vendorName, String vendorId, String quotationId) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Vendor: $vendorName ($vendorId)', style: AppFonts.text14.medium.style),
+        10.verticalSpace,
+        Row(
+          children: [
+            _iconBadge(LucideIcons.receiptText, Colors.blue, const Color(0xffe7f3f9)),
+            6.horizontalSpace,
+            Text(quotationId, style: AppFonts.text12.regular.grey.style),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _quotationItem(String qty, String name, String price) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                _quantityTag(qty),
+                10.horizontalSpace,
+                Text(name, style: AppFonts.text12.regular.style),
+              ],
+            ),
+          ),
+          Text(price, style: AppFonts.text12.semiBold.style),
+        ],
       ),
     );
   }
@@ -241,11 +270,7 @@ class QuotationListScreen extends StatelessWidget {
       children: [
         Text('Site Visit Required:', style: AppFonts.text12.regular.grey.style),
         5.horizontalSpace,
-        Icon(
-          required ? LucideIcons.check : LucideIcons.x,
-          color: required ? Colors.green : Colors.red,
-          size: 18,
-        ),
+        Icon(required ? LucideIcons.check : LucideIcons.x, color: required ? Colors.green : Colors.red, size: 18),
       ],
     );
   }
@@ -316,10 +341,7 @@ class QuotationListScreen extends StatelessWidget {
   Widget _iconBadge(IconData icon, Color iconColor, Color bgColor) {
     return Container(
       padding: const EdgeInsets.all(5),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(5),
-      ),
+      decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(5)),
       child: Icon(icon, color: iconColor, size: 18),
     );
   }
@@ -327,10 +349,7 @@ class QuotationListScreen extends StatelessWidget {
   Widget _quantityTag(String qty) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE6E6E6),
-        borderRadius: BorderRadius.circular(5),
-      ),
+      decoration: BoxDecoration(color: const Color(0xFFE6E6E6), borderRadius: BorderRadius.circular(5)),
       child: Text(qty, style: AppFonts.text12.regular.style),
     );
   }

@@ -1,4 +1,6 @@
 import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/modules/vendor/dashboard/dashboard_notifier.dart';
+import 'package:community_app/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -15,6 +17,40 @@ class CustomerDashboardNotifier extends BaseChangeNotifier {
     PromotionItem(
       title: "Buy 1 Cleaning, Get 1 Free",
       imageUrl: "https://diamondshine.com.ng/storage/2021/04/diamond-shine-cleaning-services-2.jpg",
+    ),
+  ];
+
+  final List<Color> chipIconColors = [
+    Color(0xFF64B5F6), // Blue 300
+    Color(0xFFFFB74D), // Orange 300
+    Color(0xFF81C784), // Green 300
+    Color(0xFFBA68C8), // Purple 300
+    Color(0xFF9575CD), // Deep Purple 300
+    Color(0xFFE57373), // Red 300
+    Color(0xFFFFD54F), // Amber 300
+    Color(0xFF4DD0E1), // Cyan 300
+    Color(0xFFDCE775), // Lime 300
+    Color(0xFF90A4AE), // Blue Grey 300
+  ];
+
+
+
+
+
+  final List<QuickStat> quickStats = [
+    QuickStat(
+      icon: LucideIcons.arrowUpNarrowWide,
+      iconBgColor: const Color(0xffe7f0ff), // Light blue
+      iconColor: Colors.blue.shade700,
+      count: 12,
+      label: "Ongoing",
+    ),
+    QuickStat(
+      icon: LucideIcons.check,
+      iconBgColor: const Color(0xffe8f7e8), // Light orange
+      iconColor: Colors.green.shade700,
+      count: 5,
+      label: "Completed",
     ),
   ];
 
@@ -40,7 +76,14 @@ class CustomerDashboardNotifier extends BaseChangeNotifier {
     QuickAction(icon: LucideIcons.circleDollarSign, label: 'Make Payment'),
   ];
 
-  void selectCategory(ServiceCategory category) {
+  void selectCategory(BuildContext context, ServiceCategory category) {
+    print(category.name);
+    Navigator.pushReplacementNamed(
+      context,
+      AppRoutes.customerBottomBar,
+      arguments: {'currentIndex': 1, 'category': category},
+    );
+
     notifyListeners();
   }
 

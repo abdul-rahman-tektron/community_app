@@ -76,9 +76,14 @@ class ExploreNotifier extends BaseChangeNotifier {
   RangeValues selectedPriceRange = const RangeValues(0, 200);
   DistanceFilter? selectedDistance;
 
-  ExploreNotifier() {
+
+  ExploreNotifier({String? initialCategory}) {
+    selectedCategory = initialCategory ?? 'All';
     filteredServices = List.from(_allServices);
     searchController.addListener(_filterServices);
+
+    // Trigger filter once with initial category
+    _filterServices();
   }
 
   void _filterServices() {

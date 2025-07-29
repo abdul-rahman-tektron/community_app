@@ -1,5 +1,6 @@
 import 'package:community_app/modules/vendor/quotation/widgets/new_request/new_request_card.dart';
 import 'package:community_app/modules/vendor/quotation/widgets/new_request/new_request_notifier.dart';
+import 'package:community_app/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -14,7 +15,7 @@ class NewRequestScreen extends StatelessWidget {
         builder: (context, notifier, _) {
           return Scaffold(
             body: notifier.requests.isEmpty
-                ? const Center(child: Text("No new requests."))
+                ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
               itemCount: notifier.requests.length,
               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -23,10 +24,13 @@ class NewRequestScreen extends StatelessWidget {
                 return NewRequestCard(
                   request: request,
                   onQuotationTap: () {
-                    // Handle quotation button tap here
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Create quotation for ${request.customerName}')),
-                    );
+                    print("request.quotationId");
+                    print(request.quotationId);
+                    Navigator.pushNamed(context, AppRoutes.addQuotation, arguments: {
+                    'jobId': request.jobId,
+                    'serviceId': 1001,
+                    'quotationId': request.quotationId,
+                    },);
                   },
                 );
               },
@@ -37,3 +41,4 @@ class NewRequestScreen extends StatelessWidget {
     );
   }
 }
+

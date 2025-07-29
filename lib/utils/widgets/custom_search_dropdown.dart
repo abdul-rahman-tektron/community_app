@@ -463,27 +463,27 @@ class _CustomSearchDropdownState<T> extends State<CustomSearchDropdown<T>> with 
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(widget.fieldName, style:  AppFonts.text14.regular.style ),
-              const SizedBox(width: 3),
-              if (!widget.skipValidation)
-                const Text("*", style: TextStyle(fontSize: 15, color: AppColors.error)),
-              if (widget.toolTipContent != null) ...[
-                const SizedBox(width: 3),
-                Tooltip(
-                  message: widget.toolTipContent!,
-                  textAlign: TextAlign.center,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: const Icon(Icons.info_outline, size: 20, color: AppColors.primary),
-                ),
-              ],
-            ],
-          ),
-          const SizedBox(height: 5),
+          // Row(
+          //   children: [
+          //     Text(widget.fieldName, style:  AppFonts.text14.regular.style ),
+          //     const SizedBox(width: 3),
+          //     if (!widget.skipValidation)
+          //       const Text("*", style: TextStyle(fontSize: 15, color: AppColors.error)),
+          //     if (widget.toolTipContent != null) ...[
+          //       const SizedBox(width: 3),
+          //       Tooltip(
+          //         message: widget.toolTipContent!,
+          //         textAlign: TextAlign.center,
+          //         decoration: BoxDecoration(
+          //           color: AppColors.primary,
+          //           borderRadius: BorderRadius.circular(5),
+          //         ),
+          //         child: const Icon(Icons.info_outline, size: 20, color: AppColors.primary),
+          //       ),
+          //     ],
+          //   ],
+          // ),
+          // const SizedBox(height: 5),
           TextFormField(
             controller: widget.controller,
             focusNode: _focusNode,
@@ -509,6 +509,9 @@ class _CustomSearchDropdownState<T> extends State<CustomSearchDropdown<T>> with 
               contentPadding:
               const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
               filled: true,
+              labelText: widget.fieldName,
+                alignLabelWithHint: true,
+              labelStyle: AppFonts.text14.regular.grey.style,
               fillColor: isDisabled
                   ? AppColors.textSecondary
                   : AppColors.white.withOpacity(0.8),
@@ -546,6 +549,7 @@ class _CustomSearchDropdownState<T> extends State<CustomSearchDropdown<T>> with 
                   ],
                 ),
               ),
+              floatingLabelStyle: AppFonts.text16.regular.style,
               border: _defaultBorder(),
               enabledBorder: _defaultBorder(),
               focusedBorder: _defaultFocusedBorder(),

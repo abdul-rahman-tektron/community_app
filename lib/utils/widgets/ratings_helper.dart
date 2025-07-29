@@ -22,10 +22,10 @@ class RatingsHelper extends StatelessWidget {
         final starIndex = index + 1;
         if (rating >= starIndex) {
           // Full star
-          return Icon(Icons.star, size: size, color: AppColors.primary);
+          return Icon(Icons.star, size: size, color: AppColors.secondary);
         } else if (rating >= starIndex - 0.5) {
           // Half star
-          return Icon(Icons.star_half, size: size, color: AppColors.primary);
+          return Icon(Icons.star_half, size: size, color: AppColors.secondary);
         } else {
           // Empty star
           return Icon(Icons.star_border, size: size, color: Colors.grey.shade300);

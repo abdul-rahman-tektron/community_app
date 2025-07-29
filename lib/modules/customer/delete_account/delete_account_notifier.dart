@@ -5,6 +5,14 @@ import 'package:flutter/material.dart';
 class DeleteAccountNotifier extends BaseChangeNotifier {
   final TextEditingController emailAddressController = TextEditingController();
 
+  DeleteAccountNotifier() {
+    init();
+  }
+
+  void init() async {
+    await loadUserData();
+  }
+
   final formKey = GlobalKey<FormState>();
 
 

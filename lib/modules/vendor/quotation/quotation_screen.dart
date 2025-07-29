@@ -1,6 +1,7 @@
 import 'package:community_app/modules/vendor/quotation/quotation_notifier.dart';
 import 'package:community_app/modules/vendor/quotation/widgets/new_request/new_request_screen.dart';
 import 'package:community_app/modules/vendor/quotation/widgets/sent_quotation/sent_quotation_screen.dart';
+import 'package:community_app/modules/vendor/quotation/widgets/site_visit/site_visit_screen.dart';
 import 'package:community_app/modules/vendor/quotation/widgets/updated_quotation/updated_quotation_screen.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
@@ -32,7 +33,7 @@ class QuotationScreen extends StatelessWidget {
         body: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+              padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
               child: tabBar(context, quotationNotifier),
             ),
             tabBarView(context, quotationNotifier),
@@ -61,7 +62,8 @@ class QuotationScreen extends StatelessWidget {
           onTap: (index) {
             quotationNotifier.selectedIndex = index;
             if (index == 0) {
-            } else {}
+            } else {
+            }
           },
           dividerColor: Colors.transparent,
           indicatorSize: TabBarIndicatorSize.tab,
@@ -69,8 +71,8 @@ class QuotationScreen extends StatelessWidget {
           unselectedLabelStyle: AppFonts.text14.regular.style,
           tabs: [
             Tab(text: "New Request"),
-            Tab(text: "Sent Quotation"),
-            Tab(text: "Updated Quotation"),
+            Tab(text: "Quotation"),
+            Tab(text: "Site Visit"),
           ],
         ),
       ),
@@ -78,6 +80,6 @@ class QuotationScreen extends StatelessWidget {
   }
 
   Widget tabBarView(BuildContext context, QuotationNotifier quotationNotifier) {
-    return Expanded(child: TabBarView(children: [NewRequestScreen(), SentQuotationScreen(), UpdatedQuotationScreen()]));
+    return Expanded(child: TabBarView(children: [NewRequestScreen(), SentQuotationScreen(), SiteVisitScreen()]));
   }
 }

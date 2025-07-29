@@ -37,7 +37,7 @@ class VendorRegistrationBankScreen extends StatelessWidget {
             key: addressKey,
             child: Column(
               children: [
-                imageView(context),
+                // imageView(context),
                 mainContent(context, addressKey, vendorRegistrationNotifier),
               ],
             ),
@@ -66,7 +66,7 @@ class VendorRegistrationBankScreen extends StatelessWidget {
   Widget _buildLogo() {
     return Align(
       alignment: Alignment.topLeft,
-      child: Image.asset(width: 100.w, AppImages.tektronLogo, fit: BoxFit.contain),
+      child: Image.asset(width: 100.w, AppImages.logo, fit: BoxFit.contain),
     );
   }
 

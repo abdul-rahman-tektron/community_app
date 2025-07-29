@@ -2,6 +2,7 @@ import 'package:community_app/core/notifier/language_notifier.dart';
 import 'package:community_app/modules/customer/settings/settings_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
+import 'package:community_app/res/images.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
@@ -38,11 +39,7 @@ class SettingsScreen extends StatelessWidget {
                     context,
                     settingsNotifier,
                   ),
-                  _buildSettingsGroup(
-                    [_tileData(LucideIcons.wallet, "Saved Cards", 'saved-cards')],
-                    context,
-                    settingsNotifier,
-                  ),
+                  //
                   _buildSettingsGroup(
                     [
                       _tileData(LucideIcons.languages, "Change Language", 'change-language'),
@@ -84,8 +81,8 @@ class SettingsScreen extends StatelessWidget {
                   width: 120.h,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
-                    child: Image.network(
-                      "https://sb.kaleidousercontent.com/67418/1920x1545/c5f15ac173/samuel-raita-ridxdghg7pw-unsplash.jpg",
+                    child: Image.asset(
+                      AppImages.userPlaceHolder,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -111,7 +108,6 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
         ),
-        _buildBackButton(context),
       ],
     );
   }

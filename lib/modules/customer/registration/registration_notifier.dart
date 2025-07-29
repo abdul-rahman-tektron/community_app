@@ -1,21 +1,16 @@
 import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/dropdown/community_dropdown_response.dart';
-import 'package:community_app/core/model/login/login_request.dart';
-import 'package:community_app/core/model/register/customer_register_request.dart';
+import 'package:community_app/core/model/common/dropdown/community_dropdown_response.dart';
+import 'package:community_app/core/model/common/login/login_request.dart';
+import 'package:community_app/core/model/common/register/customer_register_request.dart';
 import 'package:community_app/core/remote/services/auth_repository.dart';
 import 'package:community_app/core/remote/services/service_repository.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:community_app/utils/router/routes.dart';
+import 'package:community_app/utils/widgets/custom_stepper.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class CustomerRegistrationNotifier extends BaseChangeNotifier {
-  CustomerRegistrationNotifier() {
-    initApi();
-  }
-
-  Future<void> initApi() async {
-    apiCommunityDropdown();
-  }
 
   final nameController = TextEditingController();
   final emailController = TextEditingController();
@@ -29,11 +24,25 @@ class CustomerRegistrationNotifier extends BaseChangeNotifier {
 
   List<CommunityDropdownData> communityDropdownData = [];
 
+  final List<CustomStepperItem> registrationSteps = [
+    CustomStepperItem(title: 'Personal', icon: LucideIcons.userRound),
+    CustomStepperItem(title: 'Address', icon: LucideIcons.mapPin),
+  ];
+
   String? _selectedCommunity;
   String? _selectedCommunityId;
   bool acceptedPrivacyPolicy = false;
   double? latitude;
   double? longitude;
+  int _currentStep = 1;
+
+  CustomerRegistrationNotifier() {
+    initApi();
+  }
+
+  Future<void> initApi() async {
+    apiCommunityDropdown();
+  }
 
   void setCommunity(CommunityDropdownData? value) {
     selectedCommunity = value?.name ?? "";
@@ -107,6 +116,28 @@ class CustomerRegistrationNotifier extends BaseChangeNotifier {
     }
   }
 
+  void updateStep(int step) {
+    debugPrint('Updating step to: $step');
+    currentStep = step;
+    notifyListeners();
+  }
+
+  void nextStep() {
+    if (_currentStep <= totalSteps) {
+      updateStep(_currentStep + 1);
+    } else {
+      debugPrint('Already at the last step.');
+    }
+  }
+
+  void previousStep() {
+    if (_currentStep > 0) {
+      updateStep(_currentStep - 1);
+    } else {
+      debugPrint('Already at the first step.');
+    }
+  }
+
   @override
   void dispose() {
     nameController.dispose();
@@ -129,10 +160,20 @@ class CustomerRegistrationNotifier extends BaseChangeNotifier {
     }
   }
 
+  int get totalSteps => 2;
+
   String? get selectedCommunityId => _selectedCommunityId;
   set selectedCommunityId(String? value) {
     if (_selectedCommunityId != value) {
       _selectedCommunityId = value;
+      notifyListeners();
+    }
+  }
+
+  int get currentStep => _currentStep;
+  set currentStep(int value) {
+    if (_currentStep != value) {
+      _currentStep = value;
       notifyListeners();
     }
   }

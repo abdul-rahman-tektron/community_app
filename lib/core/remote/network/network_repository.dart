@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:community_app/core/model/error/error_response.dart';
 import 'package:community_app/core/remote/network/api_url.dart';
 import 'package:community_app/main.dart';
 import 'package:community_app/utils/enums.dart';
