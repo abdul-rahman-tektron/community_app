@@ -6,26 +6,35 @@ import 'package:flutter/material.dart';
 
 class VendorBottomBarNotifier extends BaseChangeNotifier {
   int _currentIndex = 0;
+  int _subCurrentIndex = 0;
 
   int get currentIndex => _currentIndex;
+  int get subCurrentIndex => _subCurrentIndex;
 
-  VendorBottomBarNotifier(int? currentIndex) {
+  VendorBottomBarNotifier(int? currentIndex, int? subCurrentIndex) {
     initNotifier();
     _currentIndex = currentIndex ?? 0;
+    _subCurrentIndex = subCurrentIndex ?? 0;
   }
 
   Future<void> initNotifier() async {
     await loadUserRole();
   }
+
   void changeTab(int index) {
     _currentIndex = index;
     notifyListeners();
   }
 
-  final List<Widget> _screens = [
+  void changeSubTab(int subIndex) {
+    _subCurrentIndex = subIndex;
+    notifyListeners();
+  }
+
+  List<Widget> get _screens => [
     VendorDashboardScreen(),
-    QuotationScreen(),
-    JobsScreen(),
+    QuotationScreen(currentIndex: _subCurrentIndex),
+    JobsScreen(currentIndex: _subCurrentIndex),
   ];
 
   Widget get currentScreen => _screens[_currentIndex];

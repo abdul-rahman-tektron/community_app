@@ -1,7 +1,9 @@
 import 'package:community_app/core/notifier/language_notifier.dart';
 import 'package:community_app/modules/auth/user_role_selection/user_role_selection_notifier.dart';
+import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/images.dart';
+import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/enums.dart';
 import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/helpers/screen_size.dart';
@@ -86,27 +88,38 @@ class UserRoleSelectionScreen extends StatelessWidget {
           Text(context.locale.pleaseChooseYourRole, style: AppFonts.text20.semiBold.style),
           10.verticalSpace,
           Text(context.locale.yourRoleHelpsUs, textAlign: TextAlign.center, style: AppFonts.text16.regular.style),
-          30.verticalSpace,
-          CustomButton(
-            text: context.locale.tenant,
-            onPressed: () {
-              userRoleSelectionNotifier.selectRoleAndNavigate(context, UserRole.tenant);
-            },
-          ),
           20.verticalSpace,
-          CustomButton(
-            text: context.locale.owner,
-            onPressed: () {
-              userRoleSelectionNotifier.selectRoleAndNavigate(context, UserRole.owner);
-            },
+          Wrap(
+            alignment: WrapAlignment.center,
+            runAlignment: WrapAlignment.spaceBetween,
+            spacing: 10,
+            runSpacing: 0,
+            children: [
+              categoryWidget("Tenant", AppImages.tenant, () => userRoleSelectionNotifier.selectRoleAndNavigate(context, UserRole.tenant)),
+              categoryWidget("Owner", AppImages.owner, () => userRoleSelectionNotifier.selectRoleAndNavigate(context, UserRole.owner)),
+              categoryWidget("Vendor", AppImages.vendor, () => userRoleSelectionNotifier.selectRoleAndNavigate(context, UserRole.vendor)),
+            ],
           ),
-          20.verticalSpace,
-          CustomButton(
-            text: context.locale.vendor,
-            onPressed: () {
-              userRoleSelectionNotifier.selectRoleAndNavigate(context, UserRole.vendor);
-            },
-          ),
+          // CustomButton(
+          //   text: context.locale.tenant,
+          //   onPressed: () {
+          //     userRoleSelectionNotifier.selectRoleAndNavigate(context, UserRole.tenant);
+          //   },
+          // ),
+          // 20.verticalSpace,
+          // CustomButton(
+          //   text: context.locale.owner,
+          //   onPressed: () {
+          //     userRoleSelectionNotifier.selectRoleAndNavigate(context, UserRole.owner);
+          //   },
+          // ),
+          // 20.verticalSpace,
+          // CustomButton(
+          //   text: context.locale.vendor,
+          //   onPressed: () {
+          //     userRoleSelectionNotifier.selectRoleAndNavigate(context, UserRole.vendor);
+          //   },
+          // ),
           20.verticalSpace,
           languageWidget(context),
         ],
@@ -115,23 +128,89 @@ class UserRoleSelectionScreen extends StatelessWidget {
   }
 
   Widget languageWidget(BuildContext context) {
-    return Text.rich(
-      textAlign: TextAlign.center,
-      TextSpan(
-        text: context.locale.changeLanguageTo,
-        style: AppFonts.text16.regular.style,
-        children: [
-          TextSpan(text: " ", style: AppFonts.text16.regular.red.style),
-          TextSpan(
-            text: context.locale.switchLng,
-            style: FontResolver.resolve(context.locale.switchLng, AppFonts.text16.regular.red.style),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () {
-                final langNotifier = context.read<LanguageNotifier>();
-                langNotifier.switchLanguage();
+    final langNotifier = context.watch<LanguageNotifier>();
+    final currentLang = langNotifier.locale.languageCode; // 'en' or 'ar'
+
+    return Column(
+      children: [
+        Text(
+          context.locale.changeLanguageTo,
+          style: AppFonts.text16.regular.style,
+          textAlign: TextAlign.center,
+        ),
+        10.verticalSpace,
+        Wrap(
+          spacing: 10,
+          children: [
+            ChoiceChip(
+              label: Text(
+                "English",
+                style: AppFonts.text14.regular.style.copyWith(
+                  color: currentLang == 'en' ? Colors.white : AppColors.secondary,
+                ),
+              ),
+              selected: currentLang == 'en',
+              checkmarkColor: AppColors.white,
+              selectedColor: AppColors.secondary, // Fill with secondary when selected
+              backgroundColor: Colors.white, // Unselected background
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(color: AppColors.secondary),
+              ),
+              onSelected: (selected) {
+                if (selected && currentLang != 'en') langNotifier.switchLanguage();
               },
+            ),
+            ChoiceChip(
+              label: Text(
+                "العربية",
+                style: FontResolver.resolve("العربية", AppFonts.text14.regular.style.copyWith(
+                  color: currentLang == 'ar' ? Colors.white : AppColors.secondary,
+                ),),
+              ),
+              selected: currentLang == 'ar',
+              selectedColor: AppColors.secondary,
+              backgroundColor: Colors.white,
+              checkmarkColor: AppColors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(color: AppColors.secondary),
+              ),
+              onSelected: (selected) {
+                if (selected && currentLang != 'ar') langNotifier.switchLanguage();
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget categoryWidget(String title, String images, Function() onPressed) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.primary),
+          boxShadow: const [
+            BoxShadow(color: Colors.black12, blurRadius: 7),
+          ],
+        ),
+        padding: EdgeInsets.all(30),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(100),
+          child: Column(
+            children: [
+              10.verticalSpace,
+              Image.asset(images, height: 60, width: 60,),
+              10.verticalSpace,
+              Text(title),
+              10.verticalSpace,
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

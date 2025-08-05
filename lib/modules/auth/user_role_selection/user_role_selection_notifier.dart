@@ -9,6 +9,8 @@ class UserRoleSelectionNotifier extends ChangeNotifier {
   UserRole? get userRole => _userRole;
 
   void selectRoleAndNavigate(BuildContext context, UserRole selectedRole) {
+    print("selectedRole");
+    print(selectedRole);
     _userRole = selectedRole;
 
     HiveStorageService.setUserCategory(selectedRole.name);

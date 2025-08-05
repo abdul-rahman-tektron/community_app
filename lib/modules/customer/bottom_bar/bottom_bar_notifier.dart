@@ -32,7 +32,7 @@ class BottomBarNotifier extends BaseChangeNotifier {
     return [
       CustomerDashboardScreen(
         onCategoryTap: (category) {
-          changeTab(1, category: category.name); // pass category name
+          changeTab(1, category: category.serviceName); // pass category name
         },
       ),
       ExploreScreen(initialCategory: _selectedCategory), // Pass the selected category here too

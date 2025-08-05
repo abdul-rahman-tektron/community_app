@@ -1,4 +1,7 @@
-import 'package:community_app/modules/customer/services/services_notifier.dart';
+import 'package:community_app/core/model/customer/job/ongoing_jobs_response.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
@@ -6,27 +9,26 @@ import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_linear_progress_indicator.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class TrackingServiceCard extends StatelessWidget {
-  final ServiceModel service;
+  final CustomerOngoingJobsData job;
 
-  const TrackingServiceCard({super.key, required this.service});
+  const TrackingServiceCard({super.key, required this.job});
 
   @override
   Widget build(BuildContext context) {
+    final arrival = job.customerRequestedDate?.toLocal().formatDateTime(withTime: true) ?? 'N/A';
+
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 15),
-      padding: EdgeInsets.all(15),
+      margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
+      padding: EdgeInsets.all(15.w),
       decoration: AppStyles.commonDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildServiceId(),
+          _buildJobId(),
           SizedBox(height: 15.h),
-          _buildTrackingRow(context),
+          _buildTrackingRow(context, arrival),
           SizedBox(height: 15.h),
           _buildProgressBar(),
         ],
@@ -34,26 +36,18 @@ class TrackingServiceCard extends StatelessWidget {
     );
   }
 
-  Widget _buildServiceId() {
+  Widget _buildJobId() {
     return Text.rich(
       TextSpan(
         children: [
-          TextSpan(
-            text: "Job ID: ",
-            style: AppFonts.text16.regular.style,
-          ),
-          TextSpan(
-            text: "#${service.id}",
-            style: AppFonts.text16.regular.style,
-          ),
+          TextSpan(text: "Job ID: ", style: AppFonts.text16.regular.style),
+          TextSpan(text: "#${job.jobId ?? 'N/A'}", style: AppFonts.text16.regular.style),
         ],
       ),
     );
   }
 
-  Widget _buildTrackingRow(BuildContext context) {
-    final arrival = service.estimatedArrival?.toLocal().formatDateTime(withTime: true) ?? 'N/A';
-
+  Widget _buildTrackingRow(BuildContext context, String arrival) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -73,7 +67,7 @@ class TrackingServiceCard extends StatelessWidget {
           borderColor: AppColors.primary,
           textStyle: AppFonts.text14.regular.style,
           onPressed: () {
-            Navigator.pushNamed(context, AppRoutes.tracking);
+            Navigator.pushNamed(context, AppRoutes.tracking, arguments: {"jobId": job.jobId});
           },
           text: "Track",
         ),
@@ -108,8 +102,10 @@ class TrackingServiceCard extends StatelessWidget {
   }
 
   Widget _buildProgressBar() {
+    // If you want to use estimatedAmount or progress (you need to decide)
     return CustomLinearProgressIndicator(
-      percentage: service.progressPercent ?? 0,
+      percentage: 20, // Static or customize as needed
+      borderRadius: 6,
     );
   }
 }

@@ -1,0 +1,98 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:community_app/core/model/common/error/common_response.dart';
+import 'package:community_app/core/model/common/error/error_response.dart';
+import 'package:community_app/core/model/common/jobs/ongoing_jobs_response.dart';
+import 'package:community_app/core/model/customer/job/job_completion_request.dart';
+import 'package:community_app/core/model/vendor/assign_employee/assign_employee_request.dart';
+import 'package:community_app/core/model/vendor/jobs/ongoing_jobs_assigned_response.dart';
+import 'package:community_app/core/remote/network/api_url.dart';
+import 'package:community_app/core/remote/network/base_repository.dart';
+import 'package:community_app/utils/enums.dart';
+import 'package:community_app/utils/storage/secure_storage.dart';
+
+class VendorJobsRepository extends BaseRepository {
+  VendorJobsRepository._internal();
+  static final instance = VendorJobsRepository._internal();
+
+  /// POST: /Job/AssignEmployees
+  /// Purpose: Assigns employees to a specific job request
+  Future<Object?> apiAssignEmployee(AssignEmployeeRequest requestParams) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.post,
+      pathUrl: ApiUrls.pathAssignEmployees,
+      body: jsonEncode(requestParams.toJson()),
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final commonResponse = commonResponseFromJson(jsonEncode(response?.data));
+      return commonResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+  /// POST: /Job/JobCompletion
+  /// Purpose: Marks a job as completed and uploads before/after photos (if provided)
+  Future<Object?> apiJobCompletion(JobCompletionRequest requestParams) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.post,
+      pathUrl: ApiUrls.pathJobCompletion,
+      body: jsonEncode(requestParams.toJson()),
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final commonResponse = commonResponseFromJson(jsonEncode(response?.data));
+      return commonResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+  /// GET: /Job/GetVendorJobs/{vendorId}
+  /// Purpose: Fetches all jobs associated with a vendor
+  Future<Object?> apiGetVendorJobs(String vendorId) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.get,
+      pathUrl: ApiUrls.pathVendorJobs,
+      queryParam: vendorId,
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final ongoingJobsResponse = ongoingJobsResponseFromJson(jsonEncode(response?.data));
+      return ongoingJobsResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+  /// GET: /Job/GetVendorOngoingJobs/{vendorId}
+  /// Purpose: Fetches only ongoing jobs assigned to a vendor
+  Future<Object?> apiGetVendorOngoingJobs(String vendorId) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.get,
+      pathUrl: ApiUrls.pathVendorOngoingJobs,
+      queryParam: vendorId,
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final ongoingJobAssignedResponse = onGoingJobAssignedResponseFromJson(jsonEncode(response?.data));
+      return ongoingJobAssignedResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+}

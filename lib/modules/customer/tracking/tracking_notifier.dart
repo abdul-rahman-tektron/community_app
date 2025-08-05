@@ -1,13 +1,12 @@
 import 'dart:math';
+
 import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/remote/services/service_repository.dart';
-import 'package:community_app/res/api_constants.dart';
+import 'package:community_app/core/remote/services/customer/customer_jobs_repository.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/utils/map_icon_paint.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class TrackingNotifier extends BaseChangeNotifier {
@@ -151,7 +150,7 @@ class TrackingNotifier extends BaseChangeNotifier {
     final destination = '${_customerPosition.latitude},${_customerPosition.longitude}';
 
     try {
-      final responseData = await ServiceRepository().getRouteWithTraffic(
+      final responseData = await CustomerJobsRepository.instance.getRouteWithTraffic(
         origin: origin,
         destination: destination,
       );

@@ -18,4 +18,19 @@ mixin CommonUtils {
       return getEnglish() ?? fallback;
     }
   }
+
+  static JobStatusCategory jobStatusFromString(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'tracking':
+        return JobStatusCategory.tracking;
+      case 'inprogress':
+      case 'in_progress':
+      case 'in progress':
+        return JobStatusCategory.inProgress;
+      case 'completed':
+        return JobStatusCategory.completed;
+      default:
+        return JobStatusCategory.unknown;
+    }
+  }
 }

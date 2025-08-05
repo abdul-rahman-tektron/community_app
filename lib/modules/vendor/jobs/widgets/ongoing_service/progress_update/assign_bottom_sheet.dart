@@ -1,11 +1,16 @@
+import 'dart:io';
+import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
+import 'package:community_app/utils/helpers/dashed_border_container.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
+import 'package:community_app/utils/widgets/custom_popup.dart';
 import 'package:community_app/utils/widgets/custom_textfields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class AssignBottomSheet extends StatefulWidget {
-  final void Function(String name, String phone) onAdd;
+  final void Function(String name, String phone, {File? emiratesId}) onAdd;
 
   const AssignBottomSheet({super.key, required this.onAdd});
 
@@ -16,6 +21,7 @@ class AssignBottomSheet extends StatefulWidget {
 class _AssignBottomSheetState extends State<AssignBottomSheet> {
   late TextEditingController nameController;
   late TextEditingController phoneController;
+  File? emiratesIdFile;
 
   @override
   void initState() {
@@ -48,12 +54,14 @@ class _AssignBottomSheetState extends State<AssignBottomSheet> {
             Text("Enter an employee to assign", style: AppFonts.text18.bold.style),
             20.verticalSpace,
             _employeeInfoField(),
+            15.verticalSpace,
+            _uploadEmiratesIdButton(context), // <-- NEW
             30.verticalSpace,
             CustomButton(
               text: "Add Employee",
               onPressed: () {
                 if (nameController.text.trim().isNotEmpty && phoneController.text.trim().isNotEmpty) {
-                  widget.onAdd(nameController.text.trim(), phoneController.text.trim());
+                  widget.onAdd(nameController.text.trim(), phoneController.text.trim(), emiratesId: emiratesIdFile);
                   Navigator.pop(context);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -68,6 +76,7 @@ class _AssignBottomSheetState extends State<AssignBottomSheet> {
     );
   }
 
+
   Widget _employeeInfoField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,6 +87,47 @@ class _AssignBottomSheetState extends State<AssignBottomSheet> {
       ],
     );
   }
+
+  Widget _uploadEmiratesIdButton(BuildContext context) {
+    if (emiratesIdFile != null) {
+      return Column(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.file(emiratesIdFile!, height: 100, width: 100, fit: BoxFit.fill),
+          ),
+          TextButton(
+            onPressed: () => setState(() => emiratesIdFile = null),
+            child: Text("Remove Emirates ID", style: AppFonts.text14.regular.red.style,),
+          ),
+        ],
+      );
+    }
+
+    // Only show button if no file is selected
+    return GestureDetector(
+      onTap: () {
+        showImageSourceDialog(
+          context,
+              (file) => setState(() => emiratesIdFile = file),
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        foregroundDecoration: DashedBorder(),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(LucideIcons.upload, size: 20, color: AppColors.primary),
+            10.horizontalSpace,
+            Text("Upload Emirates ID (Optional)", style: AppFonts.text14.semiBold.style),
+          ],
+        ),
+      ),
+    );
+  }
 }
-
-

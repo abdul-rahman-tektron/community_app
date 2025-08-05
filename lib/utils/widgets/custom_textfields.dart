@@ -185,13 +185,13 @@ class _CustomTextFieldState extends State<CustomTextField> {
               timePickerTheme: TimePickerThemeData(
                 backgroundColor: Colors.white,
                 hourMinuteTextColor: Colors.black,
-                dayPeriodColor: AppColors.primary,
-                dialHandColor: AppColors.primary,
+                dayPeriodColor: AppColors.secondary,
+                dialHandColor: AppColors.secondary,
                 dialBackgroundColor: Colors.grey.shade200,
-                entryModeIconColor: AppColors.primary,
+                entryModeIconColor: AppColors.secondary,
               ),
               colorScheme: ColorScheme.light(
-                primary: AppColors.primary,
+                primary: AppColors.secondary,
                 onPrimary: Colors.white,
                 onSurface: Colors.black,
               ),

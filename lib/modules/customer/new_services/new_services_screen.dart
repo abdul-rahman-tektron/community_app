@@ -95,14 +95,14 @@ class NewServicesScreen extends StatelessWidget {
                             activeColor: AppColors.secondary,
                             thumbColor: WidgetStateProperty.all(AppColors.white),
                             trackColor: WidgetStateProperty.resolveWith((states) {
-                              return newServicesNotifier.siteVisitOption == 1
+                              return newServicesNotifier.siteVisitOption
                                   ? AppColors.secondary
                                   : AppColors.secondary.withOpacity(0.3);
                             }),
                             trackOutlineColor: WidgetStateProperty.all(AppColors.white),
-                            value: newServicesNotifier.siteVisitOption == 1,
+                            value: newServicesNotifier.siteVisitOption,
                             onChanged: (bool value) {
-                              newServicesNotifier.setSiteVisitOption(value ? 1 : 0);
+                              newServicesNotifier.setSiteVisitOption(value);
                             },
                           ),
                         ),

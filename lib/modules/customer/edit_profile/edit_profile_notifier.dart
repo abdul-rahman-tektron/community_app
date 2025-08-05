@@ -5,7 +5,9 @@ import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/core/model/common/login/login_response.dart';
 import 'package:community_app/core/model/common/user/update_user_request.dart';
 import 'package:community_app/core/model/common/user/update_user_response.dart';
-import 'package:community_app/core/remote/services/auth_repository.dart';
+import 'package:community_app/core/remote/services/common_repository.dart';
+import 'package:community_app/core/remote/services/customer/customer_auth_repository.dart';
+import 'package:community_app/utils/crashlytics_service.dart';
 import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:community_app/utils/router/routes.dart';
@@ -74,7 +76,7 @@ class EditProfileNotifier extends BaseChangeNotifier {
     );
 
     try {
-    final result = await AuthRepository().apiUpdateUserProfile(
+    final result = await CustomerAuthRepository.instance.apiUpdateCustomerProfile(
         userData?.customerId.toString() ?? "0",
         updateProfileRequest,
       );
@@ -115,6 +117,13 @@ class EditProfileNotifier extends BaseChangeNotifier {
 
       // Save merged LoginResponse back to Hive
       HiveStorageService.setUserData(jsonEncode(updatedLogin));
+
+      CrashlyticsService.setUser({
+        "id": updatedLogin.customerId,
+        "name": updatedLogin.name,
+        "email": updatedLogin.email,
+        "role": updatedLogin.type,
+      });
 
       Navigator.pop(context);
     }

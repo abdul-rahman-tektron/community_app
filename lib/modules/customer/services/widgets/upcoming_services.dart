@@ -1,103 +1,69 @@
+import 'package:community_app/core/model/customer/job/ongoing_jobs_response.dart';
 import 'package:community_app/modules/customer/services/services_notifier.dart';
 import 'package:community_app/modules/customer/services/widgets/completed_service_card.dart';
 import 'package:community_app/modules/customer/services/widgets/in_progress_service_card.dart';
 import 'package:community_app/modules/customer/services/widgets/tracking_service_card.dart';
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/res/fonts.dart';
 import 'package:community_app/utils/enums.dart';
-import 'package:community_app/utils/extensions.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class UpcomingServicesWidget extends StatelessWidget {
-  final List<ServiceModel> upcomingServices;
+  final List<CustomerOngoingJobsData> upcomingJobs;
 
-  const UpcomingServicesWidget({super.key, required this.upcomingServices});
+  const UpcomingServicesWidget({super.key, required this.upcomingJobs});
 
   @override
   Widget build(BuildContext context) {
-    // Group services by status
-    final Map<UpcomingServiceStatus, List<ServiceModel>> grouped = {
-      for (var status in UpcomingServiceStatus.values)
-        status: upcomingServices.where((s) => s.status == status).toList()
+    // Group by jobStatusCategory enum
+    final Map<JobStatusCategory, List<CustomerOngoingJobsData>> grouped = {
+      for (var status in JobStatusCategory.values)
+        status: upcomingJobs
+            .where((job) => CommonUtils.jobStatusFromString(job.jobStatusCategory) == status)
+            .toList(),
     };
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildHeadingWithGradientUnderline(context),
-        20.verticalSpace,
-        ...UpcomingServiceStatus.values.map((status) {
-          final services = grouped[status]!;
-          if (services.isEmpty) return const SizedBox.shrink();
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ...services.map((service) {
-                switch (status) {
-                  case UpcomingServiceStatus.tracking:
-                    return TrackingServiceCard(service: service);
-                  case UpcomingServiceStatus.inProgress:
-                    return InProgressServiceCard(service: service);
-                  case UpcomingServiceStatus.completed:
-                    return CompletedServiceCard(service: service);
-                }
-              }),
-              20.verticalSpace,
-            ],
-          );
-        }),
-      ]
-    );
-  }
-
-  Widget _buildHeadingWithGradientUnderline(BuildContext context) {
-    final text = "Ongoing Jobs";
-    final style = AppFonts.text20.semiBold.style;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+    return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(text, style: style),
-          6.verticalSpace,
-          _buildGradientUnderline(text, style),
+          ...JobStatusCategory.values.map((status) {
+            final jobs = grouped[status]!;
+            if (jobs.isEmpty) return const SizedBox.shrink();
+      
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...jobs.map((job) {
+                  switch (status) {
+                    case JobStatusCategory.tracking:
+                      return TrackingServiceCard(job: job);
+                    case JobStatusCategory.inProgress:
+                      return InProgressServiceCard(service: job);
+                    case JobStatusCategory.completed:
+                      return CompletedServiceCard(service: job);
+                    case JobStatusCategory.unknown:
+                    return SizedBox.shrink();
+                  }
+                }),
+              ],
+            );
+          }),
         ],
       ),
     );
   }
 
-  Widget _buildGradientUnderline(String text, TextStyle style) {
-    final textWidth = _getTextWidth(text, style);
-
-    return Container(
-      height: 2,
-      width: textWidth,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.transparent,
-            AppColors.primary.withOpacity(0.5),
-            AppColors.primary,
-            AppColors.primary.withOpacity(0.5),
-            Colors.transparent,
-          ],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-      ),
-    );
-  }
-
-  double _getTextWidth(String text, TextStyle style) {
-    final TextPainter textPainter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      maxLines: 1,
-      textDirection: TextDirection.ltr,
-    )..layout();
-
-    return textPainter.width;
+  String _statusLabel(JobStatusCategory status) {
+    switch (status) {
+      case JobStatusCategory.tracking:
+        return "Tracking";
+      case JobStatusCategory.inProgress:
+        return "In Progress";
+      case JobStatusCategory.completed:
+        return "Completed";
+      case JobStatusCategory.unknown:
+      default:
+        return "Other";
+    }
   }
 }

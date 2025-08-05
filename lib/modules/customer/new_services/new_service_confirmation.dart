@@ -14,26 +14,31 @@ class ServiceRequestConfirmationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          // mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildAnimation(),
-            25.verticalSpace,
-            _buildThankYouMessage(),
-            10.verticalSpace,
-            _buildSuccessMessage(),
-            15.verticalSpace,
-            _buildServiceIdBox(serviceId),
-            15.verticalSpace,
-            _buildInfoText(),
-            50.verticalSpace,
-            _buildViewVendorsButton(context),
-          ],
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        appBar: CustomAppBar(showBackButton: false,),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              // mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildAnimation(),
+                25.verticalSpace,
+                _buildThankYouMessage(),
+                10.verticalSpace,
+                _buildSuccessMessage(),
+                15.verticalSpace,
+                _buildServiceIdBox(serviceId),
+                15.verticalSpace,
+                _buildInfoText(),
+                50.verticalSpace,
+                _buildViewVendorsButton(context),
+              ],
+            ),
+          ),
         ),
       ),
     );

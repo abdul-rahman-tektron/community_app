@@ -8,7 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class PreviousServicesWidget extends StatelessWidget {
   final List<ServiceModel> previousServices;
 
-  const PreviousServicesWidget({super.key, required this.previousServices});
+  const                                                                                                                                                                                                                                                              PreviousServicesWidget({super.key, required this.previousServices});
 
   @override
   Widget build(BuildContext context) {
@@ -19,10 +19,8 @@ class PreviousServicesWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildHeadingWithGradientUnderline(context),
         20.verticalSpace,
         ..._buildCardListWithSpacing(),
-        15.verticalSpace,
       ],
     );
   }

@@ -1,5 +1,6 @@
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/utils/router/routes.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -24,23 +25,24 @@ class VendorDashboardScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildLicenseAlertCard(notifier),
-                  15.verticalSpace,
+                  // _buildLicenseAlertCard(notifier),
+                  // 15.verticalSpace,
                   _buildLicenseStatusCard(notifier),
                   25.verticalSpace,
 
                   Text("Quick Stats", style: AppFonts.text16.semiBold.style),
                   10.verticalSpace,
                   _buildQuickStatsGrid(notifier),
+                  15.verticalSpace,
+                  _buildServiceStatusPieChart(notifier),
                   25.verticalSpace,
-
                   Text("Quick Actions", style: AppFonts.text16.semiBold.style),
                   10.verticalSpace,
                   buildQuickActions(context, notifier),
                   25.verticalSpace,
 
-                  Text("Alerts", style: AppFonts.text16.semiBold.style),
-                  _buildAlertsList(notifier),
+                  // Text("Alerts", style: AppFonts.text16.semiBold.style),
+                  // _buildAlertsList(notifier),
                 ],
               ),
             ),
@@ -58,12 +60,7 @@ class VendorDashboardScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Color(0xffffe8e8),
         borderRadius: BorderRadius.circular(10),
-        border: Border(
-          left: BorderSide(
-            color: Colors.red,
-            width: 5.0,
-          ),
-        ),
+        border: Border(left: BorderSide(color: Colors.red, width: 5.0)),
         boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 7)],
       ),
       child: Row(
@@ -138,7 +135,7 @@ class VendorDashboardScreen extends StatelessWidget {
       itemCount: notifier.quickStats.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 2 / 1,
+        childAspectRatio: 1 / 0.6,
         crossAxisSpacing: 12.w,
         mainAxisSpacing: 12.h,
       ),
@@ -147,27 +144,26 @@ class VendorDashboardScreen extends StatelessWidget {
         return Container(
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
           decoration: AppStyles.commonDecoration,
-          child: Row(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                width: 36.w,
-                height: 36.w,
-                decoration: BoxDecoration(color: stat.iconBgColor, borderRadius: BorderRadius.circular(8.r)),
-                child: Icon(stat.icon, color: stat.iconColor, size: 20.w),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 36.w,
+                    height: 36.w,
+                    decoration: BoxDecoration(color: stat.iconBgColor, borderRadius: BorderRadius.circular(8.r)),
+                    child: Icon(stat.icon, color: stat.iconColor, size: 20.w),
+                  ),
+                  15.horizontalSpace,
+                  Text(stat.count.toString(), style: AppFonts.text24.semiBold.style, overflow: TextOverflow.ellipsis),
+                ],
               ),
-              15.horizontalSpace,
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(stat.count.toString(), style: AppFonts.text18.semiBold.style, overflow: TextOverflow.ellipsis),
-                    2.verticalSpace,
-                    Text(stat.label, style: AppFonts.text14.regular.style),
-                  ],
-                ),
-              ),
+              15.verticalSpace,
+              Text(stat.label, style: AppFonts.text14.regular.style),
             ],
           ),
         );
@@ -194,26 +190,39 @@ class VendorDashboardScreen extends StatelessWidget {
 
             switch (action.label) {
               case "View New Request":
-                Navigator.pushNamed(context, AppRoutes.vendorBottomBar, arguments: 1);
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.vendorBottomBar,
+                  arguments: {"currentIndex": 1, "subCurrentIndex": 0},
+                );
                 break;
               case "Manage Quotation":
-                Navigator.pushNamed(context, AppRoutes.vendorBottomBar, arguments: 1);
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.vendorBottomBar,
+                  arguments: {"currentIndex": 1, "subCurrentIndex": 1}, // Quotation > Manage Quotation tab
+                );
                 break;
               case "Assign Employee":
-                Navigator.pushNamed(context, AppRoutes.vendorBottomBar, arguments: 2);
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.vendorBottomBar,
+                  arguments: {"currentIndex": 2, "subCurrentIndex": 0},
+                );
               case "Service History":
-                Navigator.pushNamed(context, AppRoutes.vendorBottomBar, arguments: 2);
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.vendorBottomBar,
+                  arguments: {"currentIndex": 2, "subCurrentIndex": 1},
+                );
                 break;
               default:
-              // optional: show a toast or do nothing
+                // optional: show a toast or do nothing
                 break;
             }
           },
           child: Container(
-            decoration: BoxDecoration(
-              color: action.iconBgColor,
-              borderRadius: BorderRadius.circular(12),
-            ),
+            decoration: BoxDecoration(color: action.iconBgColor, borderRadius: BorderRadius.circular(12)),
             padding: EdgeInsets.all(12),
             child: Row(
               children: [
@@ -250,6 +259,149 @@ class VendorDashboardScreen extends StatelessWidget {
           ),
         );
       }).toList(),
+    );
+  }
+
+  List<PieChartSectionData> getServiceStatusPieData(
+      VendorDashboardNotifier notifier, {
+        int touchedIndex = -1,
+      }) {
+    final acceptedCount = notifier.acceptedCount ?? 0;
+    final rejectedCount = notifier.rejectedCount ?? 0;
+    final total = acceptedCount + rejectedCount;
+
+    // Handle 0 case
+    final acceptedValue = total == 0 ? 50.0 : acceptedCount.toDouble();
+    final rejectedValue = total == 0 ? 50.0 : rejectedCount.toDouble();
+
+    final acceptedPercent = total == 0 ? 0 : (acceptedCount / total) * 100;
+    final rejectedPercent = total == 0 ? 0 : (rejectedCount / total) * 100;
+
+    List<PieChartSectionData> sections = [];
+
+    sections.add(
+      PieChartSectionData(
+        color: const Color(0xFF81C784),
+        value: acceptedValue,
+        title: '${acceptedPercent.toStringAsFixed(1)}%',
+        radius: touchedIndex == 0 ? 60 : 50,
+        titleStyle: TextStyle(
+          fontSize: touchedIndex == 0 ? 18 : 14,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+    );
+
+    sections.add(
+      PieChartSectionData(
+        color: const Color(0xFFE57373),
+        value: rejectedValue,
+        title: '${rejectedPercent.toStringAsFixed(1)}%',
+        radius: touchedIndex == 1 ? 60 : 50,
+        titleStyle: TextStyle(
+          fontSize: touchedIndex == 1 ? 18 : 14,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+    );
+
+    return sections;
+  }
+
+
+  Widget _buildServiceStatusPieChart(VendorDashboardNotifier notifier) {
+    int touchedIndex = -1;
+
+    return Container(
+      decoration: AppStyles.commonDecoration,
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: StatefulBuilder(
+              builder: (context, setState) {
+                return SizedBox(
+                  height: 180.h,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      PieChart(
+                        PieChartData(
+                          pieTouchData: PieTouchData(
+                            touchCallback: (event, response) {
+                              setState(() {
+                                if (!event.isInterestedForInteractions ||
+                                    response == null ||
+                                    response.touchedSection == null) {
+                                  touchedIndex = -1;
+                                  return;
+                                }
+                                touchedIndex = response.touchedSection!.touchedSectionIndex;
+                              });
+                            },
+                          ),
+                          borderData: FlBorderData(show: false),
+                          sectionsSpace: 2,
+                          centerSpaceRadius: 35.w, // <-- dynamically scaled
+                          sections: getServiceStatusPieData(notifier, touchedIndex: touchedIndex),
+                        ),
+                      ),
+                      // Center content
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(LucideIcons.pencilRuler, size: 20.w, color: AppColors.textPrimary),
+                          4.verticalSpace,
+                          Text(
+                            "Jobs",
+                            style: AppFonts.text14.bold.style
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 15,
+                      width: 15,
+                      decoration: BoxDecoration(shape: BoxShape.circle, color: Color(0xFF81C784)),
+                    ),
+                    10.horizontalSpace,
+                    Text("Accepted", style: AppFonts.text14.regular.style),
+                  ],
+                ),
+                10.verticalSpace,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 15,
+                      width: 15,
+                      decoration: BoxDecoration(shape: BoxShape.circle, color: Color(0xFFE57373)),
+                    ),
+                    10.horizontalSpace,
+                    Text("Rejected", style: AppFonts.text14.regular.style),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

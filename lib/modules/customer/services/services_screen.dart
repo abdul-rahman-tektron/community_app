@@ -2,6 +2,8 @@ import 'package:community_app/modules/customer/services/services_notifier.dart';
 import 'package:community_app/modules/customer/services/widgets/new_service_button.dart';
 import 'package:community_app/modules/customer/services/widgets/previous_services.dart';
 import 'package:community_app/modules/customer/services/widgets/upcoming_services.dart';
+import 'package:community_app/res/colors.dart';
+import 'package:community_app/res/fonts.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -23,11 +25,13 @@ class ServicesScreen extends StatelessWidget {
   }
 
   Widget buildBody(BuildContext context, ServicesNotifier servicesNotifier) {
-    return SafeArea(
-      child: Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.only(top: 15.0),
-          child: SingleChildScrollView(
+    return DefaultTabController(
+      length: 2,
+      initialIndex: servicesNotifier.selectedIndex,
+      child: SafeArea(
+        child: Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.only(top: 15.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -36,18 +40,61 @@ class ServicesScreen extends StatelessWidget {
                     Navigator.of(context).pushNamed(AppRoutes.newServices);
                   },
                 ),
-                25.verticalSpace,
-                UpcomingServicesWidget(
-                  upcomingServices: servicesNotifier.upcomingServices,
+                10.verticalSpace,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                  child: tabBar(context, servicesNotifier),
                 ),
-                20.verticalSpace,
-                PreviousServicesWidget(
-                  previousServices: servicesNotifier.previousServices,
-                ),
+                tabBarView(context, servicesNotifier),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget tabBar(BuildContext context, ServicesNotifier servicesNotifier) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: 45.h),
+      child: Container(
+        padding: EdgeInsets.all(0), // space around the indicator
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+          color: AppColors.white,
+          boxShadow: [BoxShadow(color: AppColors.shadowColor, blurRadius: 7)],
+        ),
+        child: TabBar(
+          labelColor: AppColors.primary,
+          indicator: UnderlineTabIndicator(
+            borderSide: BorderSide(color: AppColors.primary, width: 3.0),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          onTap: (index) {
+            servicesNotifier.selectedIndex = index;
+            if (index == 0) {
+            } else {}
+          },
+          dividerColor: Colors.transparent,
+          indicatorSize: TabBarIndicatorSize.tab,
+          labelStyle: AppFonts.text14.regular.style,
+          unselectedLabelStyle: AppFonts.text14.regular.style,
+          tabs: [
+            Tab(text: "Ongoing"),
+            Tab(text: "History"),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget tabBarView(BuildContext context, ServicesNotifier servicesNotifier) {
+    return Expanded(
+      child: TabBarView(
+        children: [
+          UpcomingServicesWidget(upcomingJobs: servicesNotifier.upcomingServices),
+          PreviousServicesWidget(previousServices: servicesNotifier.previousServices),
+        ],
       ),
     );
   }

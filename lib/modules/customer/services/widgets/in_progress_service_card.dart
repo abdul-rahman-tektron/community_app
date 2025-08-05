@@ -1,14 +1,13 @@
-import 'package:community_app/modules/customer/services/services_notifier.dart';
+import 'package:community_app/core/model/customer/job/ongoing_jobs_response.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
-import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_linear_progress_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class InProgressServiceCard extends StatelessWidget {
-  final ServiceModel service;
+  final CustomerOngoingJobsData service;
 
   const InProgressServiceCard({super.key, required this.service});
 
@@ -42,7 +41,7 @@ class InProgressServiceCard extends StatelessWidget {
             style: AppFonts.text16.regular.style,
           ),
           TextSpan(
-            text: "#${service.id}",
+            text: "#${service.jobId ?? '-'}",
             style: AppFonts.text16.regular.style,
           ),
         ],
@@ -51,6 +50,9 @@ class InProgressServiceCard extends StatelessWidget {
   }
 
   Widget _buildProgressRow() {
+    // Using jobStatusCategory as progressStatus fallback
+    final progressStatus = service.jobStatusCategory ?? 'N/A';
+
     return Row(
       children: [
         _iconBox(
@@ -61,7 +63,7 @@ class InProgressServiceCard extends StatelessWidget {
         10.horizontalSpace,
         Expanded(
           child: Text(
-            service.progressStatus ?? 'N/A',
+            progressStatus,
             style: AppFonts.text14.regular.style,
           ),
         ),
@@ -70,16 +72,18 @@ class InProgressServiceCard extends StatelessWidget {
   }
 
   Widget _buildTechnicianDetails() {
-    final technician = service.technician;
+    final assignedEmployee = (service.assignedEmployees?.isNotEmpty == true)
+        ? service.assignedEmployees!.first
+        : null;
 
-    if (technician == null) return const SizedBox.shrink();
+    if (assignedEmployee == null) return const SizedBox.shrink();
 
     return Row(
       children: [
         Expanded(
           child: _iconLabelRow(
             icon: LucideIcons.userRound,
-            label: technician.name,
+            label: assignedEmployee.employeeName ?? 'Technician',
             bgColor: const Color(0xfffdf5e7),
             iconColor: Colors.orange,
           ),
@@ -88,7 +92,7 @@ class InProgressServiceCard extends StatelessWidget {
         Expanded(
           child: _iconLabelRow(
             icon: LucideIcons.phone,
-            label: technician.contact ?? '',
+            label: assignedEmployee.employeePhoneNumber ?? '',
             bgColor: const Color(0xffe7f3f9),
             iconColor: Colors.blue,
           ),
@@ -130,8 +134,12 @@ class InProgressServiceCard extends StatelessWidget {
   }
 
   Widget _buildProgressBar() {
+    // No progressPercent in CustomerOngoingJobsData - keep static or remove
+    // Optionally: you can map jobStatusCategory to a progress % if needed.
+    final progressPercent = 0.0; // Static or custom logic here
+
     return CustomLinearProgressIndicator(
-      percentage: service.progressPercent ?? 0,
+      percentage: progressPercent,
     );
   }
 }

@@ -1,45 +1,40 @@
 import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/core/model/vendor/vendor_quotation/vendor_quotation_request_list.dart';
+import 'package:community_app/core/remote/services/vendor/vendor_quotation_repository.dart';
+import 'package:community_app/utils/helpers/toast_helper.dart';
+import 'package:flutter/material.dart';
 
 class SentQuotationNotifier extends BaseChangeNotifier {
-  List<QuotationCardModel> quotations = [
-    QuotationCardModel(
-      customerName: "Fatima Khan",
-      sentDate: DateTime.now().subtract(Duration(days: 1)),
-      serviceName: "Painting",
-      price: 150.0,
-      status: QuotationStatus.awaiting,
-    ),
-    QuotationCardModel(
-      customerName: "Ahmed Al Mazroui",
-      sentDate: DateTime.now().subtract(Duration(days: 3)),
-      serviceName: "AC Maintenance",
-      price: 300.0,
-      status: QuotationStatus.awaiting,
-    ),
-    QuotationCardModel(
-      customerName: "Sara Al Nuaimi",
-      sentDate: DateTime.now().subtract(Duration(days: 5)),
-      serviceName: "Plumbing",
-      price: 120.0,
-      status: QuotationStatus.rejected,
-    ),
-  ];
-}
+  List<VendorQuotationRequestData> quotations = [];
+  bool isLoading = false;
 
-enum QuotationStatus { awaiting, rejected }
+  SentQuotationNotifier() {
+    initializeData();
+  }
 
-class QuotationCardModel {
-  final String customerName;
-  final DateTime sentDate;
-  final String serviceName;
-  final double price;
-  final QuotationStatus status;
+  Future<void> initializeData() async {
+    await loadUserData();
+    await fetchSentQuotations(userData?.customerId ?? 0);
+  }
 
-  QuotationCardModel({
-    required this.customerName,
-    required this.sentDate,
-    required this.serviceName,
-    required this.price,
-    required this.status,
-  });
+  Future<void> fetchSentQuotations(int? vendorId) async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final result = await VendorQuotationRepository.instance.apiVendorQuotationRequestList(vendorId?.toString() ?? "0");
+      if (result is VendorQuotationRequestListResponse && result.success == true) {
+        quotations = result.data ?? [];
+      } else {
+        quotations = [];
+      }
+    } catch (e) {
+      quotations = [];
+      ToastHelper.showError('Failed to fetch quotations.');
+      debugPrint("Error: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
 }

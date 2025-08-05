@@ -1,21 +1,25 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 import 'package:community_app/core/generated_locales/l10n.dart';
 import 'package:community_app/core/model/common/login/login_response.dart';
 import 'package:community_app/core/notifier/language_notifier.dart';
-import 'package:community_app/modules/auth/login/login_screen.dart';
+import 'package:community_app/firebase_options.dart';
 import 'package:community_app/modules/auth/user_role_selection/user_role_selection_screen.dart';
 import 'package:community_app/modules/customer/bottom_bar/bottom_screen.dart';
 import 'package:community_app/modules/vendor/bottom_bar/bottom_bar_screen.dart';
-import 'package:community_app/modules/vendor/onboard/onboard_screen.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/images.dart';
 import 'package:community_app/res/themes.dart';
+import 'package:community_app/utils/crashlytics_service.dart';
 import 'package:community_app/utils/helpers/screen_size.dart';
+import 'package:community_app/utils/notification_service.dart';
 import 'package:community_app/utils/permissions_handler.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/storage/hive_storage.dart';
 import 'package:community_app/utils/storage/secure_storage.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -27,47 +31,53 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:toastification/toastification.dart';
 
-import 'dart:typed_data';
 import 'dart:ui' as ui;
-
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 Future<void> main() async {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
 
-    // Request permissions
+    // Permissions
     await AppPermissionHandler.checkAndRequestLocation();
 
+    // Firebase
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+    // Init Notifications
+    await NotificationService().init();
+    NotificationService().setNavigatorKey(MyApp.navigatorKey);
+
+
+    // Hive & Secure storage
     await Hive.initFlutter();
     await HiveStorageService.init();
+    await SecureStorageService.init();
 
-    // Lock orientation2
+    // Orientation & System UI
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       systemStatusBarContrastEnforced: true,
       statusBarColor: AppColors.primary,
-      statusBarIconBrightness: Brightness.light, // Android
+      statusBarIconBrightness: Brightness.light,
     ));
 
-    // Initialize secure storage
-    await SecureStorageService.init();
-
+    // Load user
     final token = await SecureStorageService.getToken();
     final userJson = HiveStorageService.getUserData();
     LoginResponse? user;
-    if (userJson != null) {
-      user = loginResponseFromJson(userJson);
-    }
+    if (userJson != null) user = loginResponseFromJson(userJson);
 
-    runApp(MyApp(token: token, user: user));
+    await CrashlyticsService.init();
+
+    await CrashlyticsService.runWithCrashlytics(() async {
+      runApp(MyApp(token: token, user: user));
+    });
   }, (error, stackTrace) {
-    // TODO: integrate error reporting (e.g., Crashlytics)
     debugPrint('Unhandled error: $error');
     debugPrint('$stackTrace');
   });
@@ -87,12 +97,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<LanguageNotifier>(
           create: (_) => LanguageNotifier(),
         ),
-        // Add other notifiers if needed
       ],
       child: Builder(
         builder: (context) {
           final langNotifier = context.watch<LanguageNotifier>();
-
           return ScreenUtilInit(
             designSize: const Size(375, 812),
             minTextAdapt: true,
@@ -117,7 +125,8 @@ class MyApp extends StatelessWidget {
                 home: user != null
                     ? (user!.type == "V" ? VendorBottomScreen() : CustomerBottomScreen())
                     : const UserRoleSelectionScreen(),
-                theme: AppThemes.lightTheme(languageCode: langNotifier.locale.languageCode),
+                theme: AppThemes.lightTheme(
+                    languageCode: langNotifier.locale.languageCode),
                 builder: (context, child) {
                   ScreenSize.init(context);
 

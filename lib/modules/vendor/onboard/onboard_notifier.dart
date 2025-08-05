@@ -3,7 +3,8 @@ import 'dart:io';
 import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/core/model/common/dropdown/service_dropdown_response.dart';
 import 'package:community_app/core/model/vendor/add_vendor_service/add_vendor_service_request.dart';
-import 'package:community_app/core/remote/services/service_repository.dart';
+import 'package:community_app/core/remote/services/common_repository.dart';
+import 'package:community_app/core/remote/services/vendor/vendor_auth_repository.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -44,7 +45,7 @@ class OnboardNotifier extends BaseChangeNotifier {
   //Service dropdown Api call
   Future<void> apiServiceDropdown() async {
     try {
-      final result = await ServiceRepository().apiServiceDropdown();
+      final result = await CommonRepository.instance.apiServiceDropdown();
 
       if (result is List<ServiceDropdownData>) {
         serviceData = result;
@@ -60,7 +61,7 @@ class OnboardNotifier extends BaseChangeNotifier {
   //Service dropdown Api call
   Future<void> apiAddVendorService() async {
     try {
-      final result = await ServiceRepository().apiAddVendorService(AddVendorServiceRequest(
+      final result = await VendorAuthRepository.instance.apiAddVendorService(AddVendorServiceRequest(
         vendorName: userData?.name ?? "",
         vendorId: userData?.customerId ?? 0,
         service: selectedService?.serviceId ?? 0,

@@ -3,6 +3,7 @@ import 'package:community_app/modules/customer/quotation_list/quotation_list_not
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
+import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_popup.dart';
@@ -12,12 +13,13 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class QuotationListScreen extends StatelessWidget {
-  const QuotationListScreen({super.key});
+  final int? jobId;
+  const QuotationListScreen({super.key, this.jobId});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => QuotationListNotifier(),
+      create: (_) => QuotationListNotifier(jobId),
       child: Consumer<QuotationListNotifier>(
         builder: (_, notifier, __) {
           return SafeArea(
@@ -30,14 +32,16 @@ class QuotationListScreen extends StatelessWidget {
                   : SingleChildScrollView(
                 child: Column(
                   children: [
+                    15.verticalSpace,
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [_buildHeader()],
                     ),
-                    ...List.generate(
-                      notifier.jobs.length,
-                          (i) => _buildJobCard(context, notifier, i, notifier.jobs[i]),
-                    ),
+                    10.verticalSpace,
+                    ...notifier.jobs
+                        .expand((job) => job.jobQuotationRequest ?? [])
+                        .map((quotation) => _buildQuotationCard(context, notifier, quotation))
+                        ,
                   ],
                 ),
               ),
@@ -75,69 +79,68 @@ class QuotationListScreen extends StatelessWidget {
       child: Column(
         children: [
           Text("Quotation List", style: AppFonts.text20.semiBold.style),
-          _buildGradientUnderline("Quotation List", AppFonts.text20.semiBold.style),
+          // _buildGradientUnderline("Quotation List", AppFonts.text20.semiBold.style),
         ],
       ),
     );
   }
 
-  Widget _buildJobCard(BuildContext context, QuotationListNotifier notifier, int index, QuotationRequestListData job) {
-    final quotations = job.jobQuotationRequest ?? [];
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-      decoration: AppStyles.commonDecoration,
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Job ID: ${job.jobId}', style: AppFonts.text14.medium.style),
-          _buildUnderline(),
-
-          quotations.isEmpty
-              ? Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Center(
-              child: Text(
-                "Quotation not provided yet",
-                style: AppFonts.text14.semiBold.red.style,
-              ),
-            ),
-          )
-              : Column(
-            children: quotations.map((model) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildVendorInfo("Sample Vendor", "VND101", model.quotationId?.toString() ?? "-"),
-                  _buildUnderline(),
-                  if (model.hasQuotationResponse == true) ...[
-                    _buildQuotationItemsStatic(),
-                    _buildServiceCharge(50),
-                    _buildTotalWithVat(200),
-                    _buildSiteVisitRequired(true),
-                    _buildCompletionAvailability("2 Days", "12 Jul", "10:00 AM"),
-                    _buildFooterActions(context, notifier, index),
-                  ] else ...[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Center(
-                        child: Text(
-                          "Quotation not provided yet",
-                          style: AppFonts.text14.semiBold.red.style,
-                        ),
-                      ),
-                    ),
-                  ],
-                  SizedBox(height: 16),
-                ],
-              );
-            }).toList(),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildJobCard(BuildContext context, QuotationListNotifier notifier, int index, QuotationRequestListData job) {
+  //   final quotations = job.jobQuotationRequest ?? [];
+  //
+  //   return Container(
+  //     margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+  //     decoration: AppStyles.commonDecoration,
+  //     padding: const EdgeInsets.all(16),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Text('Job ID: ${job.jobId}', style: AppFonts.text14.medium.style),
+  //         3.verticalSpace,
+  //         quotations.isEmpty
+  //             ? Padding(
+  //           padding: const EdgeInsets.symmetric(vertical: 10),
+  //           child: Center(
+  //             child: Text(
+  //               "Quotation not provided yet",
+  //               style: AppFonts.text14.semiBold.red.style,
+  //             ),
+  //           ),
+  //         )
+  //             : Column(
+  //           children: quotations.map((model) {
+  //             return Column(
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: [
+  //                 _buildVendorInfo("Sample Vendor", "VND101", model.quotationId?.toString() ?? "-"),
+  //                 _buildUnderline(),
+  //                 if (model.hasQuotationResponse == true) ...[
+  //                   _buildQuotationItemsStatic(),
+  //                   _buildServiceCharge(50),
+  //                   _buildTotalWithVat(200),
+  //                   _buildSiteVisitRequired(true),
+  //                   _buildCompletionAvailability("2 Days", "12 Jul", "10:00 AM"),
+  //                   _buildFooterActions(context, notifier, index),
+  //                 ] else ...[
+  //                   Padding(
+  //                     padding: const EdgeInsets.symmetric(vertical: 10),
+  //                     child: Center(
+  //                       child: Text(
+  //                         "Quotation not provided yet",
+  //                         style: AppFonts.text14.semiBold.red.style,
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ],
+  //                 SizedBox(height: 16),
+  //               ],
+  //             );
+  //           }).toList(),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   // The rest of your widgets remain unchanged (like _buildVendorInfo, _buildQuotationItemsStatic, etc.)
 
@@ -161,6 +164,39 @@ class QuotationListScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildQuotationCard(BuildContext context, QuotationListNotifier notifier, JobQuotationRequest quotation) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      decoration: AppStyles.commonDecoration,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Quotation ID: ${quotation.quotationId}', style: AppFonts.text14.medium.style),
+          5.verticalSpace,
+          Text('Vendor ID: ${quotation.toVendorId}', style: AppFonts.text12.regular.grey.style),
+          10.verticalSpace,
+          quotation.hasQuotationResponse == true
+              ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildQuotationItemsStatic(),
+              _buildServiceCharge(50),
+              _buildTotalWithVat(200),
+              _buildSiteVisitRequired(true),
+              _buildCompletionAvailability("2 Days", "12 Jul", "10:00 AM"),
+              _buildFooterActions(context, notifier, quotation),
+            ],
+          )
+              : Center(
+            child: Text("Quotation not provided yet", style: AppFonts.text14.semiBold.red.style),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   double _getTextWidth(String text, TextStyle style) {
     final TextPainter textPainter = TextPainter(
@@ -303,7 +339,9 @@ class QuotationListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFooterActions(BuildContext context, QuotationListNotifier notifier, int index) {
+  Widget _buildFooterActions(BuildContext context, QuotationListNotifier notifier, JobQuotationRequest quotation) {
+    // final quotation = quotation.jobQuotationRequest?.firstWhere((q) => q.hasQuotationResponse == true);
+
     return Padding(
       padding: const EdgeInsets.only(top: 20),
       child: Row(
@@ -312,7 +350,19 @@ class QuotationListScreen extends StatelessWidget {
             child: CustomButton(
               height: 40,
               onPressed: () {
-                bookingConfirmationPopup(context);
+                bookingConfirmationPopup(
+                  context,
+                  onConfirm: () async {
+                    await notifier.apiJobBooking(
+                      context,
+                      jobId: quotation.jobId ?? 0,
+                      quotationRequestId: quotation?.quotationId ?? 0,
+                      quotationResponseId: quotation?.quotationId ?? 0,
+                      vendorId: quotation?.toVendorId ?? 0,
+                      remarks: "Accepted by customer",
+                    );
+                  },
+                );
               },
               backgroundColor: AppColors.white,
               borderColor: AppColors.primary,
@@ -337,6 +387,7 @@ class QuotationListScreen extends StatelessWidget {
       ),
     );
   }
+
 
   Widget _iconBadge(IconData icon, Color iconColor, Color bgColor) {
     return Container(

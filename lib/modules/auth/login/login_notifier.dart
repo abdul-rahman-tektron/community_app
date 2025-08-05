@@ -6,7 +6,7 @@ import 'package:community_app/core/model/common/error/error_response.dart';
 import 'package:community_app/core/model/common/login/login_request.dart';
 import 'package:community_app/core/model/common/login/login_response.dart';
 import 'package:community_app/core/model/common/remember_me/remember_me_model.dart';
-import 'package:community_app/core/remote/services/auth_repository.dart';
+import 'package:community_app/core/remote/services/common_repository.dart';
 import 'package:community_app/res/strings.dart';
 import 'package:community_app/utils/enums.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
@@ -102,7 +102,7 @@ class LoginNotifier extends BaseChangeNotifier {
     );
 
     try {
-      final result = await AuthRepository().apiUserLogin(request);
+      final result = await CommonRepository.instance.apiUserLogin(request);
 
       if (result is LoginResponse) {
         await _handleLoginSuccess(result, context);
@@ -133,7 +133,7 @@ class LoginNotifier extends BaseChangeNotifier {
       Navigator.pushReplacementNamed(
         context,
         AppRoutes.vendorBottomBar,
-        arguments: 0,
+        arguments: {'currentIndex': 0},
       );
     } else {
       HiveStorageService.setUserCategory(UserRole.tenant.name);

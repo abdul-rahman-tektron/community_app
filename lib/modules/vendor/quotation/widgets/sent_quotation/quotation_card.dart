@@ -1,4 +1,4 @@
-import 'package:community_app/modules/vendor/quotation/widgets/sent_quotation/sent_quotation_notifier.dart';
+import 'package:community_app/core/model/vendor/vendor_quotation/vendor_quotation_request_list.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
@@ -9,7 +9,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class QuotationCard extends StatelessWidget {
-  final QuotationCardModel quotation;
+  final VendorQuotationRequestData quotation;
   final VoidCallback? onViewDetails;
   final VoidCallback? onResend;
 
@@ -31,7 +31,8 @@ class QuotationCard extends StatelessWidget {
         children: [
           _buildTopRow(),
           3.verticalSpace,
-          Text(quotation.serviceName, style: AppFonts.text14.medium.style),
+          // Text(quotation.serviceName ?? "-", style: AppFonts.text14.medium.style),
+          Text("Service Name" ?? "-", style: AppFonts.text14.medium.style),
           15.verticalSpace,
           _buildStatusRow(),
           15.verticalSpace,
@@ -46,11 +47,17 @@ class QuotationCard extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            quotation.customerName,
+            // quotation.customerName ?? "-",
+            "Customer Name",
             style: AppFonts.text16.semiBold.style,
           ),
         ),
-        _iconLabelRow(icon: LucideIcons.clock, label: quotation.sentDate.formatDateTime(), bgColor: Color(0xfffdf5e7), iconColor: Colors.orange),
+        _iconLabelRow(
+          icon: LucideIcons.clock,
+          label: quotation.createdDate?.formatDateTime() ?? "-",
+          bgColor: const Color(0xfffdf5e7),
+          iconColor: Colors.orange,
+        ),
       ],
     );
   }
@@ -63,34 +70,34 @@ class QuotationCard extends StatelessWidget {
             children: [
               TextSpan(
                 text: "AED ",
-                style: AppFonts.text14.semiBold.style, // Smaller style
+                style: AppFonts.text14.semiBold.style,
               ),
               TextSpan(
-                text: quotation.price.toStringAsFixed(2),
-                style: AppFonts.text20.semiBold.style, // Larger price style
+                // text: (quotation.totalAmount ?? 0).toStringAsFixed(2),
+                text: "Quoted Amount",
+                style: AppFonts.text20.semiBold.style,
               ),
             ],
           ),
         ),
         const Spacer(),
-        _buildStatusTag(quotation.status),
+        _buildStatusTag(quotation.quotationResponseStatus ?? "Status"),
       ],
     );
   }
 
-  Widget _buildStatusTag(QuotationStatus status) {
+  Widget _buildStatusTag(String status) {
     Color bgColor;
     Color textColor;
 
-    switch (status) {
-      case QuotationStatus.awaiting:
-        bgColor = const Color(0xfffdf5e7);
-        textColor = Colors.orange;
-        break;
-      case QuotationStatus.rejected:
+    switch (status.toLowerCase()) {
+      case "rejected":
         bgColor = const Color(0xffffeded);
         textColor = Colors.red;
         break;
+      default:
+        bgColor = const Color(0xfffdf5e7);
+        textColor = Colors.orange;
     }
 
     return Container(
@@ -100,7 +107,7 @@ class QuotationCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        status.name.toCapitalize(),
+        status.toCapitalize(),
         style: AppFonts.text12.semiBold.style.copyWith(color: textColor),
       ),
     );
@@ -119,7 +126,7 @@ class QuotationCard extends StatelessWidget {
           fullWidth: false,
           onPressed: onViewDetails,
         ),
-        if (quotation.status == QuotationStatus.rejected) ...[
+        if ((quotation.quotationResponseStatus ?? "").toLowerCase() == "rejected") ...[
           10.horizontalSpace,
           CustomButton(
             text: "Resend",

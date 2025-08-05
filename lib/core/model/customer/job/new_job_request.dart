@@ -15,6 +15,7 @@ class CreateJobRequest {
   String? remarks;
   String? status;
   bool? active;
+  bool? siteVisitRequired;
   DateTime? expectedDate;
   String? contactNumber;
   String? priority;
@@ -28,6 +29,7 @@ class CreateJobRequest {
     this.remarks,
     this.status,
     this.active,
+    this.siteVisitRequired,
     this.expectedDate,
     this.contactNumber,
     this.priority,
@@ -42,6 +44,7 @@ class CreateJobRequest {
     remarks: json["remarks"],
     status: json["status"],
     active: json["active"],
+    siteVisitRequired: json["siteVisitRequired"],
     expectedDate: json["expectedDate"] == null ? null : DateTime.parse(json["expectedDate"]),
     contactNumber: json["contactNumber"],
     priority: json["priority"],
@@ -55,6 +58,7 @@ class CreateJobRequest {
     "customerId": customerId,
     "remarks": remarks,
     "active": active,
+    "siteVisitRequired": siteVisitRequired,
     "status": status,
     "expectedDate": expectedDate?.toIso8601String(),
     "contactNumber": contactNumber,

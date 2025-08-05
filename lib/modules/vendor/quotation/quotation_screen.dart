@@ -10,13 +10,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 class QuotationScreen extends StatelessWidget {
-  const QuotationScreen({super.key});
+  final int? currentIndex;
+  const QuotationScreen({super.key, this.currentIndex = 0});
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: ChangeNotifierProvider(
-        create: (context) => QuotationNotifier(),
+        create: (context) => QuotationNotifier(currentIndex),
         child: Consumer<QuotationNotifier>(
           builder: (context, quotationNotifier, child) {
             return buildBody(context, quotationNotifier);
@@ -29,6 +30,7 @@ class QuotationScreen extends StatelessWidget {
   Widget buildBody(BuildContext context, QuotationNotifier quotationNotifier) {
     return DefaultTabController(
       length: 3,
+      initialIndex: quotationNotifier.selectedIndex,
       child: Scaffold(
         body: Column(
           children: [

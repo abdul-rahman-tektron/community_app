@@ -1,15 +1,13 @@
-import 'package:community_app/modules/vendor/jobs/widgets/ongoing_service/ongoing_service_notifier.dart';
-import 'package:community_app/res/colors.dart';
+import 'package:community_app/core/model/vendor/jobs/ongoing_jobs_assigned_response.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/extensions.dart';
-import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class OngoingServiceCard extends StatelessWidget {
-  final OngoingServiceModel job;
+  final OngoingJobsAssignedData job;
   final VoidCallback? onViewDetails;
 
   const OngoingServiceCard({
@@ -31,9 +29,9 @@ class OngoingServiceCard extends StatelessWidget {
           children: [
             _buildTopRow(),
             10.verticalSpace,
-            Text(job.serviceName, style: AppFonts.text14.medium.style),
+            Text(job.serviceName ?? "Service Name", style: AppFonts.text14.medium.style),
             6.verticalSpace,
-            Text("ID: ${job.jobId}", style: AppFonts.text12.regular.grey.style),
+            Text("ID: ${job.jobId ?? '-'}", style: AppFonts.text12.regular.grey.style),
             8.verticalSpace,
             Row(
               children: [
@@ -50,13 +48,11 @@ class OngoingServiceCard extends StatelessWidget {
                   ),
                 ),
                 6.horizontalSpace,
-                Text(job.location, style: AppFonts.text14.regular.style),
+                Text("Dubai Marina, Tower A", style: AppFonts.text14.regular.style), // static if no location
               ],
             ),
             8.verticalSpace,
             _buildTimeAndEmployeeRow(),
-            // 12.verticalSpace,
-            // _buildBottomRow(context),
           ],
         ),
       ),
@@ -67,82 +63,54 @@ class OngoingServiceCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(job.customerName, style: AppFonts.text16.semiBold.style),
-        Text(job.date.formatDateTime(), style: AppFonts.text12.regular.style),
+        Text(job.customerName ?? "Customer Name", style: AppFonts.text16.semiBold.style),
+        Text(job.customerRequestedDate?.formatDateTime() ?? '-', style: AppFonts.text12.regular.style),
       ],
     );
   }
 
   Widget _buildProgressRow() {
-    final color = _getProgressColor(job.progress);
-
+    final color = _getProgressColor(job.jobStatusCategory ?? "Submitted");
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1), // light background
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        job.progress,
+        job.jobStatusCategory ?? "Submitted",
         style: AppFonts.text14.medium.style.copyWith(color: color),
       ),
     );
   }
 
-
   Widget _buildTimeAndEmployeeRow() {
+    final employee = job.assignedEmployees?.isNotEmpty == true ? job.assignedEmployees!.first : null;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text("Est. Time: ${job.estimatedTime}", style: AppFonts.text12.regular.grey.style),
+        Text("Est. Time: 1:30 PM", style: AppFonts.text12.regular.grey.style), // static if no actual time
         Row(
           children: [
             CircleAvatar(
               radius: 10.r,
               backgroundColor: Colors.grey.shade300,
-              backgroundImage: job.assignedEmployeeImage != null && job.assignedEmployeeImage!.isNotEmpty
-                  ? NetworkImage(job.assignedEmployeeImage!)
-                  : null,
-              child: job.assignedEmployeeImage == null || job.assignedEmployeeImage!.isEmpty
-                  ? Text(
-                job.assignedEmployee.isNotEmpty ? job.assignedEmployee[0] : '',
+              child: Text(
+                (employee?.employeeName?.isNotEmpty == true ? employee!.employeeName![0] : "A").toUpperCase(),
                 style: AppFonts.text10.medium.white.style,
-              )
-                  : null,
+              ),
             ),
             6.horizontalSpace,
-            Text(
-              job.assignedEmployee,
-              style: AppFonts.text12.regular.grey.style,
-            ),
+            Text(employee?.employeeName ?? "Ali Hassan", style: AppFonts.text12.regular.grey.style),
           ],
         )
-
-      ],
-    );
-  }
-
-  Widget _buildBottomRow(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        CustomButton(
-          text: "Update Status",
-          height: 32.h,
-          backgroundColor: AppColors.white,
-          borderColor: AppColors.primary,
-          textStyle: AppFonts.text14.regular.style,
-          fullWidth: false,
-          onPressed: onViewDetails ?? () {},
-        ),
-        _buildProgressRow()
       ],
     );
   }
 
   Color _getProgressColor(String status) {
     switch (status.toLowerCase()) {
-      case "on the way":
+      case "submitted":
         return Colors.orange;
       case "started":
         return Colors.blue;

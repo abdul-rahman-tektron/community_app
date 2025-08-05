@@ -56,6 +56,14 @@ class HiveStorageService {
     return _box.get(HiveKeys.userData);
   }
 
+  static Future<void> setNotification(String flow) async {
+    await _box.put(HiveKeys.notification, flow);
+  }
+
+  static String? getNotification() {
+    return _box.get(HiveKeys.notification);
+  }
+
   /// Remove specific key
   static Future<void> remove(String key) async {
     await _box.delete(key);

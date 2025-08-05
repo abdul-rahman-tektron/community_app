@@ -45,7 +45,7 @@ class CustomerOngoingJobsData {
   String? customerName;
   String? serviceName;
   DateTime? customerRequestedDate;
-  int? estimatedAmount;
+  double? estimatedAmount;
   String? jobStatusCategory;
   List<AssignedEmployee>? assignedEmployees;
 

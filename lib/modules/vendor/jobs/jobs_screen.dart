@@ -12,13 +12,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 class JobsScreen extends StatelessWidget {
-  const JobsScreen({super.key});
+  final int? currentIndex;
+  const JobsScreen({super.key, this.currentIndex = 0});
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: ChangeNotifierProvider(
-        create: (context) => JobsNotifier(),
+        create: (context) => JobsNotifier(currentIndex),
         child: Consumer<JobsNotifier>(
           builder: (context, jobsNotifier, child) {
             return buildBody(context, jobsNotifier);
@@ -31,6 +32,7 @@ class JobsScreen extends StatelessWidget {
   Widget buildBody(BuildContext context, JobsNotifier jobsNotifier) {
     return DefaultTabController(
       length: 2,
+      initialIndex: jobsNotifier.selectedIndex,
       child: Scaffold(
         body: Column(
           children: [
@@ -64,7 +66,10 @@ class JobsScreen extends StatelessWidget {
           onTap: (index) {
             jobsNotifier.selectedIndex = index;
             if (index == 0) {
-            } else {}
+
+            } else {
+
+            }
           },
           dividerColor: Colors.transparent,
           indicatorSize: TabBarIndicatorSize.tab,

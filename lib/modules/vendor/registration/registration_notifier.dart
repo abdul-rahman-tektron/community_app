@@ -3,7 +3,8 @@ import 'dart:io';
 import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/core/model/common/login/login_request.dart';
 import 'package:community_app/core/model/common/register/vendor_register_request.dart';
-import 'package:community_app/core/remote/services/auth_repository.dart';
+import 'package:community_app/core/remote/services/common_repository.dart';
+import 'package:community_app/core/remote/services/vendor/vendor_auth_repository.dart';
 import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/helpers/file_upload_helper.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
@@ -72,7 +73,7 @@ class VendorRegistrationNotifier extends BaseChangeNotifier {
   Future<void> performRegistration(BuildContext context) async {
 
     try {
-      await AuthRepository().apiUserLogin(
+      await CommonRepository.instance.apiUserLogin(
         LoginRequest(email: "admin@example.com", password: "password"),
       );
 
@@ -106,7 +107,7 @@ class VendorRegistrationNotifier extends BaseChangeNotifier {
         ]
       );
 
-      final result = await AuthRepository().apiVendorRegister(request);
+      final result = await VendorAuthRepository.instance.apiVendorRegister(request);
 
       await _handleRegisterSuccess(result, context);
     } catch (e, stackTrace) {

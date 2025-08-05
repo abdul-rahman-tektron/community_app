@@ -1,31 +1,42 @@
 class ApiUrls {
   ApiUrls._();
 
-  static final baseHost = "teksmartsolutions.com/CommunityServiceAPI/api";
-  // static final baseHost = "teksmartsolutions.com/MOFAAPI/api";
-  static final baseHttp = "https://";
-  static final baseUrl = "$baseHttp$baseHost";
+  ///Base
+  static const baseHttp = "https://";
+  static const baseHost = "teksmartsolutions.com/CommunityServiceAPI/api";
 
-  //Auth
-  static final pathLogin = "/Auth/login";
-  static final pathCustomerRegister = "/Customer/CreateCustomer";
-  static final pathVendorRegister = "/Vendor/RegisterVendor";
-  static final pathUpdateUser = "/Customer/updatecustomer/";
-  static final pathTopVendor = "/Vendor/GetAllVendorsforService/";
-  static final pathQuotationRequestList = "/Job/GetCustomerJobsByJobId/";
-  static final pathVendorQuotationRequestList = "/Job/GetAllQuotationsByVendor/";
-  static final pathQuotationRequest = "/Job/CreateJobQuotationRequest";
-  static final pathVendorJobQuotationRequest = "/Job/CreateJobQuotationResponse";
-  static final pathCreateJobBooking = "/Job/CreateJobBooking";
-  static final pathVendorJobs = "/Job/GetVendorJobs/";
-  static final pathVendorOngoingJobs = "/Job/GetVendorOngoingJobs/";
-  static final pathCustomerOngoingJobs = "/Job/GetCustomerOngoingJobs/";
-  static final pathAssignEmployees = "/Job/AssignEmployees";
-  static final pathJobCompletion = "/api/Job/JobCompletion";
+  ///Test
+  // static const baseHttp = "http://";
+  // static const baseHost = "192.168.10.30/CommunityServiceAPI/api";
 
-  //Services
-  static final pathServiceDropdown = "/Service";
-  static final pathCommunityDropdown = "/Community";
-  static final pathCreateJob = "/Job/CreateJob";
-  static final pathAddVendorService = "/Vendor/AddVendorService";
+  static const baseUrl = "$baseHttp$baseHost";
+
+  ///Common
+  static const pathLogin = "/Auth/login"; // POST
+  static const pathServiceDropdown = "/Service"; // GET
+  static const pathCommunityDropdown = "/Community"; // GET
+
+  ///Customer
+  static const pathCustomerRegister = "/Customer/CreateCustomer"; // POST
+  static const pathUpdateUser = "/Customer/updatecustomer/"; // PUT
+  static const pathTopVendor = "/Vendor/GetAllVendorsforService/"; // GET
+  static const pathQuotationList = "/Job/GetCustomerJobsByJobId/"; // GET
+  static const pathQuotationRequest = "/Job/CreateJobQuotationRequest"; // POST
+  static const pathCreateJobBooking = "/Job/CreateJobBooking"; // POST
+  static const pathCustomerOngoingJobs = "/Job/GetCustomerOngoingJobs/"; // GET
+  static const pathQuotationRequestList = "/Job/GetJobsByCustomer/"; // GET
+  static const pathCreateJob = "/Job/CreateJob"; // POST
+  static const pathCustomerDashboard = "/Customer/GetDashboard/"; // GET
+  static const pathCustomerDelete = "/Customer/deletecustomer/"; // GET
+
+  ///Vendor
+  static const pathVendorRegister = "/Vendor/RegisterVendor"; // POST
+  static const pathVendorJobs = "/Job/GetVendorJobs/"; // GET
+  static const pathAddVendorService = "/Vendor/AddVendorService"; // POST
+  static const pathVendorQuotationRequestList = "/Job/GetAllQuotationsByVendor/"; // GET
+  static const pathAssignEmployees = "/Job/AssignEmployees"; // POST
+  static const pathVendorOngoingJobs = "/Job/GetVendorOngoingJobs/"; // GET
+  static const pathVendorJobQuotationRequest = "/Job/CreateJobQuotationResponse"; // POST
+  static const pathJobCompletion = "/Job/JobCompletion"; // POST
+  static const pathVendorDashboard = "/Vendor/GetVendorDashboard/"; // GET
 }

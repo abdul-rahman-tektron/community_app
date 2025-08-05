@@ -11,7 +11,7 @@ String jobCompletionRequestToJson(JobCompletionRequest data) => json.encode(data
 class JobCompletionRequest {
   int? jobId;
   String? createdBy;
-  List<PhotoPair>? photoPairs;
+  List<JobCompletionPhotoPair>? photoPairs;
   String? notes;
 
   JobCompletionRequest({
@@ -24,7 +24,7 @@ class JobCompletionRequest {
   factory JobCompletionRequest.fromJson(Map<String, dynamic> json) => JobCompletionRequest(
     jobId: json["jobId"],
     createdBy: json["CreatedBy"],
-    photoPairs: json["photoPairs"] == null ? [] : List<PhotoPair>.from(json["photoPairs"]!.map((x) => PhotoPair.fromJson(x))),
+    photoPairs: json["photoPairs"] == null ? [] : List<JobCompletionPhotoPair>.from(json["photoPairs"]!.map((x) => JobCompletionPhotoPair.fromJson(x))),
     notes: json["notes"],
   );
 
@@ -36,16 +36,16 @@ class JobCompletionRequest {
   };
 }
 
-class PhotoPair {
+class JobCompletionPhotoPair {
   String? beforePhoto;
   String? afterPhoto;
 
-  PhotoPair({
+  JobCompletionPhotoPair({
     this.beforePhoto,
     this.afterPhoto,
   });
 
-  factory PhotoPair.fromJson(Map<String, dynamic> json) => PhotoPair(
+  factory JobCompletionPhotoPair.fromJson(Map<String, dynamic> json) => JobCompletionPhotoPair(
     beforePhoto: json["beforePhoto"],
     afterPhoto: json["afterPhoto"],
   );

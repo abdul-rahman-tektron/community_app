@@ -1,4 +1,5 @@
 import 'package:community_app/core/model/common/login/login_response.dart';
+import 'package:community_app/core/model/common/user/update_user_response.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/images.dart';
@@ -123,9 +124,12 @@ class CustomDrawer extends StatelessWidget {
   }
 
   Widget _buildMenuList(BuildContext context) {
+    final String? userJson = HiveStorageService.getUserData();
+    final LoginResponse? user = userJson != null ? loginResponseFromJson(userJson) : null;
+
     final items = [
       [LucideIcons.layoutDashboard, "Dashboard", 0],
-      [LucideIcons.search, "Explore", 1],
+      [LucideIcons.search, user?.type == "V" ? "Quotation" : "Explore", 1],
       [LucideIcons.brushCleaning, "Jobs", 2],
       [LucideIcons.settings, "Settings", 3],
     ];
@@ -140,18 +144,19 @@ class CustomDrawer extends StatelessWidget {
           item[0] as IconData,
           item[1] as String,
           item[2] as int,
+          user ?? LoginResponse(),
         );
       },
     );
   }
 
   Widget _buildDrawerItem(
-      BuildContext context, IconData icon, String title, int value) {
+      BuildContext context, IconData icon, String title, int value, LoginResponse user) {
     return ListTile(
       leading: Icon(icon, size: 25, color: AppColors.textPrimary),
       title: Text(title, style: AppFonts.text16.medium.style),
       onTap: () {
-        _handleNavigation(context, value);
+        _handleNavigation(context, value, user);
       },
     );
   }
@@ -178,16 +183,30 @@ class CustomDrawer extends StatelessWidget {
     );
   }
 
-  void _handleNavigation(BuildContext context, int value) {
+  void _handleNavigation(BuildContext context, int value, LoginResponse user) {
+
+
+
     Navigator.pop(context);
     if (value >= 0 && value <= 2) {
       Navigator.pop(context);
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRoutes.customerBottomBar,
+      if(user.type == "V") {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.vendorBottomBar,
           arguments: {'currentIndex': value},
-            (route) => false,
-      );
+              (route) => false,
+        );
+      } else {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.customerBottomBar,
+          arguments: {'currentIndex': value},
+              (route) => false,
+        );
+      }
+
+
     } else if (value == 3) {
       Navigator.pushNamed(
         context,

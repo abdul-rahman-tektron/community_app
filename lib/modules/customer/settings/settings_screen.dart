@@ -172,7 +172,7 @@ class SettingsScreen extends StatelessWidget {
             }),
             trackOutlineColor: WidgetStateProperty.all(AppColors.white),
             value: settingsNotifier.notificationSwitch, onChanged: (bool value) {
-              settingsNotifier.switchNotification();
+              settingsNotifier.toggleNotifications();
             }),
       );
     }

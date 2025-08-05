@@ -1,7 +1,9 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:community_app/core/model/common/dropdown/service_dropdown_response.dart';
 import 'package:community_app/modules/customer/dashboard/dashboard_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
+import 'package:community_app/res/images.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
@@ -11,7 +13,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class CustomerDashboardScreen extends StatelessWidget {
-  final void Function(ServiceCategory category)? onCategoryTap;
+  final void Function(ServiceDropdownData category)? onCategoryTap;
   const CustomerDashboardScreen({super.key, this.onCategoryTap});
 
   @override
@@ -28,21 +30,40 @@ class CustomerDashboardScreen extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        20.verticalSpace,
                         _buildPromotionsCard(context, notifier),
-                        _buildPromoDots(notifier),
+                        // _buildPromoDots(notifier),
                         15.verticalSpace,
                         // _buildServiceCounts(notifier),
                         _buildQuickStatsGrid(notifier),
                         20.verticalSpace,
-                        _buildHeader("Categories"),
-                        15.verticalSpace,
+                        Row(
+                          children: [
+                            Expanded(child: _buildHeader("Categories")),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.pushReplacementNamed(
+                                  context,
+                                  AppRoutes.customerBottomBar,
+                                  arguments: {'currentIndex': 1},
+                                );
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 15.0),
+                                child: Row(
+                                  children: [
+                                    Text("view all", style: AppFonts.text14.regular.style),
+                                    3.horizontalSpace,
+                                    Icon(LucideIcons.chevronRight, size: 16.sp),
+                                  ],
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
                         _buildCategoryChips(context, notifier),
                         20.verticalSpace,
-                        _buildHeader("Quick Access"),
-                        25.verticalSpace,
+                        // _buildHeader("Quick Access"),
                         _buildQuickActions(context, notifier),
-                        30.verticalSpace,
                       ],
                     ),
                   ],
@@ -56,67 +77,94 @@ class CustomerDashboardScreen extends StatelessWidget {
   }
 
   Widget _buildPromotionsCard(BuildContext context, CustomerDashboardNotifier notifier) {
-    return CarouselSlider.builder(
-      itemCount: notifier.promotions.length,
-      options: CarouselOptions(
-        height: 180,
-        autoPlay: true,
-        enlargeCenterPage: true,
-        enableInfiniteScroll: true,
-        onPageChanged: (index, _) => notifier.updatePromotionIndex(index),
-      ),
-      itemBuilder: (context, index, realIndex) {
-        final promo = notifier.promotions[index];
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            image: DecorationImage(
-              image: NetworkImage(promo.imageUrl),
-              fit: BoxFit.cover,
-              colorFilter: ColorFilter.mode(
-                Colors.black.withOpacity(0.4),
-                BlendMode.darken,
-              ),
-            ),
+    return Stack(
+      children: [
+        // Carousel
+        CarouselSlider.builder(
+          itemCount: notifier.promotions.length,
+          options: CarouselOptions(
+            height: 250,
+            viewportFraction: 1, // Full width
+            autoPlay: true,
+            enlargeCenterPage: false,
+            enableInfiniteScroll: true,
+            onPageChanged: (index, _) => notifier.updatePromotionIndex(index),
           ),
-          child: Stack(
-            children: [
-              Center(
-                child: Text(
-                  promo.title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(blurRadius: 6, color: Colors.black45),
-                    ],
+          itemBuilder: (context, index, realIndex) {
+            final promo = notifier.promotions[index];
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 0),
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage(promo.imageUrl),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.4),
+                    BlendMode.darken,
                   ),
                 ),
               ),
-              Positioned(
-                bottom: 10,
-                right: 10,
-                child: CustomButton(
-                  onPressed: () {
-                    // Handle booking action here
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Booking action triggered")),
-                    );
-                  },
-                  fullWidth: false,
-                  backgroundColor: AppColors.white.withOpacity(0.6),
-                  borderColor: AppColors.textPrimary,
-                  textStyle: AppFonts.text14.regular.style,
-                  height: 30,
-                  text: "Book",
-                ),
+              child: Stack(
+                children: [
+                  Center(
+                    child: Text(
+                      promo.title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(blurRadius: 6, color: Colors.black45),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 20,
+                    right: 20,
+                    child: CustomButton(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Booking action triggered")),
+                        );
+                      },
+                      fullWidth: false,
+                      backgroundColor: AppColors.white.withOpacity(0.6),
+                      borderColor: AppColors.textPrimary,
+                      textStyle: AppFonts.text14.regular.style,
+                      height: 30,
+                      text: "Book",
+                    ),
+                  ),
+                ],
               ),
-            ],
+            );
+          },
+        ),
+
+        // Dots (always static)
+        Positioned(
+          bottom: 10,
+          left: 0,
+          right: 0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(notifier.promotions.length, (dotIndex) {
+              final isActive = dotIndex == notifier.currentPromotionIndex;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: isActive ? 12 : 8,
+                height: 8,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  color: isActive ? AppColors.primary : Colors.white.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              );
+            }),
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 
@@ -140,63 +188,59 @@ class CustomerDashboardScreen extends StatelessWidget {
 
 
   Widget _buildCategoryChips(BuildContext context, CustomerDashboardNotifier notifier) {
-    return SizedBox(
-      height: 110.h,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: 15),
-        itemCount: notifier.categories.length,
-        itemBuilder: (context, index) {
-          final category = notifier.categories[index];
-          final iconColor = notifier.chipIconColors[index % notifier.chipIconColors.length];
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+      child: SizedBox(
+        width: double.infinity, // Take full width
+        child: Wrap(
+          spacing: 25,
+          runSpacing: 15,
+          alignment: WrapAlignment.center, // Center horizontally
+          runAlignment: WrapAlignment.center, // Center vertically in each row
+            children: List.generate(notifier.categoriesData.length, (index) {
+              final category = notifier.categoriesData[index];
+              final iconColor = notifier.chipIconColors[index % notifier.chipIconColors.length];
 
-          return Padding(
-            padding: EdgeInsets.only(
-              top: 10,
-              left: index == 0 ? 0 : 12,
-              bottom: 10,
-            ),
-            child: GestureDetector(
-              onTap: () {
-                if (onCategoryTap != null) {
-                  onCategoryTap!(category);
-                } else {
-                  notifier.selectCategory(context, category);
-                }
-              },
-              child: Container(
-                width: 100.h,
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                decoration: AppStyles.commonDecoration,
+              return GestureDetector(
+                onTap: () {
+                  if (onCategoryTap != null) {
+                    onCategoryTap!(category);
+                  } else {
+                    notifier.selectCategory(context, category);
+                  }
+                },
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(category.icon, color: AppColors.secondary, size: 28),
-                    10.verticalSpace,
-                    Text(
-                      category.name,
-                      textAlign: TextAlign.center,
-                      style: AppFonts.text12.regular.style,
+                    Container(
+                      height: 60,
+                      width: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        notifier.getServiceIcon(category.serviceName ?? ""),
+                        color: iconColor,
+                        size: 25,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: 70,
+                      child: Text(
+                        category.serviceName ?? "",
+                        textAlign: TextAlign.center,
+                        style: AppFonts.text12.regular.style,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildServiceCounts(CustomerDashboardNotifier notifier) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 15),
-      child: Row(
-        children: [
-          _buildCountCard('Ongoing \nJobs', notifier.ongoingCount, Colors.orange, LucideIcons.minus),
-          15.horizontalSpace,
-          _buildCountCard('Completed \nJobs', notifier.completedCount, Colors.green, LucideIcons.check),
-        ],
+              );
+            }),
+        ),
       ),
     );
   }
@@ -249,35 +293,7 @@ class CustomerDashboardScreen extends StatelessWidget {
   Widget _buildHeader(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15.0),
-      child: Column(
-        children: [
-          Text(title, style: AppFonts.text20.semiBold.style),
-          3.verticalSpace,
-          _buildGradientUnderline(title, AppFonts.text20.semiBold.style),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGradientUnderline(String text, TextStyle style) {
-    final textWidth = _getTextWidth(text, style);
-
-    return Container(
-      height: 2,
-      width: textWidth,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.transparent,
-            AppColors.primary.withOpacity(0.5),
-            AppColors.primary,
-            AppColors.primary.withOpacity(0.5),
-            Colors.transparent,
-          ],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-      ),
+      child: Text(title, style: AppFonts.text16.semiBold.style),
     );
   }
 
@@ -342,46 +358,56 @@ class CustomerDashboardScreen extends StatelessWidget {
   Widget _buildQuickActions(BuildContext context, CustomerDashboardNotifier notifier) {
     final iconColors = notifier.chipIconColors;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: GridView.count(
-        crossAxisCount: 2,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        mainAxisSpacing: 15,
-        crossAxisSpacing: 15,
-        childAspectRatio: 2 / 1,
-        children: List.generate(notifier.quickActions.length, (index) {
-          final action = notifier.quickActions[index];
-          final iconColor = iconColors[index % iconColors.length];
+    return Container(
+       width: double.infinity,
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(
+              AppImages.backgroundPattern),
+          fit: BoxFit.fitWidth,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+        child: GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 15,
+          crossAxisSpacing: 15,
+          childAspectRatio: 2 / 1,
+          children: List.generate(notifier.quickActions.length, (index) {
+            final action = notifier.quickActions[index];
+            final iconColor = iconColors[index % iconColors.length];
 
-          return GestureDetector(
-            onTap: () {
-              if (action.label == "New Service") {
-                Navigator.pushNamed(context, AppRoutes.newServices);
-              } else if(action.label == "Pending Quotation") {
-                Navigator.pushNamed(context, AppRoutes.quotationList);
-              } else if(action.label == "Track Request") {
-                Navigator.pushNamed(context, AppRoutes.tracking);
-              } else if(action.label == "Make Payment") {
-                Navigator.pushNamed(context, AppRoutes.payment);
-              }
-            },
-            child: Container(
-              decoration: AppStyles.commonDecoration,
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(action.icon, size: 30, color: AppColors.secondary),
-                    10.verticalSpace,
-                    Text(action.label),
-                  ],
+            return GestureDetector(
+              onTap: () {
+                if (action.label == "New Service") {
+                  Navigator.pushNamed(context, AppRoutes.newServices);
+                } else if(action.label == "Pending Quotation") {
+                  Navigator.pushNamed(context, AppRoutes.quotationRequestList);
+                } else if(action.label == "Track Request") {
+                  Navigator.pushNamed(context, AppRoutes.tracking);
+                } else if(action.label == "Make Payment") {
+                  Navigator.pushNamed(context, AppRoutes.payment);
+                }
+              },
+              child: Container(
+                decoration: AppStyles.commonDecoration,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(action.icon, size: 30, color: AppColors.secondary),
+                      10.verticalSpace,
+                      Text(action.label),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
     );
   }

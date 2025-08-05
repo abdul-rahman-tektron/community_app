@@ -1,5 +1,6 @@
 import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/remote/services/auth_repository.dart';
+import 'package:community_app/core/remote/services/common_repository.dart';
+import 'package:community_app/core/remote/services/customer/customer_auth_repository.dart';
 import 'package:flutter/material.dart';
 
 class DeleteAccountNotifier extends BaseChangeNotifier {
@@ -18,7 +19,11 @@ class DeleteAccountNotifier extends BaseChangeNotifier {
 
   //Delete Account Api call
   Future apiDeleteAccount(BuildContext context) async {
-    // await AuthRepository().apiDeleteAccount(ForgetPasswordRequest(sEmail: emailAddressController.text), context);
-  }
+    final result = await CustomerAuthRepository.instance.apiDeleteCustomer(
+      userData?.customerId.toString() ?? "0",
+    );
 
+    print("result of Delete");
+    print(result);
+  }
 }

@@ -10,6 +10,10 @@ class AppImages {
   static const bookingGif = 'assets/animations/lottie/booking.json';
   static const userPlaceHolder = 'assets/images/place_holder/user-image.jpeg';
   static const nameTag = 'assets/images/jpg/name_tag.jpg';
+  static const tenant = 'assets/images/jpg/tenant.jpeg';
+  static const vendor = 'assets/images/jpg/vendor.jpeg';
+  static const owner = 'assets/images/jpg/owner.jpeg';
+  static const backgroundPattern = 'assets/images/jpg/background_pattern.jpeg';
 
 
   static const videoPlayer = 'assets/video/sample_video.mp4';

@@ -7,6 +7,7 @@ import 'package:community_app/res/images.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/enums.dart';
 import 'package:community_app/utils/helpers/dashed_border_container.dart';
+import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_search_dropdown.dart';
 import 'package:community_app/utils/widgets/custom_textfields.dart';
@@ -16,26 +17,24 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class ProgressUpdateScreen extends StatelessWidget {
-  const ProgressUpdateScreen({super.key});
+  final int? jobId;
+  final int? customerId;
+  final String? status;
+
+  const ProgressUpdateScreen({super.key, this.jobId, this.customerId, this.status});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => ProgressUpdateNotifier(),
+      create: (_) => ProgressUpdateNotifier(jobId, customerId, status),
       child: Consumer<ProgressUpdateNotifier>(
         builder: (context, notifier, _) => Scaffold(
-          persistentFooterButtons: [
-            _buildPersistentButtons(context, notifier),
-          ],
-          appBar: AppBar(title: const Text('Progress Update')),
+          persistentFooterButtons: [_buildPersistentButtons(context, notifier)],
+          appBar: CustomAppBar(),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(15),
             child: Column(
-              children: [
-                buildCustomerInfo(context, notifier),
-                15.verticalSpace,
-                _buildPhaseContent(context, notifier),
-              ],
+              children: [buildCustomerInfo(context, notifier), 15.verticalSpace, _buildPhaseContent(context, notifier)],
             ),
           ),
         ),
@@ -48,7 +47,7 @@ class ProgressUpdateScreen extends StatelessWidget {
       case JobPhase.assign:
         return Column(
           children: [
-            _buildAssignEmployeeList(notifier),
+            _buildAssignEmployeeList(context, notifier),
             10.verticalSpace,
             _buildAddEmployeeButton(context, notifier),
           ],
@@ -74,18 +73,26 @@ class ProgressUpdateScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildAssignEmployeeList(ProgressUpdateNotifier notifier) {
+  Widget _buildAssignEmployeeList(BuildContext context, ProgressUpdateNotifier notifier) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ...notifier.assignedEmployees.map((e) => Card(
-          margin: const EdgeInsets.symmetric(vertical: 5),
-          child: ListTile(
-            leading: const Icon(Icons.person),
-            title: Text(e['name']!),
-            subtitle: Text(e['phone']!),
+        ...notifier.assignedEmployees.map(
+          (e) => Container(
+            margin: const EdgeInsets.symmetric(vertical: 5),
+            decoration: AppStyles.commonDecoration,
+            child: ListTile(
+              title: Text(e.name),
+              subtitle: Text(e.phone),
+              trailing: e.emiratesId != null
+                  ? GestureDetector(
+                      onTap: () => notifier.openImageViewer(context, e.emiratesId!),
+                      child: const Text("View Emirates ID", style: TextStyle(color: Colors.blue)),
+                    )
+                  : null,
+            ),
           ),
-        )),
+        ),
       ],
     );
   }
@@ -95,33 +102,25 @@ class ProgressUpdateScreen extends StatelessWidget {
       case JobPhase.assign:
         return CustomButton(
           text: "Assign",
-          onPressed: notifier.assignedEmployees.isNotEmpty ? notifier.goToInProgress : null,
+          onPressed: notifier.assignedEmployees.isNotEmpty
+              ? () =>
+                    notifier.assignEmployees(context) // Pass real jobId & customerId
+              : null,
         );
       case JobPhase.inProgress:
         return Row(
           children: [
             Expanded(
-              child: CustomButton(
-                text: "Hold",
-                onPressed: notifier.notes.trim().isEmpty ? null : () {
-
-                },
-              ),
+              child: CustomButton(text: "Hold", onPressed: notifier.notes.trim().isEmpty ? null : () {}),
             ),
             10.horizontalSpace,
             Expanded(
-              child: CustomButton(
-                text: "Complete",
-                onPressed:  notifier.goToCompleted,
-              ),
+              child: CustomButton(text: "Complete", onPressed: notifier.goToCompleted),
             ),
           ],
         );
       case JobPhase.completed:
-        return CustomButton(
-          text: "Submit",
-          onPressed: notifier.canSubmit ? () => _onSubmit(context, notifier) : null,
-        );
+        return CustomButton(text: "Submit", onPressed: notifier.canSubmit ? () => _onSubmit(context, notifier) : null);
     }
   }
 
@@ -132,10 +131,9 @@ class ProgressUpdateScreen extends StatelessWidget {
           context: context,
           isScrollControlled: true,
           backgroundColor: AppColors.background,
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
           builder: (_) => AssignBottomSheet(
-            onAdd: (name, phone) => notifier.addEmployee(name, phone),
+            onAdd: (name, phone, {emiratesId}) => notifier.addEmployee(name, phone, emiratesId: emiratesId),
           ),
         );
       },
@@ -160,8 +158,6 @@ class ProgressUpdateScreen extends StatelessWidget {
       ),
     );
   }
-
-
 
   Widget buildCustomerInfo(BuildContext context, ProgressUpdateNotifier progressUpdateNotifier) {
     return Container(
@@ -438,6 +434,6 @@ class ProgressUpdateScreen extends StatelessWidget {
   }
 
   void _onSubmit(BuildContext context, ProgressUpdateNotifier notifier) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Progress update submitted!")));
+    notifier.submitJobCompletion(context);
   }
 }

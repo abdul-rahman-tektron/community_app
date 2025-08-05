@@ -4,7 +4,8 @@ import 'package:community_app/core/model/common/dropdown/priority_dropdown_respo
 import 'package:community_app/core/model/common/dropdown/service_dropdown_response.dart';
 import 'package:community_app/core/model/common/error/common_response.dart';
 import 'package:community_app/core/model/customer/job/new_job_request.dart';
-import 'package:community_app/core/remote/services/service_repository.dart';
+import 'package:community_app/core/remote/services/common_repository.dart';
+import 'package:community_app/core/remote/services/customer/customer_jobs_repository.dart';
 import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/helpers/file_upload_helper.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
@@ -31,7 +32,7 @@ class NewServicesNotifier extends BaseChangeNotifier {
   File? _uploadedFile;
   String? _uploadedFileName;
 
-  int siteVisitOption = -1;
+  bool siteVisitOption = false;
 
   // Dropdown data
   List<ServiceDropdownData> serviceDropdownData = [];
@@ -88,7 +89,7 @@ class NewServicesNotifier extends BaseChangeNotifier {
     }
   }
 
-  void setSiteVisitOption(int value) {
+  void setSiteVisitOption(bool value) {
     siteVisitOption = value;
     notifyListeners();
   }
@@ -117,7 +118,7 @@ class NewServicesNotifier extends BaseChangeNotifier {
   //Service dropdown Api call
   Future<void> apiServiceDropdown() async {
     try {
-      final result = await ServiceRepository().apiServiceDropdown();
+      final result = await CommonRepository.instance.apiServiceDropdown();
 
       if (result is List<ServiceDropdownData>) {
         serviceDropdownData = result;
@@ -143,6 +144,7 @@ class NewServicesNotifier extends BaseChangeNotifier {
         status: "Pending",
         createdBy: "Sana",
         active: true,
+        siteVisitRequired: siteVisitOption,
         mediaList: [
           JobMediaList(
             type: "P",
@@ -159,7 +161,7 @@ class NewServicesNotifier extends BaseChangeNotifier {
         ],
       );
 
-      final result = await ServiceRepository().apiNewJob(request);
+      final result = await CustomerJobsRepository.instance.apiNewJob(request);
 
       print("result");
       print(result);

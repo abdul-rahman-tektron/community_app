@@ -1,4 +1,4 @@
-import 'package:community_app/modules/customer/services/services_notifier.dart';
+import 'package:community_app/core/model/customer/job/ongoing_jobs_response.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
@@ -11,7 +11,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class CompletedServiceCard extends StatelessWidget {
-  final ServiceModel service;
+  final CustomerOngoingJobsData service;
 
   const CompletedServiceCard({super.key, required this.service});
 
@@ -41,14 +41,14 @@ class CompletedServiceCard extends StatelessWidget {
       TextSpan(
         children: [
           TextSpan(text: "Job ID: ", style: AppFonts.text16.regular.style),
-          TextSpan(text: "#${service.id}", style: AppFonts.text16.regular.style),
+          TextSpan(text: "#${service.jobId ?? '-'}", style: AppFonts.text16.regular.style),
         ],
       ),
     );
   }
 
   Widget _buildProgressRow() {
-    final progress = service.progressStatus ?? 'N/A';
+    final progress = service.jobStatusCategory ?? 'N/A';
 
     return Row(
       children: [
@@ -62,17 +62,25 @@ class CompletedServiceCard extends StatelessWidget {
   Widget _buildIconBox() {
     return Container(
       padding: const EdgeInsets.all(5),
-      decoration: BoxDecoration(color: const Color(0xffeff7ef), borderRadius: BorderRadius.circular(5)),
+      decoration: BoxDecoration(
+        color: const Color(0xffeff7ef),
+        borderRadius: BorderRadius.circular(5),
+      ),
       child: const Icon(LucideIcons.check, color: Colors.green, size: 20),
     );
   }
 
   Widget _buildCheckProgressButton(BuildContext context) {
-    return CustomButton(text: "Check Progress", backgroundColor: AppColors.white,
-        borderColor: AppColors.primary,
-        textStyle: AppFonts.text14.regular.style,onPressed: () {
-          Navigator.pushNamed(context, AppRoutes.jobVerification);
-        }, height: 35);
+    return CustomButton(
+      text: "Check Progress",
+      backgroundColor: AppColors.white,
+      borderColor: AppColors.primary,
+      textStyle: AppFonts.text14.regular.style,
+      onPressed: () {
+        Navigator.pushNamed(context, AppRoutes.jobVerification);
+      },
+      height: 35,
+    );
   }
 
   Widget _buildProgressText(String progress) {
@@ -80,6 +88,9 @@ class CompletedServiceCard extends StatelessWidget {
   }
 
   Widget _buildProgressBar() {
-    return CustomLinearProgressIndicator(percentage: service.progressPercent ?? 0);
+    // No progressPercent in CustomerOngoingJobsData, set static or 100 since it's completed
+    final progressPercent = 100.0;
+
+    return CustomLinearProgressIndicator(percentage: progressPercent);
   }
 }

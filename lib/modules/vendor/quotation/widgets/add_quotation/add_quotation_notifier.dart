@@ -1,6 +1,6 @@
 import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/core/model/vendor/vendor_quotation/create_job_quotation_request.dart';
-import 'package:community_app/core/remote/services/service_repository.dart';
+import 'package:community_app/core/remote/services/vendor/vendor_quotation_repository.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:flutter/material.dart';
 
@@ -45,7 +45,7 @@ class AddQuotationNotifier extends BaseChangeNotifier {
       );
 
       // Call API
-      await ServiceRepository().apiVendorCreateJobQuotationRequest(request);
+      await VendorQuotationRepository.instance.apiVendorCreateJobQuotationRequest(request);
 
       ToastHelper.showSuccess("Quotation submitted successfully!");
     } catch (e) {

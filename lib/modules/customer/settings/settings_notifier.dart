@@ -19,10 +19,17 @@ class SettingsNotifier extends BaseChangeNotifier {
 
   void initializeData() async {
     await loadUserData();
+    final savedValue = HiveStorageService.getNotification();
+    if (savedValue != null) {
+      _notificationSwitch = savedValue == "true";
+    }
+    notifyListeners();
   }
-  void toggleNotifications() {
-    // Add your notifications logic here
-    debugPrint("Notifications toggled");
+
+  Future<void> toggleNotifications() async {
+    notificationSwitch = !notificationSwitch;
+    await HiveStorageService.setNotification(notificationSwitch.toString());
+    debugPrint("Notifications toggled: $notificationSwitch");
   }
 
   void handleNavigation(BuildContext context, String routeKey) {
@@ -52,10 +59,6 @@ class SettingsNotifier extends BaseChangeNotifier {
         Navigator.pushNamed(context, '/logout');
         break;
     }
-  }
-
-  void switchNotification() {
-    notificationSwitch = !notificationSwitch;
   }
 
   Future<void> logoutFunctionality(BuildContext context) async {

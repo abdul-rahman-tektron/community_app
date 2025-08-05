@@ -117,6 +117,7 @@ class SiteVisitDetailScreen extends StatelessWidget {
         ),
       );
     }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: notifier.assignedEmployees.map((e) {
@@ -125,11 +126,28 @@ class SiteVisitDetailScreen extends StatelessWidget {
           decoration: AppStyles.commonDecoration,
           child: ListTile(
             leading: Icon(LucideIcons.userRound),
-            title: Text(e['name'] ?? ''),
-            subtitle: Text(e['phone'] ?? ''),
+            title: Text(e.name),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(e.phone),
+                if (e.emiratesId != null)
+                  GestureDetector(
+                    onTap: () {
+                      // Show full-screen viewer for Emirates ID
+                      // Or use your existing image viewer
+                    },
+                    child: Text(
+                      "View Emirates ID",
+                      style: TextStyle(color: AppColors.primary, fontSize: 12),
+                    ),
+                  ),
+              ],
+            ),
             trailing: GestureDetector(
-                onTap: () => notifier.removeEmployee(e),
-                child: Icon(LucideIcons.trash, color: Colors.red)),
+              onTap: () => notifier.removeEmployee(e),
+              child: Icon(LucideIcons.trash, color: Colors.red),
+            ),
           ),
         );
       }).toList(),
@@ -148,7 +166,7 @@ class SiteVisitDetailScreen extends StatelessWidget {
             borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
           ),
           builder: (_) => AssignBottomSheet(
-            onAdd: (name, phone) => notifier.addEmployee(name, phone),
+            onAdd: (name, phone, {emiratesId}) => notifier.addEmployee(name, phone, emiratesId: emiratesId),
           ),
         );
       },

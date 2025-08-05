@@ -5,4 +5,5 @@ class HiveKeys {
   static const userCategory = 'user_category';
   static const rememberMe = 'remember_me';
   static const userData = 'user_data';
+  static const notification = 'notification';
 }

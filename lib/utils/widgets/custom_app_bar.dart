@@ -1,12 +1,14 @@
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/images.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showDrawer;
-  const CustomAppBar({super.key, this.showDrawer = false});
+  final bool showBackButton;
+  const CustomAppBar({super.key, this.showDrawer = false, this.showBackButton = true});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         child: showDrawer ? InkWell(
             onTap: () => Scaffold.of(context).openDrawer(),
             child: Icon(LucideIcons.logs, color: AppColors.white, size: 25.r)
-        ) : _buildBackButton(context),
+        ) : showBackButton ? _buildBackButton(context) : null,
+      ),
+
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: AppColors.primary,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.light,      // iOS (dark text → black, set to .dark for proper contrast)
       ),
       centerTitle: true,
       title: Image.asset(AppImages.logo, height: 60),

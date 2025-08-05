@@ -2,8 +2,8 @@ import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/core/model/common/dropdown/community_dropdown_response.dart';
 import 'package:community_app/core/model/common/login/login_request.dart';
 import 'package:community_app/core/model/common/register/customer_register_request.dart';
-import 'package:community_app/core/remote/services/auth_repository.dart';
-import 'package:community_app/core/remote/services/service_repository.dart';
+import 'package:community_app/core/remote/services/common_repository.dart';
+import 'package:community_app/core/remote/services/customer/customer_auth_repository.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_stepper.dart';
@@ -58,7 +58,7 @@ class CustomerRegistrationNotifier extends BaseChangeNotifier {
   Future<void> performRegistration(BuildContext context) async {
 
     try {
-      await AuthRepository().apiUserLogin(
+      await CommonRepository.instance.apiUserLogin(
         LoginRequest(email: "admin@example.com", password: "password"),
       );
 
@@ -80,7 +80,7 @@ class CustomerRegistrationNotifier extends BaseChangeNotifier {
         createdBy: nameController.text.trim(),
       );
 
-      final result = await AuthRepository().apiCustomerRegister(request);
+      final result = await CustomerAuthRepository.instance.apiCustomerRegister(request);
 
       await _handleRegisterSuccess(result, context);
     } catch (e) {
@@ -103,7 +103,7 @@ class CustomerRegistrationNotifier extends BaseChangeNotifier {
   //Community dropdown Api call
   Future<void> apiCommunityDropdown() async {
     try {
-      final result = await ServiceRepository().apiCommunityDropdown();
+      final result = await CommonRepository.instance.apiCommunityDropdown();
 
       if (result is List<CommunityDropdownData>) {
         communityDropdownData = result;

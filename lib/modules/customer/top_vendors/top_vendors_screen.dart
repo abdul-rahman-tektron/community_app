@@ -91,25 +91,6 @@ class TopVendorsScreen extends StatelessWidget {
     );
   }
 
-  /// Back Button
-  Widget _buildBackButton(BuildContext context) {
-    return Align(
-      alignment: Alignment.topRight,
-      child: InkWell(
-        onTap: () => Navigator.pop(context),
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.primary, width: 1.5),
-          ),
-          child: const Icon(LucideIcons.arrowLeft),
-        ),
-      ),
-    );
-  }
-
   /// Vendor Card
   Widget _vendorCard(BuildContext context, TopVendorsNotifier notifier, int index, TopVendorResponse vendor) {
     final bool isSelected = notifier.isSelected(index);
@@ -150,11 +131,11 @@ class TopVendorsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(vendor.vendorName ?? "", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text(vendor.vendorName ?? "Vendor Name", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
-                  Text(vendor.address ?? "", style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                  Text(vendor.address ?? "Address", style: const TextStyle(color: Colors.grey, fontSize: 13)),
                   const SizedBox(height: 2),
-                  Text("vendor.distance", style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                  Text("1.2 km", style: const TextStyle(color: Colors.grey, fontSize: 12)),
                   const SizedBox(height: 6),
                   Row(
                     children: [

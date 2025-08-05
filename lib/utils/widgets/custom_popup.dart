@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-void bookingConfirmationPopup(BuildContext context) {
+void bookingConfirmationPopup(BuildContext context, {required VoidCallback onConfirm}) {
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -31,9 +31,17 @@ void bookingConfirmationPopup(BuildContext context) {
             children: [
               Text("Booking Confirmation", style: AppFonts.text20.semiBold.style),
               20.verticalSpace,
-              Text("Are you sure you want to proceed with the booking?" , textAlign: TextAlign.center, style:  AppFonts.text14.regular.style,),
+              Text(
+                "Are you sure you want to proceed with the booking?",
+                textAlign: TextAlign.center,
+                style: AppFonts.text14.regular.style,
+              ),
               10.verticalSpace,
-              Text("Once confirmed, the vendor will be notified and further changes may not be possible." , textAlign: TextAlign.center, style:  AppFonts.text14.regular.style,),
+              Text(
+                "Once confirmed, the vendor will be notified and further changes may not be possible.",
+                textAlign: TextAlign.center,
+                style: AppFonts.text14.regular.style,
+              ),
               15.verticalSpace,
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -44,7 +52,8 @@ void bookingConfirmationPopup(BuildContext context) {
                     text: "Book Service",
                     textStyle: AppFonts.text14.regular.white.style,
                     onPressed: () {
-                      Navigator.pushNamed(context, AppRoutes.bookingConfirmation, arguments: "987638A567");
+                      Navigator.pop(context); // close popup first
+                      onConfirm(); // trigger booking logic
                     },
                   ),
                   10.horizontalSpace,

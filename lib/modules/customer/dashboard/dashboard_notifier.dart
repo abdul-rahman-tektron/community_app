@@ -1,10 +1,18 @@
 import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/core/model/common/dropdown/service_dropdown_response.dart';
+import 'package:community_app/core/model/customer/dashboard/customer_dashboard_response.dart';
+import 'package:community_app/core/remote/services/common_repository.dart';
+import 'package:community_app/core/remote/services/customer/customer_dashboard_repository.dart';
 import 'package:community_app/modules/vendor/dashboard/dashboard_notifier.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class CustomerDashboardNotifier extends BaseChangeNotifier {
+  List<ServiceDropdownData> categoriesData = [];
+
+  String? _ongoingJobs;
+  String? _completedJobs;
   final List<PromotionItem> promotions = [
     PromotionItem(
       title: "Get 20% off on AC Repair!",
@@ -33,51 +41,77 @@ class CustomerDashboardNotifier extends BaseChangeNotifier {
     Color(0xFF90A4AE), // Blue Grey 300
   ];
 
+  CustomerDashboardNotifier() {
+    initializeData();
+  }
 
+  void initializeData() async {
+    await loadUserData();
+    await apiServiceDropdown();
+    await apiDashboard();
+  }
 
-
-
-  final List<QuickStat> quickStats = [
-    QuickStat(
-      icon: LucideIcons.arrowUpNarrowWide,
-      iconBgColor: const Color(0xffe7f0ff), // Light blue
-      iconColor: Colors.blue.shade700,
-      count: 12,
-      label: "Ongoing",
-    ),
-    QuickStat(
-      icon: LucideIcons.check,
-      iconBgColor: const Color(0xffe8f7e8), // Light orange
-      iconColor: Colors.green.shade700,
-      count: 5,
-      label: "Completed",
-    ),
-  ];
-
-  // Categories
-  List<ServiceCategory> categories = [
-    ServiceCategory(name: 'All', icon: LucideIcons.shapes),
-    ServiceCategory(name: 'AC Repair', icon: LucideIcons.airVent),
-    ServiceCategory(name: 'Plumbing', icon: LucideIcons.toilet),
-    ServiceCategory(name: 'Cleaning', icon: LucideIcons.brushCleaning),
-    ServiceCategory(name: 'Painting', icon: LucideIcons.paintRoller),
-    ServiceCategory(name: 'Pest Control', icon: LucideIcons.bug),
-  ];
-
-  // Service counts
-  int ongoingCount = 2;
-  int completedCount = 7;
+  List<QuickStat> get quickStats {
+    return [
+      QuickStat(
+        icon: LucideIcons.arrowUpNarrowWide,
+        iconColor: Colors.blue,
+        iconBgColor: Colors.blue.withOpacity(0.1),
+        label: "Ongoing",
+        count: ongoingJobs ?? '0',
+      ),
+      QuickStat(
+        icon: LucideIcons.check,
+        iconColor: Colors.green,
+        iconBgColor: Colors.green.withOpacity(0.1),
+        label: "Completed",
+        count: completedJobs ?? '0',
+      ),
+    ];
+  }
 
   // Quick actions
   final List<QuickAction> quickActions = [
-    QuickAction(icon: LucideIcons.circlePlus, label: 'New Service'),
-    QuickAction(icon: LucideIcons.receiptText, label: 'Pending Quotation'),
-    QuickAction(icon: LucideIcons.mapPin, label: 'Track Request'),
-    QuickAction(icon: LucideIcons.circleDollarSign, label: 'Make Payment'),
+    QuickAction(icon: LucideIcons.circlePlus300, label: 'New Service'),
+    QuickAction(icon: LucideIcons.receiptText300, label: 'Pending Quotation'),
+    QuickAction(icon: LucideIcons.mapPin300, label: 'Track Request'),
+    QuickAction(icon: LucideIcons.circleDollarSign300, label: 'Make Payment'),
   ];
 
-  void selectCategory(BuildContext context, ServiceCategory category) {
-    print(category.name);
+  IconData getServiceIcon(String serviceName) {
+    switch (serviceName.toLowerCase()) {
+      case "plumbing":
+        return LucideIcons.wrench300;
+      case "painting":
+        return LucideIcons.paintRoller300;
+      case "cleaning":
+        return LucideIcons.brushCleaning300;
+      case "electric works":
+        return LucideIcons.unplug300;
+      case "ac repair":
+        return LucideIcons.airVent300;
+      case "laundry":
+        return LucideIcons.washingMachine300;
+      case "pet grooming":
+        return LucideIcons.scissors300;
+      case "carpentry":
+        return LucideIcons.hammer300;
+      case "appliance repair":
+        return LucideIcons.trafficCone300;
+      case "pest control":
+        return LucideIcons.bug300;
+      case "security & cctv":
+        return LucideIcons.cctv300;
+      case "handyman services":
+        return LucideIcons.drill300;
+      default:
+        return LucideIcons.circle300; // fallback icon
+    }
+  }
+
+
+  void selectCategory(BuildContext context, ServiceDropdownData category) {
+    print(category.serviceName);
     Navigator.pushReplacementNamed(
       context,
       AppRoutes.customerBottomBar,
@@ -87,11 +121,61 @@ class CustomerDashboardNotifier extends BaseChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> apiServiceDropdown() async {
+    try {
+      final result = await CommonRepository.instance.apiServiceDropdown();
+
+      print("result from api");
+      print(result);
+
+      if (result is List<ServiceDropdownData>) {
+        categoriesData = result;
+        notifyListeners();
+      } else {
+        debugPrint("Unexpected result type from apiServiceDropDown");
+      }
+    } catch (e) {
+      debugPrint("Error in apiServiceDropdown: $e");
+    }
+  }
+
+  Future<void> apiDashboard() async {
+    try {
+      final result = await CustomerDashboardRepository.instance.apiCustomerDashboard(userData?.customerId.toString() ?? "0");
+
+      if (result is CustomerDashboardResponse) {
+        ongoingJobs = result.jobstats?.ongoing.toString() ?? "0";
+        completedJobs = result.jobstats?.completed.toString() ?? "0";
+        notifyListeners();
+      } else {
+        debugPrint("Unexpected result type from apiDashboard");
+      }
+    } catch (e) {
+      debugPrint("Error in apiDashboard: $e");
+    }
+  }
+
   int currentPromotionIndex = 0;
 
   void updatePromotionIndex(int index) {
     currentPromotionIndex = index;
     notifyListeners();
+  }
+
+  String? get ongoingJobs => _ongoingJobs;
+
+  set ongoingJobs(String? value) {
+    if (_ongoingJobs != value) return;
+    _ongoingJobs = value;
+      notifyListeners();
+  }
+
+  String? get completedJobs => _completedJobs;
+
+  set completedJobs(String? value) {
+    if (_completedJobs != value) return;
+    _completedJobs = value;
+      notifyListeners();
   }
 }
 
@@ -110,9 +194,9 @@ class PromotionItem {
 }
 
 
-class ServiceCategory {
-  final String name;
-  final IconData icon;
-
-  const ServiceCategory({required this.name, required this.icon});
-}
+// class ServiceCategory {
+//   final String name;
+//   final IconData icon;
+//
+//   const ServiceCategory({required this.name, required this.icon});
+// }
