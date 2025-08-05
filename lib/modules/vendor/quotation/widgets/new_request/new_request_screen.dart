@@ -21,16 +21,24 @@ class NewRequestScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 10),
               itemBuilder: (context, index) {
                 final request = notifier.requests[index];
+
+                // Check response status for each item
+                if (request.quotationResponseStatus?.toLowerCase() != "initiated") {
+                  return const SizedBox.shrink(); // Don't display if not "Initiated"
+                }
+
                 return NewRequestCard(
                   request: request,
                   onQuotationTap: () {
-                    print("request.quotationId");
-                    print(request.quotationId);
-                    Navigator.pushNamed(context, AppRoutes.addQuotation, arguments: {
-                    'jobId': request.jobId,
-                    'serviceId': 1001,
-                    'quotationId': request.quotationId,
-                    },);
+                    Navigator.pushNamed(
+                      context,
+                      AppRoutes.addQuotation,
+                      arguments: {
+                        'jobId': request.jobId,
+                        'serviceId': 1001,
+                        'quotationId': request.quotationId,
+                      },
+                    );
                   },
                 );
               },
@@ -41,4 +49,3 @@ class NewRequestScreen extends StatelessWidget {
     );
   }
 }
-

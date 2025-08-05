@@ -31,6 +31,9 @@ class SentQuotationScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 10),
         itemBuilder: (context, index) {
           final quotation = notifier.quotations[index];
+          if (quotation.quotationResponseStatus?.toLowerCase() != "submitted") {
+            return const SizedBox.shrink(); // Don't display if not "Initiated"
+          }
           return QuotationCard(
             quotation: quotation,
             onViewDetails: () {

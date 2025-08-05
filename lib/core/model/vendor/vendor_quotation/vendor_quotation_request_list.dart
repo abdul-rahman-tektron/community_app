@@ -42,13 +42,19 @@ class VendorQuotationRequestListResponse {
 
 class VendorQuotationRequestData {
   int? quotationId;
-  dynamic quotationResponseId;
+  int? quotationResponseId;
   int? jobId;
   int? fromCustomerId;
   int? toVendorId;
-  dynamic quotationRequestStatus;
+  String? quotationRequestStatus;
   String? quotationResponseStatus;
-  dynamic remarks;
+  String? customerName;
+  String? customerMobile;
+  String? customerAddress;
+  String? serviceName;
+  DateTime? expectedDate;
+  int? serviceId;
+  String? remarks;
   bool? deleted;
   bool? active;
   DateTime? createdDate;
@@ -64,6 +70,12 @@ class VendorQuotationRequestData {
     this.toVendorId,
     this.quotationRequestStatus,
     this.quotationResponseStatus,
+    this.customerName,
+    this.customerMobile,
+    this.customerAddress,
+    this.serviceName,
+    this.expectedDate,
+    this.serviceId,
     this.remarks,
     this.deleted,
     this.active,
@@ -81,6 +93,12 @@ class VendorQuotationRequestData {
     toVendorId: json["toVendorId"],
     quotationRequestStatus: json["quotationRequestStatus"],
     quotationResponseStatus: json["quotationResponseStatus"],
+    customerName: json["customerName"],
+    customerMobile: json["customerMobile"],
+    customerAddress: json["customerAddress"],
+    serviceName: json["serviceName"],
+    expectedDate: json["expectedDate"] == null ? null : DateTime.parse(json["expectedDate"]),
+    serviceId: json["serviceId"],
     remarks: json["remarks"],
     deleted: json["deleted"],
     active: json["active"],
@@ -98,6 +116,12 @@ class VendorQuotationRequestData {
     "toVendorId": toVendorId,
     "quotationRequestStatus": quotationRequestStatus,
     "quotationResponseStatus": quotationResponseStatus,
+    "customerName": customerName,
+    "customerMobile": customerMobile,
+    "customerAddress": customerAddress,
+    "serviceName": serviceName,
+    "expectedDate": expectedDate?.toIso8601String(),
+    "serviceId": serviceId,
     "remarks": remarks,
     "deleted": deleted,
     "active": active,

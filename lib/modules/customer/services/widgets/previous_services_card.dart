@@ -3,6 +3,7 @@ import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/extensions.dart';
+import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_linear_progress_indicator.dart';
 import 'package:flutter/material.dart';
@@ -27,9 +28,7 @@ class PreviousServiceCard extends StatelessWidget {
           10.verticalSpace,
           _buildDateTimeRow(),
           15.verticalSpace,
-          _buildProductList(),
-          15.verticalSpace,
-          _buildActionButtons(),
+          _buildActionButtons(context),
         ],
       ),
     );
@@ -142,7 +141,7 @@ class PreviousServiceCard extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(BuildContext context) {
     return Row(
       children: [
         Expanded(
@@ -150,7 +149,11 @@ class PreviousServiceCard extends StatelessWidget {
             text: "View Details",
             height: 35,
             onPressed: () {
-              // Handle view details
+              Navigator.pushNamed(
+                context,
+                AppRoutes.previousDetails,
+                arguments: 156
+              );
             },
           ),
         ),

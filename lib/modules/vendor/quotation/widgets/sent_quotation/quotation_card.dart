@@ -31,8 +31,10 @@ class QuotationCard extends StatelessWidget {
         children: [
           _buildTopRow(),
           3.verticalSpace,
-          // Text(quotation.serviceName ?? "-", style: AppFonts.text14.medium.style),
-          Text("Service Name" ?? "-", style: AppFonts.text14.medium.style),
+          Text(
+            quotation.serviceName ?? "-",
+            style: AppFonts.text14.medium.style,
+          ),
           15.verticalSpace,
           _buildStatusRow(),
           15.verticalSpace,
@@ -47,14 +49,13 @@ class QuotationCard extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            // quotation.customerName ?? "-",
-            "Customer Name",
+            quotation.customerName ?? "-",
             style: AppFonts.text16.semiBold.style,
           ),
         ),
         _iconLabelRow(
           icon: LucideIcons.clock,
-          label: quotation.createdDate?.formatDateTime() ?? "-",
+          label: quotation.createdDate?.formatDateTime(withTime: true) ?? "-",
           bgColor: const Color(0xfffdf5e7),
           iconColor: Colors.orange,
         ),
@@ -73,8 +74,7 @@ class QuotationCard extends StatelessWidget {
                 style: AppFonts.text14.semiBold.style,
               ),
               TextSpan(
-                // text: (quotation.totalAmount ?? 0).toStringAsFixed(2),
-                text: "Quoted Amount",
+                text: (quotation.modifiedBy ?? 10000).toStringAsFixed(2),
                 style: AppFonts.text20.semiBold.style,
               ),
             ],
@@ -94,6 +94,10 @@ class QuotationCard extends StatelessWidget {
       case "rejected":
         bgColor = const Color(0xffffeded);
         textColor = Colors.red;
+        break;
+      case "approved":
+        bgColor = const Color(0xffe7f9ed);
+        textColor = Colors.green;
         break;
       default:
         bgColor = const Color(0xfffdf5e7);

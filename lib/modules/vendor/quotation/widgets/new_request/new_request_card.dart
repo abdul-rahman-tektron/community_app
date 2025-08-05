@@ -6,6 +6,7 @@ import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:community_app/utils/extensions.dart';
 
 class NewRequestCard extends StatelessWidget {
   final VendorQuotationRequestData request;
@@ -19,11 +20,6 @@ class NewRequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Fallbacks if API data is missing
-    final customerName =  "Ali Hassan";
-    final serviceName =  "Plumbing";
-    final remarks = request.remarks?.toString() ?? "Leakage in bathroom sink"; // Example placeholder
-
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
       padding: EdgeInsets.all(12.w),
@@ -31,12 +27,12 @@ class NewRequestCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildTopRow(context, customerName),
+          _buildTopRow(context, request.customerName ?? "Customer Name"),
           10.verticalSpace,
-          _buildCategoryRow(serviceName),
-          if (remarks.isNotEmpty) ...[
+          _buildCategoryRow(request.serviceName ?? "Service Name"),
+          if (request.remarks?.isNotEmpty ?? false) ...[
             10.verticalSpace,
-            Text(remarks, style: AppFonts.text14.regular.style, maxLines: 1, overflow: TextOverflow.ellipsis),
+            Text(request.remarks ?? "-", style: AppFonts.text14.regular.style, maxLines: 1, overflow: TextOverflow.ellipsis),
           ],
           10.verticalSpace,
           Text("Job ID: ${request.jobId ?? '-'}", style: AppFonts.text14.regular.style),
@@ -127,9 +123,11 @@ class NewRequestCard extends StatelessWidget {
             const Icon(LucideIcons.clock, size: 16, color: Colors.grey),
             SizedBox(width: 6.w),
             Text(
-              request.createdDate?.toString() ?? "3 July 2025",
+              request.expectedDate != null
+                  ? request.expectedDate!.formatFullDateTime()
+                  : "3 July 2025",
               style: AppFonts.text12.regular.style,
-            ),
+            )
           ],
         ),
         const Spacer(),

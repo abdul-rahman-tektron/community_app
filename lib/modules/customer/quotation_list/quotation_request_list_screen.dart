@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:community_app/core/model/customer/quotation/quotation_request_list_response.dart';
 import 'package:community_app/core/model/vendor/quotation_request/quotation_request_list_response.dart';
 import 'package:community_app/modules/customer/quotation_list/quotation_list_notifier.dart';
@@ -69,7 +71,6 @@ class QuotationRequestListScreen extends StatelessWidget {
   }
 
   Widget _buildRequestCard(BuildContext context, QuotationRequestListNotifier notifier, int index, CustomerRequestListData request) {
-    final quotations = request.jobQuotationRequest ?? [];
 
     return GestureDetector(
       onTap: () => Navigator.pushNamed(context, AppRoutes.quotationList, arguments: request.jobId),
@@ -81,10 +82,14 @@ class QuotationRequestListScreen extends StatelessWidget {
         child: ListTile(
           contentPadding: EdgeInsets.zero,
           title: Text(
-            notifier.getServiceNameById(request.serviceId),
+            "${notifier.getServiceNameById(request.serviceId)} - ${request.jobId}",
             style: AppFonts.text14.bold.style,
           ),
-          subtitle: Text("${request.jobId}", style: AppFonts.text12.medium.style),
+          leading: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.memory(base64Decode(request.mediaList?[0].fileContent ?? ""), height: 50, width: 50, fit: BoxFit.cover),
+          ),
+          subtitle: Text("${request.remarks}", style: AppFonts.text12.medium.style, maxLines: 1, overflow: TextOverflow.ellipsis),
           trailing: Icon(LucideIcons.chevronRight),
         ),
       ),

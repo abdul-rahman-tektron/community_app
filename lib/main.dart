@@ -13,6 +13,7 @@ import 'package:community_app/res/images.dart';
 import 'package:community_app/res/themes.dart';
 import 'package:community_app/utils/crashlytics_service.dart';
 import 'package:community_app/utils/helpers/screen_size.dart';
+import 'package:community_app/utils/location_helper.dart';
 import 'package:community_app/utils/notification_service.dart';
 import 'package:community_app/utils/permissions_handler.dart';
 import 'package:community_app/utils/router/routes.dart';
@@ -34,7 +35,7 @@ import 'package:toastification/toastification.dart';
 import 'dart:ui' as ui;
 
 Future<void> main() async {
-  runZonedGuarded(() async {
+  await CrashlyticsService.runWithCrashlytics(() async {
     WidgetsFlutterBinding.ensureInitialized();
 
     // Permissions
@@ -49,17 +50,19 @@ Future<void> main() async {
     await NotificationService().init();
     NotificationService().setNavigatorKey(MyApp.navigatorKey);
 
-
     // Hive & Secure storage
     await Hive.initFlutter();
     await HiveStorageService.init();
     await SecureStorageService.init();
+
+    await LocationHelper.initialize();
 
     // Orientation & System UI
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       systemStatusBarContrastEnforced: true,
       statusBarColor: AppColors.primary,
@@ -72,16 +75,14 @@ Future<void> main() async {
     LoginResponse? user;
     if (userJson != null) user = loginResponseFromJson(userJson);
 
+    // Init Crashlytics
     await CrashlyticsService.init();
 
-    await CrashlyticsService.runWithCrashlytics(() async {
-      runApp(MyApp(token: token, user: user));
-    });
-  }, (error, stackTrace) {
-    debugPrint('Unhandled error: $error');
-    debugPrint('$stackTrace');
+    // Run the app
+    runApp(MyApp(token: token, user: user));
   });
 }
+
 
 class MyApp extends StatelessWidget {
   final String? token;

@@ -1,3 +1,4 @@
+import 'package:community_app/core/model/vendor/jobs/ongoing_jobs_assigned_response.dart';
 import 'package:community_app/modules/vendor/jobs/widgets/ongoing_service/ongoing_service_card.dart';
 import 'package:community_app/modules/vendor/jobs/widgets/ongoing_service/ongoing_service_notifier.dart';
 import 'package:community_app/utils/router/routes.dart';
@@ -16,18 +17,18 @@ class OngoingServiceScreen extends StatelessWidget {
           if (notifier.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (notifier.ongoingJobs.isEmpty) {
-            return const Center(child: Text("No ongoing jobs."));
-          }
+          // if (notifier.ongoingJobs.isEmpty) {
+          //   return const Center(child: Text("No ongoing jobs."));
+          // }
           return ListView.builder(
-            itemCount: notifier.ongoingJobs.length,
+            itemCount: 1,
             itemBuilder: (context, index) {
-              final job = notifier.ongoingJobs[index];
+              // final job = notifier.ongoingJobs[index];
               return OngoingServiceCard(
-                job: job,
+                job: OngoingJobsAssignedData(),
                 onViewDetails: () {
                   Navigator.pushNamed(context, AppRoutes.progressUpdate,
-                      arguments: {"jobId": job.jobId, "status": job.jobStatusCategory});
+                      arguments: {"jobId": 123, "status": "Job Assigned"});
                 },
               );
             },

@@ -74,7 +74,9 @@ class TopVendorsScreen extends StatelessWidget {
                 10.verticalSpace,
                 // Scrollable List
                 Expanded(
-                  child: ListView.builder(
+                  child: notifier.isLoading
+                      ? Center(child: CircularProgressIndicator())
+                      : ListView.builder(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                       itemCount: notifier.topVendors.length,
                       itemBuilder: (ctx, i) {
@@ -94,6 +96,9 @@ class TopVendorsScreen extends StatelessWidget {
   /// Vendor Card
   Widget _vendorCard(BuildContext context, TopVendorsNotifier notifier, int index, TopVendorResponse vendor) {
     final bool isSelected = notifier.isSelected(index);
+
+    final cleanAddress = notifier.vendorCleanAddresses[vendor.vendorId ?? -1] ?? "Address";
+    final distanceKm = notifier.vendorDistances[vendor.vendorId ?? -1];
 
     return GestureDetector(
       onTap: () => notifier.toggle(index),
@@ -133,9 +138,12 @@ class TopVendorsScreen extends StatelessWidget {
                 children: [
                   Text(vendor.vendorName ?? "Vendor Name", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
-                  Text(vendor.address ?? "Address", style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                  Text(cleanAddress, style: const TextStyle(color: Colors.grey, fontSize: 13)),
                   const SizedBox(height: 2),
-                  Text("1.2 km", style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                  Text(
+                    distanceKm != null ? "${distanceKm.toStringAsFixed(1)} km" : "Distance unavailable",
+                    style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
                   const SizedBox(height: 6),
                   Row(
                     children: [
@@ -143,7 +151,7 @@ class TopVendorsScreen extends StatelessWidget {
                       const SizedBox(width: 5),
                       RatingsHelper(rating: vendor.rating ?? 0),
                       const SizedBox(width: 3),
-                    Text('(${vendor.reviewCount ?? "0"})', style: const TextStyle(fontSize: 12)),
+                      Text('(${vendor.reviewCount ?? "0"})', style: const TextStyle(fontSize: 12)),
                     ],
                   ),
                 ],

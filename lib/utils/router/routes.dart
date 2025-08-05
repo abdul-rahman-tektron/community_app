@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:community_app/modules/customer/feedback/feedback_screen.dart';
 import 'package:community_app/modules/customer/job_verification/job_verification_screen.dart';
 import 'package:community_app/modules/customer/payment/payment_screen.dart';
+import 'package:community_app/modules/customer/previous_detail/previous_detail_screen.dart';
 import 'package:community_app/modules/customer/quotation_list/quotation_request_list_screen.dart';
 import 'package:community_app/modules/customer/service_details/service_details_screen.dart';
 import 'package:community_app/modules/vendor/jobs/widgets/job_history_detail/job_history_detail_screen.dart';
@@ -68,6 +69,7 @@ class AppRoutes {
   static const String payment = '/payment';
   static const String feedback = '/feedback';
   static const String serviceDetails = '/service-details';
+  static const String previousDetails = '/previous-details';
 
   /// 🧑‍🔧 Vendor
   static const String vendorRegistrationPersonal = '/vendor-registration-personal';
@@ -107,18 +109,14 @@ class AppRouter {
         final args = settings.arguments as Map<String, dynamic>? ?? {};
         final currentIndex = args['currentIndex'] as int?;
         final subCurrentIndex = args['subCurrentIndex'] as int?;
-        screen = VendorBottomScreen(currentIndex: currentIndex, subCurrentIndex: subCurrentIndex,);
+        screen = VendorBottomScreen(currentIndex: currentIndex, subCurrentIndex: subCurrentIndex);
         break;
       case AppRoutes.addQuotation:
         final args = settings.arguments as Map<String, dynamic>? ?? {};
         final jobId = args['jobId'] as int?;
         final serviceId = args['serviceId'] as int?;
         final quotationId = args['quotationId'] as int?;
-        screen = AddQuotationScreen(
-          jobId: jobId,
-          serviceId: serviceId,
-          quotationId: quotationId,
-        );
+        screen = AddQuotationScreen(jobId: jobId, serviceId: serviceId, quotationId: quotationId);
         break;
       case AppRoutes.jobHistoryDetail:
         final jobId = settings.arguments as int;
@@ -127,11 +125,11 @@ class AppRouter {
       case AppRoutes.quotationDetails:
         screen = QuotationDetailScreen();
         break;
-        case AppRoutes.progressUpdate:
-          final args = settings.arguments as Map<String, dynamic>? ?? {};
-          final jobId = args['jobId'] as int?;
-          final customerId = args['customerId'] as int?;
-          final status = args['status'] as String?;
+      case AppRoutes.progressUpdate:
+        final args = settings.arguments as Map<String, dynamic>? ?? {};
+        final jobId = args['jobId'] as int?;
+        final customerId = args['customerId'] as int?;
+        final status = args['status'] as String?;
         screen = ProgressUpdateScreen(jobId: jobId, customerId: customerId, status: status);
         break;
 
@@ -170,7 +168,7 @@ class AppRouter {
         screen = QuotationListScreen(jobId: args);
         break;
 
-        case AppRoutes.quotationRequestList:
+      case AppRoutes.quotationRequestList:
         screen = QuotationRequestListScreen();
         break;
       case AppRoutes.jobVerification:
@@ -179,11 +177,15 @@ class AppRouter {
       case AppRoutes.payment:
         screen = PaymentScreen();
         break;
-        case AppRoutes.feedback:
+      case AppRoutes.feedback:
         screen = FeedbackScreen();
         break;
-        case AppRoutes.serviceDetails:
+      case AppRoutes.serviceDetails:
         screen = ServiceDetailsScreen();
+        break;
+      case AppRoutes.previousDetails:
+        final args = settings.arguments as int;
+        screen = PreviousDetailScreen(jobId: args,);
         break;
 
       // 🌐 Common

@@ -13,6 +13,7 @@ class QuotationRequestRequest {
   int? serviceId;
   int? vendorId;
   int? customerId;
+  int? fromCustomerId;
   bool? active;
   String? createdBy;
   String? status;
@@ -23,6 +24,7 @@ class QuotationRequestRequest {
     this.serviceId,
     this.vendorId,
     this.customerId,
+    this.fromCustomerId,
     this.active,
     this.createdBy,
     this.status,
@@ -34,6 +36,7 @@ class QuotationRequestRequest {
     serviceId: json["serviceId"],
     vendorId: json["vendorId"],
     customerId: json["customerId"],
+    fromCustomerId: json["FromCustomerId"],
     active: json["active"],
     createdBy: json["createdBy"],
     status: json["status"],
@@ -45,6 +48,7 @@ class QuotationRequestRequest {
     "serviceId": serviceId,
     "vendorId": vendorId,
     "customerId": customerId,
+    "FromCustomerId": fromCustomerId,
     "active": active,
     "createdBy": createdBy,
     "status": status,

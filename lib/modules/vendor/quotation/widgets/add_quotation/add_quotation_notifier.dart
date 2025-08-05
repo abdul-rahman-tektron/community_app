@@ -20,6 +20,14 @@ class AddQuotationNotifier extends BaseChangeNotifier {
 
   double get grandTotal => subTotal + vat;
 
+  AddQuotationNotifier() {
+    initializeData();
+  }
+
+  initializeData() async {
+    await loadUserData();
+  }
+
   Future<void> submitQuotation() async {
     try {
       // Build API request object

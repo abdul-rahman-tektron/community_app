@@ -18,6 +18,7 @@ extension StringExtensions on String {
   bool isArabic() {
     final arabicRegExp = RegExp(r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]');
     return arabicRegExp.hasMatch(this);
+
   }
 
   /// Parses a date string in `dd/MM/yyyy` format and returns a DateTime
@@ -84,6 +85,8 @@ extension DateFormatExtension on DateTime {
     final pattern = withTime ? 'dd/MM/yyyy, hh:mm a' : 'dd/MM/yyyy';
     return DateFormat(pattern).format(this);
   }
+
+  String formatFullDateTime() => DateFormat('dd MMM yyyy, hh:mm a').format(this);
 
   String formatDate() => DateFormat('dd MMM yyyy').format(this); // e.g. 08 Jul 2025
   String formatTime() => DateFormat('hh:mm a').format(this); // e.g. 03:45 PM

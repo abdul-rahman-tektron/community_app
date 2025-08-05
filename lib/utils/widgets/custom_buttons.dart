@@ -11,6 +11,8 @@ class CustomButton extends StatelessWidget {
   final Color? backgroundColor;
   final TextStyle? textStyle;
   final IconData? icon;
+  final Color? iconColor;
+  final double? iconSize;
   final bool iconOnLeft;
   final bool isLoading;
   final bool fullWidth;
@@ -32,6 +34,8 @@ class CustomButton extends StatelessWidget {
     this.height,
     this.radius,
     this.borderColor,
+    this.iconColor,
+    this.iconSize,
     this.padding,
   });
 
@@ -70,7 +74,7 @@ class CustomButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (icon != null && iconOnLeft) ...[
-              Icon(icon, size: 20, color: resolvedTextColor),
+              Icon(icon, size: iconSize ?? 20, color: iconColor ?? resolvedTextColor),
               5.horizontalSpace,
             ],
             FittedBox(
@@ -81,7 +85,7 @@ class CustomButton extends StatelessWidget {
             ),
             if (icon != null && !iconOnLeft) ...[
               5.horizontalSpace,
-              Icon(icon, size: 20, color: resolvedTextColor),
+              Icon(icon, size: iconSize ?? 20, color: iconColor ?? resolvedTextColor),
             ],
           ],
         ),
