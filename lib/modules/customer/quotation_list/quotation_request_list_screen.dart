@@ -41,13 +41,7 @@ class QuotationRequestListScreen extends StatelessWidget {
                       children: [_buildHeader()],
                     ),
                     10.verticalSpace,
-                    ...List.generate(
-                      notifier.requests.reversed.length,
-                          (i) {
-                        final request = notifier.requests.reversed.toList()[i];
-                        return _buildRequestCard(context, notifier, i, request);
-                      },
-                    ),
+                    ..._buildFilteredRequests(context, notifier),
                   ],
                 ),
               ),
@@ -55,6 +49,26 @@ class QuotationRequestListScreen extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  List<Widget> _buildFilteredRequests(BuildContext context, QuotationRequestListNotifier notifier) {
+    final filteredRequests = notifier.requests
+        .where((r) => r.status == "Accepted") // <-- your condition here
+        .toList()
+        .reversed
+        .toList();
+
+    if (filteredRequests.isEmpty) {
+      return [const Center(child: Text("No Accepted Requests"))];
+    }
+
+    return List.generate(
+      filteredRequests.length,
+          (i) {
+        final request = filteredRequests[i];
+        return _buildRequestCard(context, notifier, i, request);
+      },
     );
   }
 
@@ -73,7 +87,20 @@ class QuotationRequestListScreen extends StatelessWidget {
   Widget _buildRequestCard(BuildContext context, QuotationRequestListNotifier notifier, int index, CustomerRequestListData request) {
 
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, AppRoutes.quotationList, arguments: request.jobId),
+      onTap: () {
+        if(request.distributions?.isNotEmpty ?? false) {
+          Navigator.pushNamed(context, AppRoutes.quotationList, arguments: request.jobId);
+        } else {
+          Navigator.pushNamed(
+            context,
+            AppRoutes.topVendors,
+            arguments: {
+              'jobId': request.jobId,
+              'serviceId': request.serviceId,
+            },
+          );
+        }
+      },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         width: double.infinity,

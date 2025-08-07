@@ -17,18 +17,18 @@ class OngoingServiceScreen extends StatelessWidget {
           if (notifier.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          // if (notifier.ongoingJobs.isEmpty) {
-          //   return const Center(child: Text("No ongoing jobs."));
-          // }
+          if (notifier.ongoingJobs.isEmpty) {
+            return const Center(child: Text("No ongoing jobs."));
+          }
           return ListView.builder(
-            itemCount: 1,
+            itemCount: notifier.ongoingJobs.length,
             itemBuilder: (context, index) {
-              // final job = notifier.ongoingJobs[index];
+              final job = notifier.ongoingJobs[index];
               return OngoingServiceCard(
                 job: OngoingJobsAssignedData(),
                 onViewDetails: () {
                   Navigator.pushNamed(context, AppRoutes.progressUpdate,
-                      arguments: {"jobId": 123, "status": "Job Assigned"});
+                      arguments: {"jobId": job.jobId, "status": job.jobStatusCategory});
                 },
               );
             },

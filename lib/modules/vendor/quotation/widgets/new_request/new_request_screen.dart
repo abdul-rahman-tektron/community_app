@@ -23,9 +23,9 @@ class NewRequestScreen extends StatelessWidget {
                 final request = notifier.requests[index];
 
                 // Check response status for each item
-                if (request.quotationResponseStatus?.toLowerCase() != "initiated") {
-                  return const SizedBox.shrink(); // Don't display if not "Initiated"
-                }
+                // if (request.quotationResponseStatus?.toLowerCase() != "initiated" || request.quotationResponseStatus?.toLowerCase() != "") {
+                //   return const SizedBox.shrink(); // Don't display if not "Initiated"
+                // }
 
                 return NewRequestCard(
                   request: request,
