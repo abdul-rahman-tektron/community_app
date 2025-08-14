@@ -19,6 +19,7 @@ class VendorDashboardNotifier extends BaseChangeNotifier {
   }
 
   initializeData() async {
+    await loadUserData();
     await apiDashboard();
   }
 
@@ -40,6 +41,8 @@ class VendorDashboardNotifier extends BaseChangeNotifier {
         pendingPayment = result.stats?.pendingPayment ?? 0;
         acceptedCount = result.stats?.accepted ?? 0;
         rejectedCount = result.stats?.rejected ?? 0;
+        print("acceptedCount test");
+        print(acceptedCount);
         notifyListeners();
       } else {
         debugPrint("Unexpected result type from apiDashboard");
@@ -129,7 +132,7 @@ class VendorDashboardNotifier extends BaseChangeNotifier {
   int? get acceptedCount => _acceptedCount;
 
   set acceptedCount(int? value) {
-    if (_acceptedCount != value) return;
+    if (_acceptedCount == value) return;
     _acceptedCount = value;
     notifyListeners();
   }
@@ -137,7 +140,7 @@ class VendorDashboardNotifier extends BaseChangeNotifier {
   int? get rejectedCount => _rejectedCount;
 
   set rejectedCount(int? value) {
-    if (_rejectedCount != value) return;
+    if (_rejectedCount == value) return;
     _rejectedCount = value;
     notifyListeners();
   }
@@ -145,7 +148,7 @@ class VendorDashboardNotifier extends BaseChangeNotifier {
   int? get newRequest => _newRequest;
 
   set newRequest(int? value) {
-    if (_newRequest != value) return;
+    if (_newRequest == value) return;
     _newRequest = value;
     notifyListeners();
   }
@@ -153,7 +156,7 @@ class VendorDashboardNotifier extends BaseChangeNotifier {
   int? get awaitingQuotation => _awaitingQuotation;
 
   set awaitingQuotation(int? value) {
-    if (_awaitingQuotation != value) return;
+    if (_awaitingQuotation == value) return;
     _awaitingQuotation = value;
     notifyListeners();
   }
@@ -161,7 +164,7 @@ class VendorDashboardNotifier extends BaseChangeNotifier {
   int? get inProgress => _inProgress;
 
   set inProgress(int? value) {
-    if (_inProgress != value) return;
+    if (_inProgress == value) return;
     _inProgress = value;
     notifyListeners();
   }
@@ -169,7 +172,7 @@ class VendorDashboardNotifier extends BaseChangeNotifier {
   int? get pendingPayment => _pendingPayment;
 
   set pendingPayment(int? value) {
-    if (_pendingPayment != value) return;
+    if (_pendingPayment == value) return;
     _pendingPayment = value;
     notifyListeners();
   }

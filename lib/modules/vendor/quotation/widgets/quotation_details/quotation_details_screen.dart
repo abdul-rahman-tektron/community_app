@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:community_app/modules/vendor/quotation/widgets/quotation_details/quotation_details_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
@@ -12,12 +14,15 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class QuotationDetailScreen extends StatelessWidget {
-  const QuotationDetailScreen({super.key});
+  final int? jobId;
+  final int? quotationResponseId;
+
+  const QuotationDetailScreen({super.key, this.jobId, this.quotationResponseId});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => QuotationDetailsNotifier(),
+      create: (_) => QuotationDetailsNotifier(jobId, quotationResponseId),
       child: Consumer<QuotationDetailsNotifier>(
         builder: (context, notifier, _) {
           return Scaffold(
@@ -27,15 +32,15 @@ class QuotationDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: Column(
                 children: [
-                  buildTitle(context, notifier),
-                  _buildCustomerInfo(context, notifier),
-                  Divider(),
+                  buildTitle(context),
+                  buildCustomerInfo(context, notifier),
+                  const Divider(),
                   10.verticalSpace,
-                  _buildQuotationTable(context, notifier),
+                  _buildQuotationTable(context, notifier), // Replaced table
                   10.verticalSpace,
-                  Divider(),
+                  const Divider(),
                   10.verticalSpace,
-                  buildNotes(notifier.notes),
+                  buildNotes(notifier),
                   10.verticalSpace,
                   _buildPrice(context, notifier),
                   if (notifier.isRejected)
@@ -55,40 +60,19 @@ class QuotationDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget buildTitle(BuildContext context, QuotationDetailsNotifier notifier) {
+  Widget buildTitle(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text("Quotation Details", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          _buildBackButton(context),
         ],
       ),
     );
   }
 
-  Widget _buildBackButton(BuildContext context) {
-    return Align(
-      alignment: Alignment.topRight,
-      child: InkWell(
-        onTap: () {
-          Navigator.pop(context);
-        },
-        child: Container(
-          padding: EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.textPrimary, width: 1.5),
-          ),
-          child: Icon(LucideIcons.arrowLeft),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCustomerInfo(BuildContext context, QuotationDetailsNotifier notifier) {
+  Widget buildCustomerInfo(BuildContext context, QuotationDetailsNotifier notifier) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
       padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 15),
@@ -97,49 +81,51 @@ class QuotationDetailScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(notifier.customerName, style: AppFonts.text16.semiBold.style),
+          Text(notifier.jobDetail.customerName ?? "Customer Name", style: AppFonts.text16.semiBold.style),
           5.verticalSpace,
-          Text(notifier.serviceName, style: AppFonts.text14.regular.style),
+          Text(notifier.jobDetail.serviceName ?? "Service Name", style: AppFonts.text14.regular.style),
           5.verticalSpace,
           _iconLabelRow(
             icon: LucideIcons.phone,
-            label: notifier.phone,
+            label: notifier.jobDetail.phoneNumber ?? "---",
             bgColor: const Color(0xffeff7ef),
             iconColor: Colors.green,
           ),
           5.verticalSpace,
           _iconLabelRow(
             icon: LucideIcons.mapPin,
-            label: notifier.location,
+            label: notifier.jobDetail.address ?? "---",
             bgColor: const Color(0xffe7f3f9),
             iconColor: Colors.blue,
           ),
           5.verticalSpace,
-          Text("Requested Date: ${notifier.requestedDate}", style: AppFonts.text14.regular.style),
-          10.verticalSpace,
-          Row(
-            children: [
-              Text("Status: ", style: AppFonts.text14.regular.style),
-              Text(
-                notifier.status.name.toCapitalize(),
-                style: AppFonts.text14.semiBold.style.copyWith(
-                  color: notifier.status.color,
-                ),
-              ),
-            ],
-          ),
+          Text("Requested Date: ${notifier.jobDetail.expectedDate?.formatFullDateTime() ?? "00/00/0000"}", style: AppFonts.text14.regular.style),
           10.verticalSpace,
           Text.rich(
             TextSpan(
               children: [
+                const TextSpan(text: 'Priority: ', style: TextStyle(fontSize: 14)),
                 TextSpan(
-                  text: "Job Description: ",
-                  style: AppFonts.text14.semiBold.style, // Bold for "Remarks:"
+                  text: notifier.jobDetail.priority ?? "None",
+                  style: AppFonts.text14.regular.red.style,
                 ),
-                TextSpan(
-                  text: "We’re planning to repaint three bedrooms. One of them has old wallpaper that needs to be removed first. The other two just need surface preparation and a fresh coat of paint. We’d like durable, washable paint since we have young kids. Colors will be provided once the quote is finalized.",
-                  style: AppFonts.text14.regular.style, // Regular for content
-                ),
+              ],
+            ),
+          ),
+          10.verticalSpace,
+          if (notifier.jobDetail.fileContent != null)
+            Image.memory(
+              base64Decode(notifier.jobDetail.fileContent ?? ""),
+              height: 100,
+              width: 100,
+              fit: BoxFit.cover,
+            ),
+          10.verticalSpace,
+          Text.rich(
+            TextSpan(
+              children: [
+                const TextSpan(text: "Job Description: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                TextSpan(text: notifier.jobDetail.remarks ?? "Not Added"),
               ],
             ),
           ),
@@ -149,6 +135,11 @@ class QuotationDetailScreen extends StatelessWidget {
   }
 
   Widget _buildQuotationTable(BuildContext context, QuotationDetailsNotifier notifier) {
+    final items = notifier.quotationDetail.items ?? [];
+
+    print("items dataa");
+    print(items);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 18.0),
       width: double.infinity,
@@ -166,15 +157,25 @@ class QuotationDetailScreen extends StatelessWidget {
             ],
           ),
           10.verticalSpace,
-          ...notifier.quotationItems.map((item) {
+          ...items.map((item) {
+            final product = item.product ?? "";
+            final quantity = item.quantity ?? "-";
+            final price = item.price ?? 0.0;
+            final totalAmount = item.totalAmount ?? 0.0;
+
+            print("Product: $product");
+            print("Quantity: $quantity");
+            print("Price: $price");
+            print("Total Amount: $totalAmount");
+
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 6.0),
               child: Row(
                 children: [
-                  Expanded(child: Text(item.product)),
-                  SizedBox(width: 50, child: Text(item.qty.toString())),
-                  SizedBox(width: 80, child: Text(item.unitPrice.toStringAsFixed(2))),
-                  SizedBox(width: 85, child: Text(item.lineTotal.toStringAsFixed(2))),
+                  Expanded(child: Text(product)),
+                  SizedBox(width: 50, child: Text(quantity == 0 ? "-" : quantity.toString())),
+                  SizedBox(width: 80, child: Text(price.toStringAsFixed(2))),
+                  SizedBox(width: 85, child: Text(totalAmount.toStringAsFixed(2))),
                 ],
               ),
             );
@@ -184,8 +185,24 @@ class QuotationDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget buildNotes(String notes) {
-    if (notes.trim().isEmpty) return const SizedBox.shrink();
+  // Widget _buildItemRow(QuotationItemModel item, {required bool isService}) {
+  //   final lineTotal = item.lineTotal;
+  //
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(vertical: 4.0),
+  //     child: Row(
+  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //       children: [
+  //         Expanded(flex: 4, child: Text(item.product, style: const TextStyle(fontSize: 14))),
+  //         Expanded(flex: 3, child: Text("AED ${item.unitPrice.toStringAsFixed(2)}", textAlign: TextAlign.right)),
+  //         Expanded(flex: 3, child: Text("AED ${lineTotal.toStringAsFixed(2)}", textAlign: TextAlign.right)),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  Widget buildNotes(QuotationDetailsNotifier notifier) {
+    if (notifier.quotationDetail.quotationDetails?.trim().isEmpty ?? false) return const SizedBox.shrink();
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 18.0),
@@ -195,15 +212,11 @@ class QuotationDetailScreen extends StatelessWidget {
         children: [
           Text("Notes:", style: AppFonts.text14.semiBold.style),
           const SizedBox(height: 8),
-          Text(
-            notes,
-            style: AppFonts.text14.regular.style,
-          ),
+          Text(notifier.quotationDetail.quotationDetails ?? "", style: AppFonts.text14.regular.style),
         ],
       ),
     );
   }
-
 
   Widget _buildPrice(BuildContext context, QuotationDetailsNotifier notifier) {
     return Container(
@@ -216,7 +229,7 @@ class QuotationDetailScreen extends StatelessWidget {
         children: [
           _priceRow("Subtotal", "AED ${notifier.subTotal.toStringAsFixed(2)}"),
           _priceRow("VAT (5%)", "AED ${notifier.vat.toStringAsFixed(2)}"),
-          Divider(thickness: 1),
+          const Divider(thickness: 1),
           _priceRow("Grand Total", "AED ${notifier.grandTotal.toStringAsFixed(2)}", isBold: true),
         ],
       ),

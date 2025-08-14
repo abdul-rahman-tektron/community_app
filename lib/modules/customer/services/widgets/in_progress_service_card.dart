@@ -1,6 +1,7 @@
 import 'package:community_app/core/model/customer/job/ongoing_jobs_response.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/widgets/custom_linear_progress_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,7 +15,7 @@ class InProgressServiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 15),
+      margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
       padding: EdgeInsets.all(12),
       decoration: AppStyles.commonDecoration,
       child: Column(
@@ -51,7 +52,7 @@ class InProgressServiceCard extends StatelessWidget {
 
   Widget _buildProgressRow() {
     // Using jobStatusCategory as progressStatus fallback
-    final progressStatus = service.jobStatusCategory ?? 'N/A';
+    final progressStatus = service.status ?? 'N/A';
 
     return Row(
       children: [
@@ -136,10 +137,9 @@ class InProgressServiceCard extends StatelessWidget {
   Widget _buildProgressBar() {
     // No progressPercent in CustomerOngoingJobsData - keep static or remove
     // Optionally: you can map jobStatusCategory to a progress % if needed.
-    final progressPercent = 0.0; // Static or custom logic here
 
     return CustomLinearProgressIndicator(
-      percentage: progressPercent,
+      percentage: AppStatus.fromName(service.status ?? "")?.percentage ?? 0,
     );
   }
 }

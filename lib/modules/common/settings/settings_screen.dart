@@ -1,5 +1,4 @@
-import 'package:community_app/core/notifier/language_notifier.dart';
-import 'package:community_app/modules/customer/settings/settings_notifier.dart';
+import 'package:community_app/modules/common/settings/settings_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/images.dart';

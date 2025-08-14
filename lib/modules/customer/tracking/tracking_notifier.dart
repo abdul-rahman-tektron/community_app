@@ -1,8 +1,12 @@
 import 'dart:math';
 
 import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/core/model/customer/job/job_status_tracking/job_status_tracking_request.dart';
+import 'package:community_app/core/model/customer/job/job_status_tracking/job_status_tracking_response.dart';
+import 'package:community_app/core/model/customer/job/job_status_tracking/jobs_status_response.dart';
 import 'package:community_app/core/remote/services/customer/customer_jobs_repository.dart';
 import 'package:community_app/res/colors.dart';
+import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:community_app/utils/map_icon_paint.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -10,9 +14,22 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class TrackingNotifier extends BaseChangeNotifier {
+  int? jobId;
   LatLng? _employeePosition;
   LatLng _customerPosition = const LatLng(25.267416939850616, 55.33019577131006);
   List<LatLng> _routePoints = [];
+
+  List<JobStatusTrackingData> jobStatusTrackingData = [];
+  List<JobStatusResponse> jobStatus = [];
+
+  TrackingNotifier(this.jobId) {
+    initializeData();
+  }
+
+  initializeData() async {
+    await apiJobStatus();
+    await apiJobStatusTracking();
+  }
 
   BitmapDescriptor? _employeeIcon;
   BitmapDescriptor? _customerIcon;
@@ -93,6 +110,54 @@ class TrackingNotifier extends BaseChangeNotifier {
     }
 
     return result;
+  }
+
+  Future<void> apiJobStatusTracking() async {
+    try {
+      isLoading = true;
+      notifyListeners();
+
+      final parsed = await CustomerJobsRepository.instance
+          .apiJobStatusTracking(JobStatusTrackingRequest(jobId: jobId)) as JobStatusTrackingResponse;
+
+      if (parsed.success == true && parsed.data != null) {
+        jobStatusTrackingData = parsed.data!;
+
+        print("jobStatusTrackingData");
+        print(jobStatusTrackingData);
+      }
+    } catch (e, stackTrace) {
+      print("❌ Error fetching quotation requests: $e");
+      print("Stack: $stackTrace");
+      ToastHelper.showError('An error occurred. Please try again.');
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> apiJobStatus() async {
+    try {
+      isLoading = true;
+      notifyListeners();
+
+      final parsed = await CustomerJobsRepository.instance
+          .apiJobStatus();
+
+      if (parsed is List<JobStatusResponse> && parsed.isNotEmpty) {
+        jobStatus = parsed;
+
+        print("jobStatusData");
+        print(jobStatus);
+      }
+    } catch (e, stackTrace) {
+      print("❌ Error fetching quotation requests: $e");
+      print("Stack: $stackTrace");
+      ToastHelper.showError('An error occurred. Please try again.');
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 
   List<ColoredPolylineSegment> _coloredRouteSegments = [];

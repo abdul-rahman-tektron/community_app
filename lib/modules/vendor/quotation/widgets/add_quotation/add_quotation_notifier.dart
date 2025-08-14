@@ -1,11 +1,20 @@
 import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/core/model/common/error/common_response.dart';
+import 'package:community_app/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
+import 'package:community_app/core/model/vendor/jobs/job_info_detail_response.dart';
 import 'package:community_app/core/model/vendor/vendor_quotation/create_job_quotation_request.dart';
+import 'package:community_app/core/remote/services/common_repository.dart';
+import 'package:community_app/core/remote/services/vendor/vendor_dashboard_repository.dart';
 import 'package:community_app/core/remote/services/vendor/vendor_quotation_repository.dart';
+import 'package:community_app/utils/enums.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:flutter/material.dart';
 
 class AddQuotationNotifier extends BaseChangeNotifier {
-  List<QuotationItem> quotationItems = [QuotationItem()];
+  List<QuotationItem> quotationItems = [];
+
+  JobInfoDetailResponse _jobDetail = JobInfoDetailResponse();
 
   int? jobId;
   int? serviceId;
@@ -26,9 +35,54 @@ class AddQuotationNotifier extends BaseChangeNotifier {
 
   initializeData() async {
     await loadUserData();
+    // Add default empty items for both types
+    quotationItems.add(QuotationItem.empty(QuotationItemType.material));
+    quotationItems.add(QuotationItem.empty(QuotationItemType.service));
+    await apiJobInfoDetail();
+    notifyListeners();
   }
 
-  Future<void> submitQuotation() async {
+
+  Future<void> apiJobInfoDetail() async {
+    try {
+      final result = await VendorDashboardRepository.instance.apiJobInfoDetail(jobId?.toString() ?? "0");
+
+      if (result is JobInfoDetailResponse) {
+        jobDetail = result;
+        print("jobDetail test");
+        print(jobDetail);
+        notifyListeners();
+      } else {
+        debugPrint("Unexpected result type from apiDashboard");
+      }
+    } catch (e) {
+      debugPrint("Error in apiDashboard: $e");
+    }
+  }
+
+  Future<void> apiUpdateJobStatus(BuildContext context, int? statusId) async {
+    if (statusId == null) return;
+    try {
+      notifyListeners();
+
+      final parsed = await CommonRepository.instance.apiUpdateJobStatus(
+        UpdateJobStatusRequest(jobId: jobId, statusId: statusId),
+      );
+
+      if (parsed is CommonResponse && parsed.success == true) {
+        Navigator.pop(context);
+      }
+
+    } catch (e, stackTrace) {
+      print("❌ Error updating job status: $e");
+      print("Stack: $stackTrace");
+      ToastHelper.showError('An error occurred. Please try again.');
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  Future<void> submitQuotation(BuildContext context) async {
     try {
       // Build API request object
       final request = VendorCreateJobQuotationRequest(
@@ -54,22 +108,29 @@ class AddQuotationNotifier extends BaseChangeNotifier {
 
       // Call API
       await VendorQuotationRepository.instance.apiVendorCreateJobQuotationRequest(request);
-
+      await apiUpdateJobStatus(context, AppStatus.quotationSubmitted.id);
       ToastHelper.showSuccess("Quotation submitted successfully!");
     } catch (e) {
       ToastHelper.showError("Failed to submit quotation. Please try again.");
     }
   }
 
-  void addItem() {
-    quotationItems.add(QuotationItem());
+  void addItem({QuotationItemType type = QuotationItemType.material}) {
+    quotationItems.add(QuotationItem.empty(type));
     notifyListeners();
   }
 
   void removeItem(int index) {
-    quotationItems[index].dispose();
-    quotationItems.removeAt(index);
-    notifyListeners();
+    final itemToRemove = quotationItems[index];
+    final sameTypeCount = quotationItems.where((item) => item.type == itemToRemove.type).length;
+
+    if (sameTypeCount > 1) {
+      itemToRemove.dispose();
+      quotationItems.removeAt(index);
+      notifyListeners();
+    } else {
+      ToastHelper.showError("At least one ${itemToRemove.type.name} item is required.");
+    }
   }
 
   @override
@@ -80,26 +141,47 @@ class AddQuotationNotifier extends BaseChangeNotifier {
     notesController.dispose();
     super.dispose();
   }
+
+  JobInfoDetailResponse get jobDetail => _jobDetail;
+
+  set jobDetail(JobInfoDetailResponse value) {
+    if (_jobDetail == value) return;
+    _jobDetail = value;
+    notifyListeners();
+  }
 }
 
 
 class QuotationItem {
-  final TextEditingController productController;
-  final TextEditingController qtyController;
-  final TextEditingController unitPriceController;
+  QuotationItemType type;
+  TextEditingController productController;
+  TextEditingController qtyController;
+  TextEditingController unitPriceController;
 
   QuotationItem({
-    String? product,
-    String? qty,
-    String? unitPrice,
-  })  : productController = TextEditingController(text: product),
-        qtyController = TextEditingController(text: qty),
-        unitPriceController = TextEditingController(text: unitPrice);
+    required this.type,
+    required this.productController,
+    required this.qtyController,
+    required this.unitPriceController,
+  });
 
   double get lineTotal {
-    final qty = double.tryParse(qtyController.text) ?? 0;
     final price = double.tryParse(unitPriceController.text) ?? 0;
+    if (type == QuotationItemType.service) {
+      return price;
+    }
+    final qty = double.tryParse(qtyController.text) ?? 0;
     return qty * price;
+  }
+
+
+  factory QuotationItem.empty(QuotationItemType type) {
+    return QuotationItem(
+      type: type,
+      productController: TextEditingController(),
+      qtyController: TextEditingController(),
+      unitPriceController: TextEditingController(),
+    );
   }
 
   void dispose() {
@@ -108,3 +190,4 @@ class QuotationItem {
     unitPriceController.dispose();
   }
 }
+

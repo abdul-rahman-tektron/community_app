@@ -1,8 +1,11 @@
 import 'dart:math';
 
 import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/core/model/common/error/common_response.dart';
+import 'package:community_app/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
 import 'package:community_app/core/model/customer/top_vendors/top_vendors_response.dart';
 import 'package:community_app/core/model/vendor/quotation_request/quotation_request_request.dart';
+import 'package:community_app/core/remote/services/common_repository.dart';
 import 'package:community_app/core/remote/services/customer/customer_dashboard_repository.dart';
 import 'package:community_app/core/remote/services/customer/customer_jobs_repository.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
@@ -80,6 +83,24 @@ class TopVendorsNotifier extends BaseChangeNotifier {
       print("result error");
       print(e);
       ToastHelper.showError('An error occurred. Please try again.');
+      notifyListeners();
+    }
+  }
+
+  Future<void> apiUpdateJobStatus(int? statusId) async {
+    if (statusId == null) return;
+    try {
+      notifyListeners();
+
+      final parsed = await CommonRepository.instance.apiUpdateJobStatus(
+        UpdateJobStatusRequest(jobId: jobId, statusId: statusId),
+      );
+
+    } catch (e, stackTrace) {
+      print("❌ Error updating job status: $e");
+      print("Stack: $stackTrace");
+      ToastHelper.showError('An error occurred. Please try again.');
+    } finally {
       notifyListeners();
     }
   }
@@ -232,7 +253,7 @@ class TopVendorsNotifier extends BaseChangeNotifier {
   Future<void> _handleSubmitRequest(BuildContext context, dynamic result) async {
     print("Result Data");
     print(result);
-    Navigator.pushNamed(context, AppRoutes.newServicesConfirmation, arguments: "67534670");
+    Navigator.pushNamed(context, AppRoutes.newServicesConfirmation, arguments: jobId.toString());
     notifyListeners();
   }
 }

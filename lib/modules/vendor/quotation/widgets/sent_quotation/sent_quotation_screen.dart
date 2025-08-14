@@ -21,28 +21,36 @@ class SentQuotationScreen extends StatelessWidget {
   }
 
   Widget buildBody(BuildContext context, SentQuotationNotifier notifier) {
+    final filteredQuotations = notifier.quotations
+        .where((q) => q.quotationResponseStatus?.toLowerCase() != "accepted")
+        .toList();
+
     return Scaffold(
       body: notifier.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : notifier.quotations.isEmpty
+          : filteredQuotations.isEmpty
           ? const Center(child: Text("No quotations sent."))
           : ListView.builder(
-        itemCount: notifier.quotations.length,
+        itemCount: filteredQuotations.length,
         padding: const EdgeInsets.symmetric(vertical: 10),
         itemBuilder: (context, index) {
-          final quotation = notifier.quotations[index];
-          if (quotation.quotationResponseStatus?.toLowerCase() != "submitted") {
-            return const SizedBox.shrink(); // Don't display if not "Initiated"
-          }
+          final quotation = filteredQuotations[index];
           return QuotationCard(
             quotation: quotation,
             onViewDetails: () {
-              Navigator.pushNamed(context, AppRoutes.quotationDetails, arguments: quotation);
+              Navigator.pushNamed(
+                context,
+                AppRoutes.quotationDetails,
+                arguments: {
+                  'jobId': quotation.jobId,
+                  'quotationResponseId': quotation.quotationResponseId,
+                },
+              ).then((value) {
+                notifier.initializeData();
+              });
             },
             onResend: (quotation.quotationResponseStatus ?? "").toLowerCase() == "rejected"
-                ? () {
-              // Handle resend logic
-            }
+                ? () {}
                 : null,
           );
         },

@@ -17,6 +17,15 @@ class CustomLinearProgressIndicator extends StatelessWidget {
     this.borderRadius = 4.0,
   });
 
+  // Create a lighter version of the given color
+  Color _lighten(Color color, [double amount = 0.3]) {
+    final hsl = HSLColor.fromColor(color);
+    final lightened = hsl.withLightness(
+      (hsl.lightness + amount).clamp(0.0, 1.0),
+    );
+    return lightened.toColor();
+  }
+
   @override
   Widget build(BuildContext context) {
     final clampedPercent = percentage.clamp(0, 100);
@@ -26,16 +35,20 @@ class CustomLinearProgressIndicator extends StatelessWidget {
       child: Container(
         height: height,
         width: double.infinity,
-        decoration: BoxDecoration(
-          color: backgroundColor,
-        ),
+        color: backgroundColor,
         child: FractionallySizedBox(
           alignment: Alignment.centerLeft,
           widthFactor: clampedPercent / 100,
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(borderRadius),
-              color: fillColor,
+              gradient: LinearGradient(
+                colors: [
+                  _lighten(fillColor, 0.3), // Lighter at start
+                  fillColor,                // Darker at end
+                ],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
             ),
           ),
         ),

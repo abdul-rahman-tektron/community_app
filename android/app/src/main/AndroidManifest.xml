@@ -4,6 +4,17 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<!--    <queries>-->
+<!--        <intent>-->
+<!--            <action android:name="android.intent.action.PROCESS_TEXT"/>-->
+<!--            <data android:mimeType="text/plain"/>-->
+<!--        </intent>-->
+<!--        &lt;!&ndash; Add UAE Pass app packages here &ndash;&gt;-->
+<!--        <package android:name="ae.uaepass.mainapp" />-->
+<!--        <package android:name="ae.uaepass.mainapp.qa" />-->
+<!--        <package android:name="ae.uaepass.mainapp.stg" />-->
+<!--    </queries>-->
+
     <application
         android:label="community_app"
         android:name="${applicationName}"
@@ -11,7 +22,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:launchMode="singleTop"
+            android:launchMode="singleTask"
             android:taskAffinity=""
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
@@ -28,6 +39,15 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:host="success" android:scheme="com.example.community_app" />
+                <data android:host="failure" android:scheme="com.example.community_app" />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

@@ -1,6 +1,7 @@
 import 'package:community_app/core/model/vendor/jobs/ongoing_jobs_assigned_response.dart';
 import 'package:community_app/modules/vendor/jobs/widgets/ongoing_service/ongoing_service_card.dart';
 import 'package:community_app/modules/vendor/jobs/widgets/ongoing_service/ongoing_service_notifier.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -23,12 +24,27 @@ class OngoingServiceScreen extends StatelessWidget {
           return ListView.builder(
             itemCount: notifier.ongoingJobs.length,
             itemBuilder: (context, index) {
-              final job = notifier.ongoingJobs[index];
+              final reversedJobs = notifier.ongoingJobs.reversed.toList();
+              final job = reversedJobs[index];
+
+              if((AppStatus.fromName(job.status ?? "")?.id ?? 0) > 12) {
+                return const SizedBox.shrink();
+              }
+
               return OngoingServiceCard(
-                job: OngoingJobsAssignedData(),
+                job: job,
                 onViewDetails: () {
-                  Navigator.pushNamed(context, AppRoutes.progressUpdate,
-                      arguments: {"jobId": job.jobId, "status": job.jobStatusCategory});
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.progressUpdate,
+                    arguments: {
+                      "jobId": job.jobId,
+                      "customerId": job.customerId,
+                      "status": job.status,
+                    },
+                  ).then((value) {
+                    notifier.initializeData();
+                  });
                 },
               );
             },

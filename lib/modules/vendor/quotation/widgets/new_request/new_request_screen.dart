@@ -13,19 +13,28 @@ class NewRequestScreen extends StatelessWidget {
       create: (_) => NewRequestNotifier(),
       child: Consumer<NewRequestNotifier>(
         builder: (context, notifier, _) {
-          return Scaffold(
-            body: notifier.requests.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-              itemCount: notifier.requests.length,
+          return buildBody(context, notifier);
+        },
+      ),
+    );
+  }
+
+  Widget buildBody(BuildContext context, NewRequestNotifier notifier) {
+    final filteredRequests = notifier.requests.where((request) {
+      final status = request.quotationResponseStatus?.toLowerCase();
+      return status != "accepted" && status != "submitted";
+    }).toList();
+
+    return Scaffold(
+      body: notifier.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : filteredRequests.isEmpty
+          ? const Center(child: Text("No new requests."))
+          : ListView.builder(
+              itemCount: filteredRequests.length,
               padding: const EdgeInsets.symmetric(vertical: 10),
               itemBuilder: (context, index) {
-                final request = notifier.requests[index];
-
-                // Check response status for each item
-                // if (request.quotationResponseStatus?.toLowerCase() != "initiated" || request.quotationResponseStatus?.toLowerCase() != "") {
-                //   return const SizedBox.shrink(); // Don't display if not "Initiated"
-                // }
+                final request = filteredRequests[index];
 
                 return NewRequestCard(
                   request: request,
@@ -35,17 +44,16 @@ class NewRequestScreen extends StatelessWidget {
                       AppRoutes.addQuotation,
                       arguments: {
                         'jobId': request.jobId,
-                        'serviceId': 1001,
+                        'serviceId': request.serviceId,
                         'quotationId': request.quotationId,
                       },
-                    );
+                    ).then((value) {
+                      notifier.initializeData();
+                    });
                   },
                 );
               },
             ),
-          );
-        },
-      ),
     );
   }
 }

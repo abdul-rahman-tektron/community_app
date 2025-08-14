@@ -14,6 +14,9 @@ class CustomButton extends StatelessWidget {
   final Color? iconColor;
   final double? iconSize;
   final bool iconOnLeft;
+  final String? image;
+  final double? imageSize;
+  final bool imageOnLeft;
   final bool isLoading;
   final bool fullWidth;
   final double? height;
@@ -29,6 +32,9 @@ class CustomButton extends StatelessWidget {
     this.textStyle,
     this.icon,
     this.iconOnLeft = false,
+    this.imageSize,
+    this.image,
+    this.imageOnLeft = false,
     this.isLoading = false,
     this.fullWidth = true,
     this.height,
@@ -77,6 +83,10 @@ class CustomButton extends StatelessWidget {
               Icon(icon, size: iconSize ?? 20, color: iconColor ?? resolvedTextColor),
               5.horizontalSpace,
             ],
+            if (image != null && imageOnLeft) ...[
+              Image.asset(image ?? "", height: imageSize ?? 20, width: imageSize ?? 20),
+              5.horizontalSpace,
+            ],
             FittedBox(
               child: Text(
                 text,
@@ -86,6 +96,10 @@ class CustomButton extends StatelessWidget {
             if (icon != null && !iconOnLeft) ...[
               5.horizontalSpace,
               Icon(icon, size: iconSize ?? 20, color: iconColor ?? resolvedTextColor),
+            ],
+            if (image != null && !imageOnLeft) ...[
+              5.horizontalSpace,
+              Image.asset(image ?? "", height: imageSize ?? 20, width: imageSize ?? 20),
             ],
           ],
         ),

@@ -43,39 +43,51 @@ class OnGoingJobAssignedResponse {
 class OngoingJobsAssignedData {
   int? jobId;
   String? customerName;
+  int? customerId;
   String? serviceName;
   DateTime? customerRequestedDate;
   double? estimatedAmount;
   String? jobStatusCategory;
+  String? status;
+  dynamic address;
   List<AssignedEmployee>? assignedEmployees;
 
   OngoingJobsAssignedData({
     this.jobId,
     this.customerName,
+    this.customerId,
     this.serviceName,
     this.customerRequestedDate,
     this.estimatedAmount,
     this.jobStatusCategory,
+    this.status,
+    this.address,
     this.assignedEmployees,
   });
 
   factory OngoingJobsAssignedData.fromJson(Map<String, dynamic> json) => OngoingJobsAssignedData(
     jobId: json["jobId"],
     customerName: json["customerName"],
+    customerId: json["customerId"],
     serviceName: json["serviceName"],
     customerRequestedDate: json["customerRequestedDate"] == null ? null : DateTime.parse(json["customerRequestedDate"]),
     estimatedAmount: json["estimatedAmount"],
     jobStatusCategory: json["jobStatusCategory"],
+    status: json["status"],
+    address: json["address"],
     assignedEmployees: json["assignedEmployees"] == null ? [] : List<AssignedEmployee>.from(json["assignedEmployees"]!.map((x) => AssignedEmployee.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
     "jobId": jobId,
     "customerName": customerName,
+    "customerId": customerId,
     "serviceName": serviceName,
     "customerRequestedDate": customerRequestedDate?.toIso8601String(),
     "estimatedAmount": estimatedAmount,
     "jobStatusCategory": jobStatusCategory,
+    "status": status,
+    "address": address,
     "assignedEmployees": assignedEmployees == null ? [] : List<dynamic>.from(assignedEmployees!.map((x) => x.toJson())),
   };
 }

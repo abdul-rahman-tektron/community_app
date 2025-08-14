@@ -11,12 +11,13 @@ import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class TrackingScreen extends StatelessWidget {
-  const TrackingScreen({super.key});
+  final int? jobId;
+  const TrackingScreen({super.key, this.jobId});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => TrackingNotifier()
+      create: (_) => TrackingNotifier(jobId)
         ..loadMarkerIcons()
         ..updateEmployeePosition(
           const LatLng(25.23420588161868, 55.2654526622921),
@@ -103,7 +104,12 @@ class TrackingScreen extends StatelessWidget {
             20.verticalSpace,
             CustomLinearProgressIndicator(percentage: 20),
             15.verticalSpace,
-            const TrackingStepsWidget(currentStep: 3),
+            TrackingStepsWidget(
+              currentStep: notifier.jobStatusTrackingData.isNotEmpty
+                  ? notifier.jobStatusTrackingData.last
+                  : null,
+              jobStatus: notifier.jobStatus,
+            )
           ],
         ),
       ),

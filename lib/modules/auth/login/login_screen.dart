@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:community_app/utils/helpers/use_pass_service.dart';
+import 'package:community_app/utils/widgets/custom_popup.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -130,6 +132,17 @@ class LoginScreen extends StatelessWidget {
             onPressed: () => loginNotifier.performLogin(context),
           ),
           20.verticalSpace,
+          CustomButton(
+            backgroundColor: AppColors.background,
+            borderColor: AppColors.secondary,
+            textStyle: AppFonts.text14.regular.style,
+            image: AppImages.uaePassImage,
+            imageSize: 30,
+            imageOnLeft: true,
+            text: "Sign in with UAE PASS",
+            onPressed: () => loginNotifier.performUaePass(context),
+          ),
+          20.verticalSpace,
           Text.rich(
             TextSpan(
               text: "${context.locale.dontHaveAccount} ",
@@ -177,7 +190,9 @@ class LoginScreen extends StatelessWidget {
   Widget forgetPasswordWidget(BuildContext context, LoginNotifier loginNotifier) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: () {},
+      onTap: () {
+        showForgotPasswordPopup(context);
+      },
       child: Text(context.locale.forgetPassword, style: AppFonts.text14.medium.style),
     );
   }

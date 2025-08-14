@@ -136,14 +136,11 @@ class PreviousDetailNotifier extends BaseChangeNotifier {
   Future<Uint8List> generateInvoicePdf() async {
     final pdf = pw.Document();
 
-    // Load fonts
     final lexend = pw.Font.ttf(await rootBundle.load("assets/fonts/Lexend-Regular.ttf"));
-    final lexendBold = pw.Font.ttf(await rootBundle.load("assets/fonts/Lexend-Regular.ttf")); // Replace with bold if available
+    final lexendBold = pw.Font.ttf(await rootBundle.load("assets/fonts/Lexend-Regular.ttf")); // Use bold font file if available
     final droidKufi = pw.Font.ttf(await rootBundle.load("assets/fonts/DroidKufi-Regular.ttf"));
 
-    // Font resolver for PDF
-    pw.TextStyle pdfTextStyle(String text,
-        {double size = 12, bool bold = false}) {
+    pw.TextStyle pdfTextStyle(String text, {double size = 12, bool bold = false}) {
       final isArabic = RegExp(r'[\u0600-\u06FF]').hasMatch(text);
       return pw.TextStyle(
         font: isArabic ? droidKufi : (bold ? lexendBold : lexend),
@@ -151,45 +148,95 @@ class PreviousDetailNotifier extends BaseChangeNotifier {
       );
     }
 
-    // Load Logo
     final logo = pw.MemoryImage(
-        (await rootBundle.load(AppImages.logo)).buffer.asUint8List());
+      (await rootBundle.load(AppImages.logo)).buffer.asUint8List(),
+    );
 
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(40),
         build: (context) => [
+          // TOP SECTION: Logo + X10 Solutions + Vendor + Receiver & Service Details
+          pw.Center(
+            child: pw.Text("TAX INVOICE",
+                style: pdfTextStyle("INVOICE", size: 20, bold: true)),
+          ),
+          pw.SizedBox(height: 20),
+          pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              // Left side: Logo + X10 Solutions + Vendor details + Bank details below
+              pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  // Logo + Name
+                  pw.Row(
+                    children: [
+                      pw.Image(logo, width: 60, height: 60),
+                      pw.SizedBox(width: 10),
+                      pw.Text(
+                        "Xception",
+                        style: pdfTextStyle("X10 Solutions", size: 24, bold: true),
+                      ),
+                    ],
+                  ),
+                  pw.SizedBox(height: 15),
+                ],
+              ),
+              pw.Column(
+                children: [
+                  pw.Text("Invoice #: INV-2025-0001", style: pdfTextStyle("Invoice #: INV-2025-0001", size: 10)),
+                  pw.Text("Invoice Date: 05 Aug 2025", style: pdfTextStyle("Invoice Date: 05 Aug 2025", size: 10)),
+                ]
+              )
+            ],
+          ),
 
-          /// HEADER
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
+              // Vendor details
               pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Image(logo, width: 60, height: 60),
-                  pw.SizedBox(height: 8),
+
+                  pw.Text("Vendor Details",
+                      style: pdfTextStyle("Vendor Details", size: 14, bold: true)),
+                  pw.SizedBox(height: 5),
                   pw.Text("CoolFix Maintenance LLC",
-                      style: pdfTextStyle("CoolFix Maintenance LLC", size: 16, bold: true)),
-                  pw.Text("Office 123, Dubai, UAE", style: pdfTextStyle("Office 123, Dubai, UAE", size: 10)),
-                  pw.Text("support@coolfix.com", style: pdfTextStyle("support@coolfix.com", size: 10)),
-                  pw.Text("+971 50 123 4567", style: pdfTextStyle("+971 50 123 4567", size: 10)),
+                      style: pdfTextStyle("CoolFix Maintenance LLC", size: 12)),
+                  pw.Text("Office 123, Dubai, UAE",
+                      style: pdfTextStyle("Office 123, Dubai, UAE", size: 12)),
+                  pw.Text("support@coolfix.com",
+                      style: pdfTextStyle("support@coolfix.com", size: 12)),
+                  pw.Text("+971 50 123 4567",
+                      style: pdfTextStyle("+971 50 123 4567", size: 12)),
+                  pw.Text("TRN: 1234567000000000",
+                      style: pdfTextStyle("TRN: 1234567000000000", size: 12)),
                 ],
               ),
+              // Right side: Receiver Details + Service details + Quotation + Total
               pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
+                mainAxisAlignment: pw.MainAxisAlignment.start,
                 children: [
-                  pw.Text("INVOICE",
-                      style: pdfTextStyle("INVOICE", size: 24, bold: true)),
-                  pw.SizedBox(height: 8),
-                  pw.Text("Invoice #: INV-2025-0001", style: pdfTextStyle("Invoice #: INV-2025-0001", size: 10)),
-                  pw.Text("Invoice Date: 05 Aug 2025", style: pdfTextStyle("Invoice Date: 05 Aug 2025", size: 10)),
-                  pw.Text("Job Ref: JOB-98765", style: pdfTextStyle("Job Ref: JOB-98765", size: 10)),
+                  pw.SizedBox(height: 15),
+                  pw.Text("Bank Details",
+                      style: pdfTextStyle("Bank Details", size: 14, bold: true)),
+                  pw.SizedBox(height: 5),
+                  pw.Text("Bank: ABC Bank", style: pdfTextStyle("Bank: ABC Bank", size: 10)),
+                  pw.Text("Account Name: X10 Solutions",
+                      style: pdfTextStyle("Account Name: X10 Solutions", size: 10)),
+                  pw.Text("Account Number: 123456789",
+                      style: pdfTextStyle("Account Number: 123456789", size: 10)),
+                  pw.Text("IBAN: AE07 1234 5678 9012 3456 7890",
+                      style: pdfTextStyle("IBAN: AE07 1234 5678 9012 3456 7890", size: 10)),
                 ],
               ),
-            ],
+            ]
           ),
 
           pw.Divider(height: 30, thickness: 1),
@@ -214,6 +261,7 @@ class PreviousDetailNotifier extends BaseChangeNotifier {
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
                 children: [
                   pw.Text("Service: AC Repair & Service", style: pdfTextStyle("Service: AC Repair & Service", size: 10)),
+                  pw.Text("Job Ref: JOB-98765", style: pdfTextStyle("Job Ref: JOB-98765", size: 10)),
                   pw.Text("Requested: 01 Aug 2025", style: pdfTextStyle("Requested: 01 Aug 2025", size: 10)),
                   pw.Text("Completed: 04 Aug 2025", style: pdfTextStyle("Completed: 04 Aug 2025", size: 10)),
                 ],
@@ -232,6 +280,10 @@ class PreviousDetailNotifier extends BaseChangeNotifier {
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text("Sr NO", style: pdfTextStyle("Sr NO", size: 10, bold: true)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
                     child: pw.Text("Description", style: pdfTextStyle("Description", size: 10, bold: true)),
                   ),
                   pw.Padding(
@@ -240,7 +292,15 @@ class PreviousDetailNotifier extends BaseChangeNotifier {
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(8),
-                    child: pw.Text("Unit Price", style: pdfTextStyle("Unit Price", size: 10, bold: true)),
+                    child: pw.Text("Rate", style: pdfTextStyle("Rate", size: 10, bold: true)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text("Amount", style: pdfTextStyle("Amount", size: 10, bold: true)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text("VAT", style: pdfTextStyle("Vat Amount", size: 10, bold: true)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(8),
@@ -248,8 +308,13 @@ class PreviousDetailNotifier extends BaseChangeNotifier {
                   ),
                 ],
               ),
+              // Data row 1
               pw.TableRow(
                 children: [
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text("1", style: pdfTextStyle("1", size: 10)),
+                  ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(8),
                     child: pw.Text("AC Gas Refill", style: pdfTextStyle("AC Gas Refill", size: 10)),
@@ -266,10 +331,23 @@ class PreviousDetailNotifier extends BaseChangeNotifier {
                     padding: const pw.EdgeInsets.all(8),
                     child: pw.Text("200.00", style: pdfTextStyle("200.00", size: 10)),
                   ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text("10.00", style: pdfTextStyle("10.00", size: 10)), // Example VAT amount
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text("210.00", style: pdfTextStyle("210.00", size: 10)),
+                  ),
                 ],
               ),
+              // Data row 2
               pw.TableRow(
                 children: [
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text("2", style: pdfTextStyle("2", size: 10)),
+                  ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(8),
                     child: pw.Text("Filter Replacement", style: pdfTextStyle("Filter Replacement", size: 10)),
@@ -286,25 +364,79 @@ class PreviousDetailNotifier extends BaseChangeNotifier {
                     padding: const pw.EdgeInsets.all(8),
                     child: pw.Text("100.00", style: pdfTextStyle("100.00", size: 10)),
                   ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text("5.00", style: pdfTextStyle("5.00", size: 10)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text("105.00", style: pdfTextStyle("105.00", size: 10)),
+                  ),
                 ],
               ),
+              // Data row 3
               pw.TableRow(
                 children: [
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text("3", style: pdfTextStyle("3", size: 10)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text("Labor Charge", style: pdfTextStyle("Labor Charge", size: 10)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text("-", style: pdfTextStyle("-", size: 10)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text("-", style: pdfTextStyle("-", size: 10)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text("300.00", style: pdfTextStyle("300.00", size: 10)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text("15.00", style: pdfTextStyle("15.00", size: 10)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text("315.00", style: pdfTextStyle("315.00", size: 10)),
+                  ),
+                ],
+              ),
+              // Data row 4
+              pw.TableRow(
+                children: [
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text("4", style: pdfTextStyle("4", size: 10)),
+                  ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(8),
                     child: pw.Text("Service Charge", style: pdfTextStyle("Service Charge", size: 10)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(8),
-                    child: pw.Text("", style: pdfTextStyle("", size: 10)),
+                    child: pw.Text("-", style: pdfTextStyle("-", size: 10)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(8),
-                    child: pw.Text("", style: pdfTextStyle("", size: 10)),
+                    child: pw.Text("-", style: pdfTextStyle("-", size: 10)),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(8),
-                    child: pw.Text("300.00", style: pdfTextStyle("300.00", size: 10)),
+                    child: pw.Text("200.00", style: pdfTextStyle("200.00", size: 10)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text("10.00", style: pdfTextStyle("10.00", size: 10)),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text("210.00", style: pdfTextStyle("210.00", size: 10)),
                   ),
                 ],
               ),
@@ -316,40 +448,119 @@ class PreviousDetailNotifier extends BaseChangeNotifier {
           /// TOTALS
           pw.Container(
             width: double.infinity,
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.end,
+            child: pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    pw.Text("Subtotal:", style: pdfTextStyle("Subtotal:", size: 10)),
-                    pw.Text("AED 600.00", style: pdfTextStyle("AED 600.00", size: 10)),
-                  ],
+                // LEFT SIDE - Amount in words
+                pw.Expanded(
+                  flex: 2,
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        "VAT Amount in words",
+                        style: pw.TextStyle(
+                          fontSize: 10,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        "FORTY AED",
+                        style: pw.TextStyle(
+                          fontSize: 10,
+                        ),
+                      ),
+                      pw.SizedBox(height: 10),
+                      pw.Text(
+                        "Total Amount in words",
+                        style: pw.TextStyle(
+                          fontSize: 10,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        "EIGHT HUNDRED AND FORTY AED",
+                        style: pw.TextStyle(
+                          fontSize: 10,
+                        ),
+                      ),
+                    ]
+                  )
                 ),
-                pw.SizedBox(height: 4),
-                pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    pw.Text("Tax (5%):", style: pdfTextStyle("Tax (5%):", size: 10)),
-                    pw.Text("AED 15.00", style: pdfTextStyle("AED 15.00", size: 10)),
-                  ],
-                ),
-                pw.Divider(height: 10, thickness: 0.5),
-                pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    pw.Text("Total:", style: pdfTextStyle("Total:", size: 12, bold: true)),
-                    pw.Text("AED 615.00", style: pdfTextStyle("AED 615.00", size: 12, bold: true)),
-                  ],
+                pw.SizedBox(width: 20),
+                // RIGHT SIDE - Totals
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                    children: [
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text("Sub Total", style: pw.TextStyle(fontSize: 10)),
+                          pw.Text("AED 800.00", style: pw.TextStyle(fontSize: 10)),
+                        ],
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text("VAT(5%)", style: pw.TextStyle(fontSize: 10)),
+                          pw.Text("AED 40.00", style: pw.TextStyle(fontSize: 10)),
+                        ],
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Container(
+                        decoration: pw.BoxDecoration(
+                          border: pw.Border(
+                            top: pw.BorderSide(width: 0.5, color: PdfColors.grey),
+                          ),
+                        ),
+                        padding: const pw.EdgeInsets.only(top: 2),
+                        child: pw.Row(
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                          children: [
+                            pw.Text(
+                              "Total",
+                              style: pw.TextStyle(
+                                fontSize: 10,
+                                fontWeight: pw.FontWeight.bold,
+                              ),
+                            ),
+                            pw.Text(
+                              "AED 840.00",
+                              style: pw.TextStyle(
+                                fontSize: 10,
+                                fontWeight: pw.FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
 
-          pw.SizedBox(height: 30),
+          pw.SizedBox(height: 40),
+
+          // Disclaimer footer centered
           pw.Center(
-            child: pw.Text("Thank you for using our services!", style: pdfTextStyle("Thank you for using our services!", size: 12)),
-          )
+            child: pw.Text(
+              "Disclaimer: This is a digital invoice and does not require a physical signature.",
+              style: pdfTextStyle(
+                "Disclaimer: This is a digital invoice and does not require a physical signature.",
+                size: 10,
+                bold: false,
+              ),
+              textAlign: pw.TextAlign.center,
+            ),
+          ),
         ],
       ),
     );

@@ -1,8 +1,13 @@
 import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/core/model/common/error/common_response.dart';
 import 'package:community_app/core/model/customer/job/create_job_booking_request.dart';
+import 'package:community_app/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
 import 'package:community_app/core/model/vendor/quotation_request/quotation_request_list_response.dart';
+import 'package:community_app/core/model/vendor/quotation_request/quotation_response_detail_response.dart';
+import 'package:community_app/core/remote/services/common_repository.dart';
 import 'package:community_app/core/remote/services/customer/customer_dashboard_repository.dart';
+import 'package:community_app/core/remote/services/vendor/vendor_quotation_repository.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:flutter/material.dart';
@@ -27,13 +32,25 @@ class QuotationListNotifier extends BaseChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      final parsed = await CustomerDashboardRepository.instance.apiQuotationList(jobId?.toString() ?? "0") as QuotationRequestListResponse;
+      final parsed = await CustomerDashboardRepository.instance
+          .apiQuotationList(jobId?.toString() ?? "0") as QuotationRequestListResponse;
 
       if (parsed.success == true && parsed.data != null) {
         jobs = parsed.data!;
+
+        print("📦 Jobs Data:");
+        for (var job in jobs) {
+          print("🛠 Job ID: ${job.jobId}");
+          print("📑 Quotations count: ${job.jobQuotationRequest?.length ?? 0}");
+
+          final quotations = job.jobQuotationRequest ?? [];
+          for (var q in quotations) {
+            print("➡️ Quotation ID: ${q.quotationId}, Vendor ID: ${q.toVendorId}, Has Response: ${q.hasQuotationResponse}");
+          }
+        }
       }
     } catch (e, stackTrace) {
-      print("Error fetching quotation requests: $e");
+      print("❌ Error fetching quotation requests: $e");
       print("Stack: $stackTrace");
       ToastHelper.showError('An error occurred. Please try again.');
     } finally {
@@ -75,7 +92,26 @@ class QuotationListNotifier extends BaseChangeNotifier {
   Future<void> _handleCreatedJobSuccess(Object? result,int? jobId, BuildContext context) async {
     if (result is CommonResponse) {
       // Navigate only after successful booking
+      await apiUpdateJobStatus(AppStatus.quotationAccepted.id);
       Navigator.pushNamed(context, AppRoutes.bookingConfirmation, arguments: jobId.toString());
+    }
+  }
+
+  Future<void> apiUpdateJobStatus(int? statusId) async {
+    if (statusId == null) return;
+    try {
+      notifyListeners();
+
+      final parsed = await CommonRepository.instance.apiUpdateJobStatus(
+        UpdateJobStatusRequest(jobId: jobId, statusId: statusId),
+      );
+
+    } catch (e, stackTrace) {
+      print("❌ Error updating job status: $e");
+      print("Stack: $stackTrace");
+      ToastHelper.showError('An error occurred. Please try again.');
+    } finally {
+      notifyListeners();
     }
   }
 
@@ -89,6 +125,8 @@ class QuotationListNotifier extends BaseChangeNotifier {
     }
     notifyListeners();
   }
+
+
 
   List<int> get selectedIndexes => _selected;
 }

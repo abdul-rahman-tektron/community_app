@@ -1,44 +1,42 @@
 import 'dart:ui';
-import 'package:community_app/modules/customer/feedback/feedback_screen.dart';
-import 'package:community_app/modules/customer/job_verification/job_verification_screen.dart';
-import 'package:community_app/modules/customer/payment/payment_screen.dart';
-import 'package:community_app/modules/customer/previous_detail/previous_detail_screen.dart';
-import 'package:community_app/modules/customer/quotation_list/quotation_request_list_screen.dart';
-import 'package:community_app/modules/customer/service_details/service_details_screen.dart';
-import 'package:community_app/modules/vendor/jobs/widgets/job_history_detail/job_history_detail_screen.dart';
-import 'package:community_app/modules/vendor/jobs/widgets/ongoing_service/progress_update/progress_update_screen.dart';
-import 'package:community_app/modules/vendor/quotation/widgets/quotation_details/quotation_details_screen.dart';
-import 'package:flutter/material.dart';
 
 // Auth
 import 'package:community_app/modules/auth/login/login_screen.dart';
+import 'package:community_app/modules/auth/otp_verification/otp_verification_screen.dart';
+import 'package:community_app/modules/auth/reset_password/reset_password_screen.dart';
 import 'package:community_app/modules/auth/user_role_selection/user_role_selection_screen.dart';
-
+import 'package:community_app/modules/common/change_password/change_password_screen.dart';
+import 'package:community_app/modules/common/delete_account/delete_account_screen.dart';
 // Common
 import 'package:community_app/modules/common/error_screen.dart';
-import 'package:community_app/modules/common/network_error_screen.dart';
 import 'package:community_app/modules/common/location/location_screen.dart';
-
+import 'package:community_app/modules/common/network_error_screen.dart';
+import 'package:community_app/modules/common/settings/settings_screen.dart';
 // Customer
 import 'package:community_app/modules/customer/bottom_bar/bottom_screen.dart';
-import 'package:community_app/modules/customer/change_password/change_password_screen.dart';
-import 'package:community_app/modules/customer/delete_account/delete_account_screen.dart';
 import 'package:community_app/modules/customer/edit_profile/edit_profile_screen.dart';
+import 'package:community_app/modules/customer/feedback/feedback_screen.dart';
+import 'package:community_app/modules/customer/job_verification/job_verification_screen.dart';
 import 'package:community_app/modules/customer/new_services/booking_complete.dart';
 import 'package:community_app/modules/customer/new_services/new_service_confirmation.dart';
 import 'package:community_app/modules/customer/new_services/new_services_screen.dart';
+import 'package:community_app/modules/customer/payment/payment_screen.dart';
+import 'package:community_app/modules/customer/previous_detail/previous_detail_screen.dart';
 import 'package:community_app/modules/customer/quotation_list/quotation_list_screen.dart';
+import 'package:community_app/modules/customer/quotation_list/quotation_request_list_screen.dart';
 import 'package:community_app/modules/customer/registration/registration_handler.dart';
 import 'package:community_app/modules/customer/saved_cards/saved_cards_screen.dart';
-import 'package:community_app/modules/customer/settings/settings_screen.dart';
+import 'package:community_app/modules/customer/service_details/service_details_screen.dart';
 import 'package:community_app/modules/customer/top_vendors/top_vendors_screen.dart';
 import 'package:community_app/modules/customer/tracking/tracking_screen.dart';
-
 // Vendor
 import 'package:community_app/modules/vendor/bottom_bar/bottom_bar_screen.dart';
-import 'package:community_app/modules/vendor/quotation/quotation_screen.dart';
+import 'package:community_app/modules/vendor/jobs/widgets/job_history_detail/job_history_detail_screen.dart';
+import 'package:community_app/modules/vendor/jobs/widgets/ongoing_service/progress_update/progress_update_screen.dart';
 import 'package:community_app/modules/vendor/quotation/widgets/add_quotation/add_quotation_screen.dart';
+import 'package:community_app/modules/vendor/quotation/widgets/quotation_details/quotation_details_screen.dart';
 import 'package:community_app/modules/vendor/registration/registration_handler.dart';
+import 'package:flutter/material.dart';
 
 class AppRoutes {
   /// 🔐 Auth
@@ -51,6 +49,8 @@ class AppRoutes {
   static const String changePassword = '/change-password';
   static const String deleteAccount = '/delete-account';
   static const String editProfile = '/edit-profile';
+  static const String otpVerification = '/otp-verification';
+  static const String resetPassword = '/reset-password';
   static const String savedCards = '/saved-cards';
 
   /// 👤 Customer
@@ -100,6 +100,16 @@ class AppRouter {
       case AppRoutes.userRoleSelection:
         screen = const UserRoleSelectionScreen();
         break;
+      case AppRoutes.otpVerification:
+        final args = settings.arguments as String?;
+        screen = OtpVerificationScreen(email: args);
+        break;
+      case AppRoutes.resetPassword:
+        final args = settings.arguments as Map<String, dynamic>? ?? {};
+        final email = args['email'] as String?;
+        final otp = args['otp'] as String?;
+        screen = ResetPasswordScreen(email: email, otp: otp,);
+        break;
 
       // 🧑‍🔧 Vendor
       case AppRoutes.vendorRegistrationHandler:
@@ -123,7 +133,10 @@ class AppRouter {
         screen = JobHistoryDetailScreen(jobId: jobId);
         break;
       case AppRoutes.quotationDetails:
-        screen = QuotationDetailScreen();
+        final args = settings.arguments as Map<String, dynamic>? ?? {};
+        final jobId = args['jobId'] as int?;
+        final quotationResponseId = args['quotationResponseId'] as int?;
+        screen = QuotationDetailScreen(jobId: jobId, quotationResponseId: quotationResponseId);
         break;
       case AppRoutes.progressUpdate:
         final args = settings.arguments as Map<String, dynamic>? ?? {};
@@ -155,7 +168,8 @@ class AppRouter {
         screen = BookingConfirmationScreen(bookingId: bookingId);
         break;
       case AppRoutes.tracking:
-        screen = TrackingScreen();
+        final jobId = settings.arguments as int?;
+        screen = TrackingScreen(jobId: jobId,);
         break;
       case AppRoutes.topVendors:
         final args = settings.arguments as Map<String, dynamic>? ?? {};
@@ -172,7 +186,8 @@ class AppRouter {
         screen = QuotationRequestListScreen();
         break;
       case AppRoutes.jobVerification:
-        screen = JobVerificationScreen();
+        final args = settings.arguments as String?;
+        screen = JobVerificationScreen(jobId: args);
         break;
       case AppRoutes.payment:
         screen = PaymentScreen();

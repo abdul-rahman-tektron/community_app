@@ -1,9 +1,14 @@
 import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/core/model/common/error/common_response.dart';
+import 'package:community_app/core/model/common/error/error_response.dart';
+import 'package:community_app/core/model/common/password/change_password_request.dart';
+import 'package:community_app/core/remote/services/common_repository.dart';
+import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ChangePasswordNotifier extends BaseChangeNotifier {
-  final TextEditingController emailAddressController = TextEditingController();
+  final TextEditingController userIdController = TextEditingController();
   final TextEditingController currentPasswordController = TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
@@ -21,7 +26,7 @@ class ChangePasswordNotifier extends BaseChangeNotifier {
   getUserData() async {
     await loadUserData();
 
-    emailAddressController.text = userData?.email ?? '';
+    userIdController.text = userData?.userId ?? '';
   }
 
   void saveButtonFunctionality(BuildContext context) async {
@@ -32,15 +37,25 @@ class ChangePasswordNotifier extends BaseChangeNotifier {
 
   Future<void> apiChangePassword(BuildContext context) async {
     try {
-      // await AuthRepository().apiUpdatePassword(
-      //   UpdatePasswordRequest(
-      //     sEmail: emailAddressController.text,
-      //     sOldPassword: currentPasswordController.text,
-      //     sPassword: newPasswordController.text,
-      //   ),
-      //   context,
-      // );
+      final parsed = await CommonRepository.instance.apiChangePassword(
+        ChangePasswordRequest(
+          userId: userIdController.text,
+          oldPassword: currentPasswordController.text,
+          newPassword: newPasswordController.text,
+          confirmPassword: confirmPasswordController.text,
+        )
+      );
       // Optionally notify success here, or handle response
+
+      print("parsed.runtimeType");
+      print(parsed.runtimeType);
+
+      if(parsed is CommonResponse && parsed.success == true) {
+        ToastHelper.showSuccess("Password changed successfully");
+        Navigator.pop(context);
+      } else if(parsed is CommonResponse && parsed.success == false) {
+        ToastHelper.showError(parsed.message ?? "Failed to change password");
+      }
     } catch (e) {
       // Handle errors here, e.g., show Toast or dialog
       debugPrint('Error changing password: $e');
@@ -49,7 +64,7 @@ class ChangePasswordNotifier extends BaseChangeNotifier {
 
   @override
   void dispose() {
-    emailAddressController.dispose();
+    userIdController.dispose();
     currentPasswordController.dispose();
     newPasswordController.dispose();
     confirmPasswordController.dispose();

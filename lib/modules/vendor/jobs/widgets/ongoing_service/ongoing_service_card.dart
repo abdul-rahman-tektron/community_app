@@ -2,6 +2,8 @@ import 'package:community_app/core/model/vendor/jobs/ongoing_jobs_assigned_respo
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/extensions.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
+import 'package:community_app/utils/widgets/custom_linear_progress_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -28,10 +30,6 @@ class OngoingServiceCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildTopRow(),
-            10.verticalSpace,
-            Text(job.serviceName ?? "Service Name", style: AppFonts.text14.medium.style),
-            6.verticalSpace,
-            Text("ID: ${job.jobId ?? '-'}", style: AppFonts.text12.regular.grey.style),
             8.verticalSpace,
             Row(
               children: [
@@ -48,11 +46,13 @@ class OngoingServiceCard extends StatelessWidget {
                   ),
                 ),
                 6.horizontalSpace,
-                Text("Dubai Marina, Tower A", style: AppFonts.text14.regular.style), // static if no location
+                Text(job.address ?? '-', style: AppFonts.text14.regular.style), // static if no location
               ],
             ),
             8.verticalSpace,
             _buildTimeAndEmployeeRow(),
+            10.verticalSpace,
+            _buildProgressBar(),
           ],
         ),
       ),
@@ -62,10 +62,35 @@ class OngoingServiceCard extends StatelessWidget {
   Widget _buildTopRow() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(job.customerName ?? "Customer Name", style: AppFonts.text16.semiBold.style),
-        Text(job.customerRequestedDate?.formatDateTime() ?? '-', style: AppFonts.text12.regular.style),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(job.customerName ?? "Customer Name", style: AppFonts.text16.semiBold.style),
+            5.verticalSpace,
+            Text(job.serviceName ?? "Service Name", style: AppFonts.text14.medium.style),
+          ],
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(job.customerRequestedDate?.formatDate() ?? '-', style: AppFonts.text12.regular.style),
+            5.verticalSpace,
+            Text("ID: ${job.jobId ?? '-'}", style: AppFonts.text12.regular.grey.style),
+          ],
+        ),
       ],
+    );
+  }
+
+  Widget _buildProgressBar() {
+    // If you want to use estimatedAmount or progress (you need to decide)
+    print("job.status");
+    print(job.status);
+    return CustomLinearProgressIndicator(
+      percentage: AppStatus.fromName(job.status ?? "")?.percentage ?? 0, // Static or customize as needed
+      borderRadius: 6,
     );
   }
 
@@ -89,7 +114,15 @@ class OngoingServiceCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text("Est. Time: 1:30 PM", style: AppFonts.text12.regular.grey.style), // static if no actual time
+        Expanded(
+          child: Text(AppStatus
+            .fromName(job.status ?? "")
+            ?.name ?? "", style: AppFonts.text12.regular.grey.style,
+          ),
+        ),
+        // static if no actual time
+        if(employee?.employeeName != null) ...[
+          10.horizontalSpace,
         Row(
           children: [
             CircleAvatar(
@@ -104,6 +137,7 @@ class OngoingServiceCard extends StatelessWidget {
             Text(employee?.employeeName ?? "Ali Hassan", style: AppFonts.text12.regular.grey.style),
           ],
         )
+    ]
       ],
     );
   }

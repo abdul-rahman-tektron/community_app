@@ -56,7 +56,13 @@ class FeedbackScreen extends StatelessWidget {
             20.verticalSpace,
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 25.h),
-              child: CustomButton(text: "Submit", onPressed: () {}),
+              child: CustomButton(text: "Submit", onPressed: () {
+                feedbackNotifier.apiUpdateCustomerJobCompletion(
+                  context,
+                   20054,
+                   "Sana",
+                );
+              }),
             ),
           ],
         ),

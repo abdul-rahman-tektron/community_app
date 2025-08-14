@@ -81,9 +81,14 @@ class _AssignBottomSheetState extends State<AssignBottomSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CustomTextField(controller: nameController, fieldName: "Employee Name", skipValidation: true),
+        CustomTextField(controller: nameController,
+            fieldName: "Employee Name",
+            skipValidation: true),
         15.verticalSpace,
-        CustomTextField(controller: phoneController, fieldName: "Employee Mobile Number", skipValidation: true),
+        CustomTextField(controller: phoneController,
+            fieldName: "Employee Mobile Number",
+            skipValidation: true,
+            keyboardType: TextInputType.phone),
       ],
     );
   }

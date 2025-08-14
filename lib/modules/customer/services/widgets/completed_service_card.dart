@@ -3,6 +3,7 @@ import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/extensions.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_linear_progress_indicator.dart';
@@ -18,7 +19,7 @@ class CompletedServiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 15),
+      margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
       padding: EdgeInsets.all(12),
       decoration: AppStyles.commonDecoration,
       child: Column(
@@ -77,7 +78,7 @@ class CompletedServiceCard extends StatelessWidget {
       borderColor: AppColors.primary,
       textStyle: AppFonts.text14.regular.style,
       onPressed: () {
-        Navigator.pushNamed(context, AppRoutes.jobVerification);
+        Navigator.pushNamed(context, AppRoutes.jobVerification, arguments: service.jobId.toString());
       },
       height: 35,
     );
@@ -89,8 +90,7 @@ class CompletedServiceCard extends StatelessWidget {
 
   Widget _buildProgressBar() {
     // No progressPercent in CustomerOngoingJobsData, set static or 100 since it's completed
-    final progressPercent = 100.0;
 
-    return CustomLinearProgressIndicator(percentage: progressPercent);
+    return CustomLinearProgressIndicator(percentage: AppStatus.fromName(service.status ?? "")?.percentage ?? 0);
   }
 }

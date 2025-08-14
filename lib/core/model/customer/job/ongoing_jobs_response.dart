@@ -47,6 +47,7 @@ class CustomerOngoingJobsData {
   DateTime? customerRequestedDate;
   double? estimatedAmount;
   String? jobStatusCategory;
+  String? status;
   List<AssignedEmployee>? assignedEmployees;
 
   CustomerOngoingJobsData({
@@ -56,6 +57,7 @@ class CustomerOngoingJobsData {
     this.customerRequestedDate,
     this.estimatedAmount,
     this.jobStatusCategory,
+    this.status,
     this.assignedEmployees,
   });
 
@@ -66,6 +68,7 @@ class CustomerOngoingJobsData {
     customerRequestedDate: json["customerRequestedDate"] == null ? null : DateTime.parse(json["customerRequestedDate"]),
     estimatedAmount: json["estimatedAmount"],
     jobStatusCategory: json["jobStatusCategory"],
+    status: json["status"],
     assignedEmployees: json["assignedEmployees"] == null ? [] : List<AssignedEmployee>.from(json["assignedEmployees"]!.map((x) => AssignedEmployee.fromJson(x))),
   );
 
@@ -76,6 +79,7 @@ class CustomerOngoingJobsData {
     "customerRequestedDate": customerRequestedDate?.toIso8601String(),
     "estimatedAmount": estimatedAmount,
     "jobStatusCategory": jobStatusCategory,
+    "status": status,
     "assignedEmployees": assignedEmployees == null ? [] : List<dynamic>.from(assignedEmployees!.map((x) => x.toJson())),
   };
 }

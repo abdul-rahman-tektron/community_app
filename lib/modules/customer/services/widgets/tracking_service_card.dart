@@ -1,4 +1,5 @@
 import 'package:community_app/core/model/customer/job/ongoing_jobs_response.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -67,7 +68,7 @@ class TrackingServiceCard extends StatelessWidget {
           borderColor: AppColors.primary,
           textStyle: AppFonts.text14.regular.style,
           onPressed: () {
-            Navigator.pushNamed(context, AppRoutes.tracking, arguments: {"jobId": job.jobId});
+            Navigator.pushNamed(context, AppRoutes.tracking, arguments: job.jobId);
           },
           text: "Track",
         ),
@@ -103,8 +104,10 @@ class TrackingServiceCard extends StatelessWidget {
 
   Widget _buildProgressBar() {
     // If you want to use estimatedAmount or progress (you need to decide)
+    print("job.status");
+    print(job.status);
     return CustomLinearProgressIndicator(
-      percentage: 20, // Static or customize as needed
+      percentage: AppStatus.fromName(job.status ?? "")?.percentage ?? 0, // Static or customize as needed
       borderRadius: 6,
     );
   }

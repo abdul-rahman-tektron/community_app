@@ -40,9 +40,8 @@ class CustomerAuthRepository extends BaseRepository {
     final token = await SecureStorageService.getToken();
 
     final response = await networkRepository.call(
-      method: Method.put,
+      method: Method.post,
       pathUrl: ApiUrls.pathUpdateUser,
-      queryParam: userId,
       body: jsonEncode(requestParams.toJson()),
       headers: buildHeaders(token: token),
     );
@@ -61,6 +60,7 @@ class CustomerAuthRepository extends BaseRepository {
     final response = await networkRepository.call(
       method: Method.delete,
       pathUrl: ApiUrls.pathCustomerDelete,
+
       queryParam: customerId,
       headers: buildHeaders(token: token),
     );

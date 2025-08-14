@@ -18,6 +18,8 @@ enum EmployeeStatus { available, busy, unavailable }
 
 enum CustomerAction { none, siteVisit, requestQuotation }
 
-enum JobPhase { assign, inProgress, completed }
+enum JobPhase { assign, initiated, inProgress, completed }
 
 enum JobStatusCategory { tracking, inProgress, completed, unknown }
+
+enum QuotationItemType { material, service }

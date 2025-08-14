@@ -1,7 +1,9 @@
+import 'dart:convert';
+
+import 'package:community_app/core/model/customer/job/job_completion_details_response.dart';
 import 'package:community_app/modules/customer/job_verification/expand_video_player.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
-import 'package:community_app/res/images.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:flutter/material.dart';
@@ -17,12 +19,13 @@ import 'package:community_app/utils/widgets/custom_drawer.dart';
 import 'package:video_player/video_player.dart';
 
 class JobVerificationScreen extends StatelessWidget {
-  const JobVerificationScreen({super.key});
+  final String? jobId;
+  const JobVerificationScreen({super.key, this.jobId});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => JobVerificationNotifier(),
+      create: (_) => JobVerificationNotifier(jobId),
       child: Consumer<JobVerificationNotifier>(
         builder: (context, notifier, child) {
           return Scaffold(
@@ -49,11 +52,12 @@ class JobVerificationScreen extends StatelessWidget {
                     child: Text("Before & After Images", style: Theme.of(context).textTheme.titleMedium),
                   ),
                   SizedBox(height: 12.h),
-                  _buildBeforeAfterPairs(context, notifier, notifier.imagePairs),
+                  _buildBeforeAfterPairs(context, notifier, notifier.fileData),
                   10.verticalSpace,
                   Divider(),
                   10.verticalSpace,
                   Container(
+                    width: double.infinity,
                     margin: EdgeInsets.symmetric(horizontal: 15),
                     decoration: AppStyles.commonDecoration,
                     padding: EdgeInsets.all(15.w),
@@ -63,7 +67,7 @@ class JobVerificationScreen extends StatelessWidget {
                         Text("Feedback:", style: AppFonts.text14.bold.style),
                         10.verticalSpace,
                         Text(
-                          "The plumbing repair in your kitchen has been completed. We replaced the faulty pipe and ensured there are no leaks. We recommend monitoring the water pressure over the next week. Thank you for trusting us.",
+                          notifier.notes ?? "",
                           style: AppFonts.text14.regular.style,
                         ),
                       ],
@@ -79,8 +83,8 @@ class JobVerificationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBeforeAfterPairs(BuildContext context, JobVerificationNotifier notifier, List<ImagePair> pairs) {
-    if (pairs.isEmpty) return const Text("No image pairs available");
+  Widget _buildBeforeAfterPairs(BuildContext context, JobVerificationNotifier notifier, List<CompletionPhoto> pairs) {
+    if (pairs.isEmpty) return Center(child: const Text("No image pairs available"));
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15.0),
@@ -91,68 +95,74 @@ class JobVerificationScreen extends StatelessWidget {
         separatorBuilder: (_, __) => SizedBox(height: 30.h),
         itemBuilder: (context, index) {
           final pair = pairs[index];
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          return Column(
             children: [
-              // Before image/video + label
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    if (pair.isVideo) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const ExpandedMediaViewer(isVideo: true)),
-                      );
-                    }
-                  },
-                  child: _buildImageWithLabel(
-                    label: "Before",
-                    imageUrl: pair.before,
-                    isVideo: pair.isVideo,
-                    controller: notifier.videoController,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Before image/video + label
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        if (pair.isBeforeVideo ?? false) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const ExpandedMediaViewer(isVideo: true)),
+                          );
+                        }
+                      },
+                      child: _buildImageWithLabel(
+                        label: "Before",
+                        imageUrl: pair.beforePhotoUrl ?? "",
+                        isVideo: pair.isBeforeVideo ?? false,
+                        controller: notifier.videoController,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              10.horizontalSpace,
-              Icon(LucideIcons.arrowRight, size: 28.sp),
-              10.horizontalSpace,
-              // After image + label
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    if (pair.isVideo) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const ExpandedMediaViewer(isVideo: true)),
-                      );
-                    }
-                  },
-                  child: _buildImageWithLabel(
-                    label: "After",
-                    imageUrl: pair.after,
-                    isVideo: pair.isVideo,
-                    controller: notifier.videoController,
+                  10.horizontalSpace,
+                  Icon(LucideIcons.arrowRight300, size: 28.sp),
+                  10.horizontalSpace,
+                  // After image + label
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        if (pair.isAfterVideo ?? false) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const ExpandedMediaViewer(isVideo: true)),
+                          );
+                        }
+                      },
+                      child: _buildImageWithLabel(
+                        label: "After",
+                        imageUrl: pair.afterPhotoUrl ?? "",
+                        isVideo: pair.isBeforeVideo ?? false,
+                        controller: notifier.videoController,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-              if (!pair.isVideo) ...[
-                10.horizontalSpace,
+              if (!((pair.isBeforeVideo ?? false) || (pair.isAfterVideo ?? false))) ...[
+                15.verticalSpace,
                 // Compare button
                 CustomButton(
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => CompareImagesScreen(beforeUrl: pair.before, afterUrl: pair.after),
+                        builder: (_) => CompareImagesScreen(beforeUrl: pair.beforePhotoUrl ?? "", afterUrl: pair.afterPhotoUrl ?? ""),
                       ),
                     );
                   },
+                  icon: LucideIcons.arrowRightLeft300,
+                  iconColor: AppColors.textPrimary,
+                  iconOnLeft: true,
                   backgroundColor: AppColors.white,
                   borderColor: AppColors.primary,
                   textStyle: AppFonts.text14.regular.style,
                   height: 35,
                   padding: EdgeInsets.symmetric(horizontal: 10),
-                  fullWidth: false,
                   text: "Compare",
                 ),
               ],
@@ -174,30 +184,32 @@ class JobVerificationScreen extends StatelessWidget {
         Stack(
           alignment: Alignment.center,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: isVideo && controller != null && controller.value.isInitialized
-                  ? SizedBox(height: 100.h, width: 100.w, child: VideoPlayer(controller))
-                  : !isVideo
-                  ? Image.network(
-                      imageUrl,
-                      height: 100.h,
-                      width: 100.w,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, progress) {
-                        if (progress == null) return child;
-                        return const Center(child: CircularProgressIndicator());
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(Icons.broken_image, size: 50, color: Colors.grey);
-                      },
-                    )
-                  : Container(
-                      height: 100.h,
-                      width: 100.w,
-                      color: Colors.black12,
-                      child: const Center(child: CircularProgressIndicator()),
-                    ),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade500, width: 1),
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: isVideo && controller != null && controller.value.isInitialized
+                    ? SizedBox(height: 100.h, width: 100.w, child: VideoPlayer(controller))
+                    : !isVideo
+                    ? Image.memory(
+                        base64Decode(imageUrl),
+                        height: 100.h,
+                        width: 100.w,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(Icons.broken_image, size: 50, color: Colors.grey);
+                        },
+                      )
+                    : Container(
+                        height: 100.h,
+                        width: 100.w,
+                        color: Colors.black12,
+                        child: const Center(child: CircularProgressIndicator()),
+                      ),
+              ),
             ),
             if (isVideo) const Icon(Icons.play_circle_fill, size: 48, color: Colors.white),
           ],
@@ -220,7 +232,7 @@ class CompareImagesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Compare Images")),
+      appBar: CustomAppBar(),
       body: Column(
         children: [
           Expanded(
@@ -229,7 +241,7 @@ class CompareImagesScreen extends StatelessWidget {
               child: Container(
                 color: Colors.black,
                 child: PhotoView(
-                  imageProvider: NetworkImage(beforeUrl),
+                  imageProvider: MemoryImage(base64Decode(beforeUrl)),
                   backgroundDecoration: const BoxDecoration(color: Colors.black),
                   loadingBuilder: (context, event) => const Center(child: CircularProgressIndicator()),
                   errorBuilder: (context, error, stackTrace) =>
@@ -245,7 +257,7 @@ class CompareImagesScreen extends StatelessWidget {
               child: Container(
                 color: Colors.black,
                 child: PhotoView(
-                  imageProvider: NetworkImage(afterUrl),
+                  imageProvider: MemoryImage(base64Decode(afterUrl)),
                   backgroundDecoration: const BoxDecoration(color: Colors.black),
                   loadingBuilder: (context, event) => const Center(child: CircularProgressIndicator()),
                   errorBuilder: (context, error, stackTrace) =>

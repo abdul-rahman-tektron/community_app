@@ -3,8 +3,14 @@ import 'dart:io';
 
 import 'package:community_app/core/model/common/error/common_response.dart';
 import 'package:community_app/core/model/common/error/error_response.dart';
+import 'package:community_app/core/model/customer/job/job_completion_details_response.dart';
+import 'package:community_app/core/model/customer/job/job_status_tracking/job_status_tracking_request.dart';
+import 'package:community_app/core/model/customer/job/job_status_tracking/job_status_tracking_response.dart';
+import 'package:community_app/core/model/customer/job/job_status_tracking/jobs_status_response.dart';
+import 'package:community_app/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
 import 'package:community_app/core/model/customer/job/new_job_request.dart';
 import 'package:community_app/core/model/customer/job/ongoing_jobs_response.dart';
+import 'package:community_app/core/model/customer/job/update_customer_completion_request.dart';
 import 'package:community_app/core/model/customer/top_vendors/top_vendors_response.dart';
 import 'package:community_app/core/remote/network/api_url.dart';
 import 'package:community_app/core/remote/network/base_repository.dart';
@@ -99,6 +105,77 @@ class CustomerJobsRepository extends BaseRepository {
     if (response?.statusCode == HttpStatus.ok) {
       final ongoingJobAssignedResponse = customerOngoingJobsResponseFromJson(jsonEncode(response?.data));
       return ongoingJobAssignedResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+  Future<Object?> apiUpdateCustomerCompletion(UpdateCustomerCompletionRequest requestParams) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.put,
+      pathUrl: ApiUrls.pathUpdateCustomerCompletion,
+      body: jsonEncode(requestParams.toJson()),
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final commonResponse = commonResponseFromJson(jsonEncode(response?.data));
+      return commonResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+  Future<Object?> apiJobCompletionDetails(String jobId) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.get,
+      pathUrl: ApiUrls.pathJobCompletionDetails,
+      queryParam: jobId,
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final jobCompletionDetailsResponse = jobCompletionDetailsResponseFromJson(jsonEncode(response?.data));
+      return jobCompletionDetailsResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+  Future<Object?> apiJobStatusTracking(JobStatusTrackingRequest requestParams) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.post,
+      pathUrl: ApiUrls.pathJobStatusTracking,
+      body: jsonEncode(requestParams.toJson()),
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final jobStatusTrackingResponse = jobStatusTrackingResponseFromJson(jsonEncode(response?.data));
+      return jobStatusTrackingResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+  Future<Object?> apiJobStatus() async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.post,
+      pathUrl: ApiUrls.pathJobStatus,
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final jobStatusResponse = jobStatusResponseFromJson(jsonEncode(response?.data));
+      return jobStatusResponse;
     } else {
       throw ErrorResponse.fromJson(response?.data ?? {});
     }

@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:community_app/core/model/common/error/common_response.dart';
 import 'package:community_app/core/model/common/error/error_response.dart';
 import 'package:community_app/core/model/customer/top_vendors/top_vendors_response.dart';
+import 'package:community_app/core/model/vendor/quotation_request/quotation_response_detail_response.dart';
 import 'package:community_app/core/model/vendor/vendor_quotation/create_job_quotation_request.dart';
 import 'package:community_app/core/model/vendor/vendor_quotation/vendor_quotation_request_list.dart';
 import 'package:community_app/core/remote/network/api_url.dart';
@@ -27,8 +29,8 @@ class VendorQuotationRepository extends BaseRepository {
     );
 
     if (response?.statusCode == HttpStatus.ok) {
-      final topVendorResponse = topVendorResponseFromJson(jsonEncode(response?.data));
-      return topVendorResponse;
+      final commonResponse = commonResponseFromJson(jsonEncode(response?.data));
+      return commonResponse;
     } else {
       throw ErrorResponse.fromJson(response?.data ?? {});
     }
@@ -49,6 +51,24 @@ class VendorQuotationRepository extends BaseRepository {
     if (response?.statusCode == HttpStatus.ok) {
       final vendorQuotationRequestListResponse = vendorQuotationRequestListResponseFromJson(jsonEncode(response?.data));
       return vendorQuotationRequestListResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+  Future<Object?> apiQuotationDetail(String quotationResponseId) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.get,
+      pathUrl: ApiUrls.pathQuotationResponseDetail,
+      queryParam: quotationResponseId,
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final quotationResponseDetailResponse = quotationResponseDetailResponseFromJson(jsonEncode(response?.data));
+      return quotationResponseDetailResponse;
     } else {
       throw ErrorResponse.fromJson(response?.data ?? {});
     }

@@ -39,9 +39,9 @@ class QuotationListScreen extends StatelessWidget {
                     ),
                     10.verticalSpace,
                     ...notifier.jobs
-                        .expand((job) => job.jobQuotationRequest ?? [])
-                        .map((quotation) => _buildQuotationCard(context, notifier, quotation))
-                        ,
+                        .expand((job) => job.jobQuotationResponce?.map(
+                          (quotation) => _buildQuotationCard(context, notifier, job, quotation),
+                    ) ?? [])
                   ],
                 ),
               ),
@@ -165,7 +165,21 @@ class QuotationListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuotationCard(BuildContext context, QuotationListNotifier notifier, JobQuotationRequest quotation) {
+  Widget _buildQuotationCard(
+      BuildContext context,
+      QuotationListNotifier notifier,
+      QuotationRequestListData job,
+      JobQuotationResponce quotation,
+      ) {
+    final double itemTotal = quotation.jobQuotationResponseItems?.fold(
+      0.0,
+          (sum, item) => (sum ?? 0.0) + (item.totalAmount ?? 0.0),
+    ) ??
+        0.0;
+
+    final double serviceCharge = quotation.serviceCharge ?? 0.0;
+    final double totalWithVat = itemTotal + serviceCharge;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
       decoration: AppStyles.commonDecoration,
@@ -173,18 +187,18 @@ class QuotationListScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Quotation ID: ${quotation.quotationId}', style: AppFonts.text14.medium.style),
+          Text('Quotation ID: ${quotation.quotationResponceId}', style: AppFonts.text14.medium.style),
           5.verticalSpace,
-          Text('Vendor ID: ${quotation.toVendorId}', style: AppFonts.text12.regular.grey.style),
+          Text('Vendor ID: ${quotation.vendorId}', style: AppFonts.text12.regular.grey.style),
           10.verticalSpace,
-          quotation.hasQuotationResponse == true
+          quotation.jobQuotationResponseItems?.isNotEmpty ?? false
               ? Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildQuotationItemsStatic(),
-              _buildServiceCharge(50),
-              _buildTotalWithVat(200),
-              _buildSiteVisitRequired(true),
+              _buildQuotationItemsDynamic(quotation.jobQuotationResponseItems ?? []),
+              _buildServiceCharge(serviceCharge),
+              _buildTotalWithVat(totalWithVat),
+              _buildSiteVisitRequired(job.siteVisitRequired ?? false),
               _buildCompletionAvailability("2 Days", "12 Jul", "10:00 AM"),
               _buildFooterActions(context, notifier, quotation),
             ],
@@ -196,6 +210,24 @@ class QuotationListScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildQuotationItemsDynamic(List<JobQuotationResponseItem> items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Quotation Items:', style: AppFonts.text12.medium.style),
+        8.verticalSpace,
+        ...items.map(
+              (item) => _quotationItem(
+            item.quantity?.toString() ?? "-",
+            item.product ?? "-",
+            'AED ${item.price?.toStringAsFixed(2) ?? "0.00"}',
+          ),
+        ),
+      ],
+    );
+  }
+
 
 
   double _getTextWidth(String text, TextStyle style) {
@@ -339,7 +371,7 @@ class QuotationListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFooterActions(BuildContext context, QuotationListNotifier notifier, JobQuotationRequest quotation) {
+  Widget _buildFooterActions(BuildContext context, QuotationListNotifier notifier, JobQuotationResponce quotation) {
     // final quotation = quotation.jobQuotationRequest?.firstWhere((q) => q.hasQuotationResponse == true);
 
     return Padding(
@@ -356,9 +388,9 @@ class QuotationListScreen extends StatelessWidget {
                     await notifier.apiJobBooking(
                       context,
                       jobId: quotation.jobId ?? 0,
-                      quotationRequestId: quotation?.quotationId ?? 0,
-                      quotationResponseId: quotation?.quotationId ?? 0,
-                      vendorId: quotation?.toVendorId ?? 0,
+                      quotationRequestId: quotation?.quotationResponceId ?? 0,
+                      quotationResponseId: quotation?.quotationResponceId ?? 0,
+                      vendorId: quotation?.vendorId ?? 0,
                       remarks: "Accepted by customer",
                     );
                   },

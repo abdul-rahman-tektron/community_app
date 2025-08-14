@@ -1,24 +1,16 @@
 import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/core/model/vendor/jobs/job_info_detail_response.dart';
+import 'package:community_app/core/model/vendor/quotation_request/quotation_response_detail_response.dart';
+import 'package:community_app/core/remote/services/vendor/vendor_dashboard_repository.dart';
+import 'package:community_app/core/remote/services/vendor/vendor_quotation_repository.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../utils/enums.dart' show QuotationStatus;
 
-class QuotationItemModel {
-  final String product;
-  final int qty;
-  final double unitPrice;
-
-  QuotationItemModel({
-    required this.product,
-    required this.qty,
-    required this.unitPrice,
-  });
-
-  double get lineTotal => qty * unitPrice;
-}
-
 class QuotationDetailsNotifier extends BaseChangeNotifier {
-  // Static/fake data for UI preview
+  int? jobId;
+  int? quotationResponseId;
+
   String customerName = "Ahmed Al Mazroui";
   String phone = "05576263567";
   String location = "Jumeirah, Villa 23";
@@ -26,21 +18,84 @@ class QuotationDetailsNotifier extends BaseChangeNotifier {
   String requestedDate = "3 July 2025";
   String notes = "The quotation covers labor and materials for indoor wall painting only. Any additional work will be quoted separately.";
 
+  JobInfoDetailResponse _jobDetail = JobInfoDetailResponse();
+  QuotationResponseDetailResponse _quotationDetail = QuotationResponseDetailResponse();
+
+  QuotationDetailsNotifier(this.jobId, this.quotationResponseId) {
+    initializeData();
+  }
+
+  Future<void> initializeData() async {
+    await apiJobInfoDetail();
+    await apiQuotationResponseDetail();
+  }
+
+  Future<void> apiJobInfoDetail() async {
+    try {
+      final result = await VendorDashboardRepository.instance.apiJobInfoDetail(jobId?.toString() ?? "0");
+
+      if (result is JobInfoDetailResponse) {
+        jobDetail = result;
+      } else {
+        debugPrint("Unexpected result type from apiJobInfoDetail");
+      }
+    } catch (e) {
+      debugPrint("Error in apiJobInfoDetail: $e");
+    }
+  }
+
+  Future<void> apiQuotationResponseDetail() async {
+    try {
+      final result = await VendorQuotationRepository.instance.apiQuotationDetail(quotationResponseId?.toString() ?? "0");
+
+
+      if (result is QuotationResponseDetailResponse) {
+        quotationDetail = result;
+
+        notifyListeners();
+      } else {
+        debugPrint("Unexpected result type from apiQuotationResponseDetail");
+      }
+    } catch (e) {
+      debugPrint("Error in apiQuotationResponseDetail: $e");
+    }
+  }
+
   QuotationStatus status = QuotationStatus.rejected;
 
-  List<QuotationItemModel> quotationItems = [
-    QuotationItemModel(product: "Wall Paint", qty: 2, unitPrice: 100.0),
-    QuotationItemModel(product: "Ceiling Paint", qty: 1, unitPrice: 120.0),
-  ];
+  /// Direct access to the items list from the quotation detail
+  List<QuotationResponseDetailResponseItem>? get items => quotationDetail.items;
 
-  double get subTotal => quotationItems.fold(0, (sum, item) => sum + item.lineTotal);
+  /// Calculate subtotal from all items (quantity * price or price if quantity is zero)
+  double get subTotal {
+    if (items == null) return 0;
+    return items!.fold(0, (sum, item) {
+      final qty = item.quantity ?? 0;
+      final price = (item.price ?? 0).toDouble();
+      return sum + (qty == 0 ? price : qty * price);
+    });
+  }
+
   double get vat => subTotal * 0.05;
   double get grandTotal => subTotal + vat;
 
   bool get isRejected => status == QuotationStatus.rejected;
 
   void resendQuotation() {
-    // TODO: Implement resend logic
     print("Resending quotation...");
+  }
+
+  JobInfoDetailResponse get jobDetail => _jobDetail;
+  set jobDetail(JobInfoDetailResponse value) {
+    if (_jobDetail == value) return;
+    _jobDetail = value;
+    notifyListeners();
+  }
+
+  QuotationResponseDetailResponse get quotationDetail => _quotationDetail;
+  set quotationDetail(QuotationResponseDetailResponse value) {
+    if (_quotationDetail == value) return;
+    _quotationDetail = value;
+    notifyListeners();
   }
 }

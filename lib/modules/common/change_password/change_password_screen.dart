@@ -1,4 +1,4 @@
-import 'package:community_app/modules/customer/change_password/change_password_notifier.dart';
+import 'package:community_app/modules/common/change_password/change_password_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/utils/enums.dart';
@@ -90,11 +90,11 @@ class ChangePasswordScreen extends StatelessWidget {
       ChangePasswordNotifier changePasswordNotifier,
       ) {
     return CustomTextField(
-      controller: changePasswordNotifier.emailAddressController,
-      fieldName: "Email address",
+      controller: changePasswordNotifier.userIdController,
+      fieldName: "User Id",
       isSmallFieldFont: true,
       isEnable: false,
-      validator: (value) => Validations.validateEmail(context, value),
+      validator: (value) => Validations.validateUserID(context, value),
     );
   }
 

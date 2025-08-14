@@ -1,26 +1,33 @@
 import 'dart:io';
 
+import 'package:community_app/core/model/common/error/error_response.dart';
+import 'package:community_app/core/model/common/password/send_otp_request.dart';
+import 'package:community_app/core/remote/services/common_repository.dart';
 import 'package:community_app/modules/vendor/registration/registration_trading.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/helpers/file_upload_helper.dart';
+import 'package:community_app/utils/helpers/toast_helper.dart';
+import 'package:community_app/utils/regex.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
+import 'package:community_app/utils/widgets/custom_textfields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-void bookingConfirmationPopup(BuildContext context, {required VoidCallback onConfirm}) {
+void bookingConfirmationPopup(
+  BuildContext context, {
+  required VoidCallback onConfirm,
+}) {
   showDialog(
     context: context,
     barrierDismissible: false,
     barrierColor: AppColors.textPrimary.withOpacity(0.4),
     builder: (_) => Dialog(
       backgroundColor: AppColors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       insetPadding: const EdgeInsets.symmetric(horizontal: 15),
       child: Container(
         decoration: AppStyles.commonDecoration,
@@ -29,7 +36,10 @@ void bookingConfirmationPopup(BuildContext context, {required VoidCallback onCon
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Booking Confirmation", style: AppFonts.text20.semiBold.style),
+              Text(
+                "Booking Confirmation",
+                style: AppFonts.text20.semiBold.style,
+              ),
               20.verticalSpace,
               Text(
                 "Are you sure you want to proceed with the booking?",
@@ -67,7 +77,7 @@ void bookingConfirmationPopup(BuildContext context, {required VoidCallback onCon
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                  )
+                  ),
                 ],
               ),
             ],
@@ -79,9 +89,9 @@ void bookingConfirmationPopup(BuildContext context, {required VoidCallback onCon
 }
 
 Future<void> showImageSourceDialog(
-    BuildContext context,
-    Function(File file) onPicked,
-    ) async {
+  BuildContext context,
+  Function(File file) onPicked,
+) async {
   showDialog(
     context: context,
     builder: (ctx) {
@@ -93,10 +103,7 @@ Future<void> showImageSourceDialog(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'Select Image Source',
-                style: AppFonts.text18.bold.style,
-              ),
+              Text('Select Image Source', style: AppFonts.text18.bold.style),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -106,7 +113,9 @@ Future<void> showImageSourceDialog(
                     label: 'Camera',
                     onTap: () async {
                       Navigator.pop(ctx);
-                      final file = await FileUploadHelper.pickImage(fromCamera: true);
+                      final file = await FileUploadHelper.pickImage(
+                        fromCamera: true,
+                      );
                       if (file != null) onPicked(file);
                     },
                   ),
@@ -115,7 +124,9 @@ Future<void> showImageSourceDialog(
                     label: 'Gallery',
                     onTap: () async {
                       Navigator.pop(ctx);
-                      final file = await FileUploadHelper.pickImage(fromCamera: false);
+                      final file = await FileUploadHelper.pickImage(
+                        fromCamera: false,
+                      );
                       if (file != null) onPicked(file);
                     },
                   ),
@@ -126,5 +137,94 @@ Future<void> showImageSourceDialog(
         ),
       );
     },
+  );
+}
+
+void showForgotPasswordPopup(BuildContext context) {
+  final TextEditingController emailController = TextEditingController();
+  final ValueNotifier<bool> isLoading = ValueNotifier(false);
+
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    barrierColor: AppColors.primary.withOpacity(0.4),
+    builder: (popupContext) => Dialog(
+      backgroundColor: AppColors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+      child: ValueListenableBuilder<bool>(
+        valueListenable: isLoading,
+        builder: (_, loading, __) {
+          return Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Forget Password",
+                      style: AppFonts.text20.semiBold.style,
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(popupContext),
+                      child: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+                30.verticalSpace,
+                Text(
+                  "We’ll send a verification code to your email to reset your password.",
+                  style: AppFonts.text14.regular.grey.style,
+                  textAlign: TextAlign.center,
+                ),
+                15.verticalSpace,
+                CustomTextField(
+                  controller: emailController,
+                  fieldName: "Email",
+                ),
+                const SizedBox(height: 20),
+                CustomButton(
+                  text: "Submit",
+                  isLoading: loading,
+                  onPressed: () async {
+                    if (emailController.text.trim().isEmpty) {
+                      ToastHelper.showError("Email is required");
+                      return;
+                    }
+
+                    if (!RegExp(
+                      RegexPatterns.email,
+                    ).hasMatch(emailController.text)) {
+                      ToastHelper.showError("Please enter a valid email");
+                      return;
+                    }
+
+                    isLoading.value = true;
+                    final response = await CommonRepository.instance
+                        .apiForgetPassword(
+                          SendOtpRequest(email: emailController.text),
+                        );
+
+                    isLoading.value = false;
+                    if (response == "OTP sent to your email.") {
+                      Navigator.pop(popupContext);
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.otpVerification,
+                        arguments: emailController.text,
+                      );
+                    } else if (response is ErrorResponse) {
+                      ToastHelper.showError("Invalid email");
+                    }
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ),
   );
 }

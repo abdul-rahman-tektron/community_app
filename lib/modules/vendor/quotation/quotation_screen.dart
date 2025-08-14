@@ -82,6 +82,10 @@ class QuotationScreen extends StatelessWidget {
   }
 
   Widget tabBarView(BuildContext context, QuotationNotifier quotationNotifier) {
-    return Expanded(child: TabBarView(children: [NewRequestScreen(), SentQuotationScreen(), SiteVisitScreen()]));
+    return Expanded(child: TabBarView(children: [
+      NewRequestScreen(),
+      SentQuotationScreen(),
+      SiteVisitScreen()
+    ],),);
   }
 }

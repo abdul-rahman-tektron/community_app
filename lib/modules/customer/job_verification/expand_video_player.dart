@@ -15,7 +15,7 @@ class ExpandedMediaViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => JobVerificationNotifier(),
+      create: (context) => JobVerificationNotifier(""),
       child: Consumer<JobVerificationNotifier>(
         builder: (context, jobVerificationNotifier, child) {
           return buildBody(context, jobVerificationNotifier);
@@ -26,6 +26,7 @@ class ExpandedMediaViewer extends StatelessWidget {
 
   Widget buildBody(BuildContext context, JobVerificationNotifier notifier) {
     final controller = notifier.videoController;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -33,24 +34,27 @@ class ExpandedMediaViewer extends StatelessWidget {
           children: [
             Center(
               child: isVideo
-                  ? controller.value.isInitialized
-                        ? AspectRatio(aspectRatio: controller.value.aspectRatio, child: VideoPlayer(controller))
-                        : const CircularProgressIndicator()
+                  ? (controller == null
+                  ? const CircularProgressIndicator()
+                  : controller.value.isInitialized
+                  ? AspectRatio(
+                aspectRatio: controller.value.aspectRatio,
+                child: VideoPlayer(controller),
+              )
+                  : const CircularProgressIndicator())
                   : Image.asset(
-                      AppImages.loginImage, // Replace with dynamic image path if needed
-                      fit: BoxFit.contain,
-                    ),
+                AppImages.loginImage, // Replace with dynamic image path if needed
+                fit: BoxFit.contain,
+              ),
             ),
 
-            // Controls
-            if (isVideo && controller.value.isInitialized)
+            if (isVideo && controller != null && controller.value.isInitialized)
               Positioned(
                 bottom: 30,
                 left: 20,
                 right: 20,
                 child: Column(
                   children: [
-                    // Slider
                     Slider(
                       value: controller.value.position.inSeconds.toDouble(),
                       max: controller.value.duration.inSeconds.toDouble(),
@@ -58,7 +62,6 @@ class ExpandedMediaViewer extends StatelessWidget {
                         notifier.seekTo(Duration(seconds: value.toInt()));
                       },
                     ),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -66,7 +69,6 @@ class ExpandedMediaViewer extends StatelessWidget {
                         Text(_formatDuration(controller.value.duration), style: const TextStyle(color: Colors.white)),
                       ],
                     ),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -84,7 +86,6 @@ class ExpandedMediaViewer extends StatelessWidget {
                 ),
               ),
 
-            // Close button
             Positioned(
               top: 20,
               left: 20,

@@ -1,70 +1,104 @@
-import 'dart:io';
-
-import 'package:community_app/modules/customer/job_verification/job_verification_screen.dart';
-import 'package:community_app/res/images.dart';
+import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/core/model/customer/job/job_completion_details_response.dart';
+import 'package:community_app/core/remote/services/customer/customer_jobs_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
-class JobVerificationNotifier extends ChangeNotifier {
-  late VideoPlayerController videoController;
+class JobVerificationNotifier extends BaseChangeNotifier {
+  VideoPlayerController? videoController;
   bool isMuted = false;
   bool isFullscreen = false;
 
-  // Add image lists for before and after photos
-  List<ImagePair> imagePairs = [
-    ImagePair(
-      before: "https://d2v5dzhdg4zhx3.cloudfront.net/web-assets/images/storypages/primary/ProductShowcasesampleimages/JPEG/Product+Showcase-1.jpg",
-      after: "https://www.seoclerk.com/pics/407226-2eWiCl1471372939.jpg",
-    ),
-    ImagePair(
-      before: "https://d2v5dzhdg4zhx3.cloudfront.net/web-assets/images/storypages/primary/ProductShowcasesampleimages/JPEG/Product+Showcase-1.jpg",
-      after: "https://www.seoclerk.com/pics/407226-2eWiCl1471372939.jpg",
-    ),
-    ImagePair(
-      before: AppImages.videoPlayer,
-      after: AppImages.videoPlayer,
-      isVideo: true,
-    ),
-    ImagePair(
-      before: "https://jureursicphotography.com/wp-content/uploads/2020/10/2020_02_21_Sephora-Favurite-Box5247.jpg",
-      after: "https://www.seoclerk.com/pics/407226-2eWiCl1471372939.jpg",
-    ),
-  ];
+  String? jobId;
+  String? notes;
 
-  JobVerificationNotifier() {
-    initializeVideo();
+  List<CompletionPhoto> fileData = [];
 
+  JobVerificationNotifier(this.jobId) {
+    fetchJobCompletionDetails(jobId ?? "");
+  }
+
+  Future<void> fetchJobCompletionDetails(String jobId) async {
+    try {
+      final response = await CustomerJobsRepository.instance.apiJobCompletionDetails(jobId);
+      if (response is JobCompletionDetailsResponse) {
+        fileData = response.photos ?? [];
+        notes = response.notes ?? "";
+
+        // After fetching, check if we have any videos
+        _initializeVideoControllerIfNeeded();
+      } else {
+        fileData = [];
+      }
+    } catch (e) {
+      print("Error fetching customer ongoing jobs: $e");
+      fileData = [];
+    }
     notifyListeners();
   }
 
-  void initializeVideo() {
-    videoController = VideoPlayerController.asset('assets/video/sample_video.mp4')
-      ..initialize().then((_) {
-        notifyListeners();
-      });
-    videoController.addListener(notifyListeners);
+  void _initializeVideoControllerIfNeeded() {
+    // Find the first video URL (before or after)
+    String? videoUrl;
+
+    for (var photo in fileData) {
+      if (photo.isBeforeVideo == true && photo.beforePhotoUrl != null && photo.beforePhotoUrl!.isNotEmpty) {
+        videoUrl = photo.beforePhotoUrl;
+        break;
+      }
+      if (photo.isAfterVideo == true && photo.afterPhotoUrl != null && photo.afterPhotoUrl!.isNotEmpty) {
+        videoUrl = photo.afterPhotoUrl;
+        break;
+      }
+    }
+
+    if (videoUrl != null) {
+      // Dispose previous controller if any
+      videoController?.dispose();
+
+      // Here, you might need to load from URL or file
+      // If videoUrl is base64 or local asset, adapt accordingly
+      // For example, if it's a network URL:
+      videoController = VideoPlayerController.network(videoUrl!)
+        ..initialize().then((_) {
+          notifyListeners();
+        });
+      videoController!.addListener(notifyListeners);
+    } else {
+      // No videos found, dispose controller if exists
+      videoController?.dispose();
+      videoController = null;
+    }
   }
 
   void toggleVideoPlayback() {
-    if (videoController.value.isPlaying) {
-      videoController.pause();
+    if (videoController == null) return;
+
+    if (videoController!.value.isPlaying) {
+      videoController!.pause();
     } else {
-      videoController.play();
+      videoController!.play();
     }
     notifyListeners();
   }
 
   void toggleMute() {
+    if (videoController == null) return;
+
     isMuted = !isMuted;
-    videoController.setVolume(isMuted ? 0 : 1);
+    videoController!.setVolume(isMuted ? 0 : 1);
     notifyListeners();
   }
 
   void seekTo(Duration position) {
-    videoController.seekTo(position);
+    if (videoController == null) return;
+
+    videoController!.seekTo(position);
   }
 
   void toggleFullscreen(BuildContext context) {
+    if (videoController == null) return;
+
     isFullscreen = !isFullscreen;
     notifyListeners();
 
@@ -76,8 +110,8 @@ class JobVerificationNotifier extends ChangeNotifier {
             children: [
               Center(
                 child: AspectRatio(
-                  aspectRatio: videoController.value.aspectRatio,
-                  child: VideoPlayer(videoController),
+                  aspectRatio: videoController!.value.aspectRatio,
+                  child: VideoPlayer(videoController!),
                 ),
               ),
               Positioned(
@@ -100,16 +134,10 @@ class JobVerificationNotifier extends ChangeNotifier {
     ));
   }
 
-  // Methods to add images to the before and after lists
-  // void addBeforeImage(File image) {
-  //   beforeImages.add(image);
-  //   notifyListeners();
-  // }
-
-
   @override
   void dispose() {
-    videoController.dispose();
+    videoController?.dispose();
     super.dispose();
   }
 }
+

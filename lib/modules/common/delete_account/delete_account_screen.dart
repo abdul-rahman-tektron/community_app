@@ -1,4 +1,4 @@
-import 'package:community_app/modules/customer/delete_account/delete_account_notifier.dart';
+import 'package:community_app/modules/common/delete_account/delete_account_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/utils/enums.dart';

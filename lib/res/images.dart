@@ -14,6 +14,8 @@ class AppImages {
   static const vendor = 'assets/images/jpg/vendor.jpeg';
   static const owner = 'assets/images/jpg/owner.jpeg';
   static const backgroundPattern = 'assets/images/jpg/background_pattern.jpeg';
+  static const otpVerificationImage = 'assets/images/png/otp_verification.png';
+  static const uaePassImage = 'assets/images/png/uae_pass.png';
 
 
   static const videoPlayer = 'assets/video/sample_video.mp4';

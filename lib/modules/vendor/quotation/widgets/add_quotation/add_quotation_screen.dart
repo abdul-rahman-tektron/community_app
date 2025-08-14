@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:community_app/modules/vendor/quotation/widgets/add_quotation/add_quotation_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/images.dart';
 import 'package:community_app/res/styles.dart';
+import 'package:community_app/utils/enums.dart';
+import 'package:community_app/utils/extensions.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_drawer.dart';
@@ -67,7 +72,9 @@ class AddQuotationScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text("Add Quotation", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          CustomButton(text: "Save Draft", fullWidth: false, height: 35, onPressed: () {}),
+          CustomButton(text: "Reject", fullWidth: false, height: 35, onPressed: () {
+            addQuotationNotifier.apiUpdateJobStatus(context, AppStatus.vendorQuotationRejected.id);
+          }),
         ],
       ),
     );
@@ -82,25 +89,25 @@ class AddQuotationScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Ahmed Al Mazroui", style: AppFonts.text16.semiBold.style),
+          Text(addQuotationNotifier.jobDetail.customerName ?? "Customer Name", style: AppFonts.text16.semiBold.style),
           5.verticalSpace,
-          Text("Painting", style: AppFonts.text14.regular.style),
+          Text(addQuotationNotifier.jobDetail.serviceName ?? "Service Name", style: AppFonts.text14.regular.style),
           5.verticalSpace,
           _iconLabelRow(
             icon: LucideIcons.phone,
-            label: "05576263567",
+            label: addQuotationNotifier.jobDetail.phoneNumber ?? "---",
             bgColor: Color(0xffeff7ef),
             iconColor: Colors.green,
           ),
           5.verticalSpace,
           _iconLabelRow(
             icon: LucideIcons.mapPin,
-            label: "Jumeirah, Villa 23",
+            label: addQuotationNotifier.jobDetail.address ?? "---",
             bgColor: Color(0xffe7f3f9),
             iconColor: Colors.blue,
           ),
           5.verticalSpace,
-          Text("Requested Date: 3 July 2025", style: AppFonts.text14.regular.style),
+          Text("Requested Date: ${addQuotationNotifier.jobDetail.expectedDate?.formatFullDateTime() ?? "00/00/0000"}", style: AppFonts.text14.regular.style),
           10.verticalSpace,
           Text.rich(
             TextSpan(
@@ -110,14 +117,14 @@ class AddQuotationScreen extends StatelessWidget {
                   style: AppFonts.text14.regular.style,
                 ),
                 TextSpan(
-                  text: 'Emergency',
+                  text: addQuotationNotifier.jobDetail.priority ?? "None",
                   style: AppFonts.text14.regular.red.style, // You can change the style here if needed
                 ),
               ],
             ),
           ),
           10.verticalSpace,
-          Image.asset(AppImages.loginImage, height: 100, width: 100, fit: BoxFit.cover,),
+          if(addQuotationNotifier.jobDetail.fileContent != null)Image.memory(base64Decode(addQuotationNotifier.jobDetail.fileContent ?? ""), height: 100, width: 100, fit: BoxFit.cover,),
           10.verticalSpace,
           Text.rich(
             TextSpan(
@@ -127,7 +134,7 @@ class AddQuotationScreen extends StatelessWidget {
                   style: AppFonts.text14.semiBold.style, // Bold for "Remarks:"
                 ),
                 TextSpan(
-                  text: "We’re planning to repaint three bedrooms. One of them has old wallpaper that needs to be removed first. The other two just need surface preparation and a fresh coat of paint. We’d like durable, washable paint since we have young kids. Colors will be provided once the quote is finalized.",
+                  text: addQuotationNotifier.jobDetail.remarks ?? "Not Added",
                   style: AppFonts.text14.regular.style, // Regular for content
                 ),
               ],
@@ -142,44 +149,108 @@ class AddQuotationScreen extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 10),
       width: double.infinity,
-      // decoration: AppStyles.commonDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Quotation Details", style: AppFonts.text16.semiBold.style),
+          // --- Material Section ---
+          Text("Material Details", style: AppFonts.text16.semiBold.style),
+          8.verticalSpace,
+          _buildQuotationTable(notifier, QuotationItemType.material),
+
           10.verticalSpace,
-
-          // Header Row
-          Row(
-            children: [
-              Expanded(child: Text("Product", style: AppFonts.text14.semiBold.style)),
-              5.horizontalSpace,
-              SizedBox(width: 50, child: Text("Qty", style: AppFonts.text14.semiBold.style)),
-              5.horizontalSpace,
-              SizedBox(width: 83, child: Text("Unit Price", style: AppFonts.text14.semiBold.style)),
-              5.horizontalSpace,
-              SizedBox(width: 75, child: Text("Line Total", style: AppFonts.text14.semiBold.style)),
-              SizedBox(width: 20), // space for delete icon
-            ],
+          CustomButton(
+            fullWidth: false,
+            height: 35,
+            iconOnLeft: true,
+            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+            textStyle: AppFonts.text14.regular.style,
+            borderColor: AppColors.primary,
+            backgroundColor: AppColors.white,
+            icon: LucideIcons.plus,
+            onPressed: () => notifier.addItem(type: QuotationItemType.material),
+            text: 'Add Material Row',
           ),
-          5.verticalSpace,
 
-          // Dynamic Rows
-          ...List.generate(notifier.quotationItems.length, (index) {
-            final item = notifier.quotationItems[index];
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: CustomTextField(
-                      controller: item.productController,
-                      fieldName: '',
-                      titleVisibility: false,
-                      skipValidation: true,
-                    ),
+          25.verticalSpace,
+
+          // --- Service Section ---
+          Text("Service Details", style: AppFonts.text16.semiBold.style),
+          8.verticalSpace,
+          _buildQuotationTable(notifier, QuotationItemType.service),
+
+          10.verticalSpace,
+          CustomButton(
+            fullWidth: false,
+            height: 35,
+            iconOnLeft: true,
+            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+            textStyle: AppFonts.text14.regular.style,
+            borderColor: AppColors.primary,
+            backgroundColor: AppColors.white,
+            icon: LucideIcons.plus,
+            onPressed: () => notifier.addItem(type: QuotationItemType.service),
+            text: 'Add Service Row',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuotationTable(AddQuotationNotifier notifier, QuotationItemType type) {
+    final filteredItems = notifier.quotationItems.where((item) => item.type == type).toList();
+
+    return Column(
+      children: [
+        // Header Row: Conditionally render columns depending on type
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                type == QuotationItemType.material ? "Description" : "Description",
+                style: AppFonts.text14.semiBold.style,
+              ),
+            ),
+            5.horizontalSpace,
+            if (type == QuotationItemType.material)
+              SizedBox(width: 52, child: Text("Qty", style: AppFonts.text14.semiBold.style)),
+            if (type == QuotationItemType.material) 5.horizontalSpace,
+            SizedBox(
+              width: 100,
+              child: Text(
+                type == QuotationItemType.material ? "Unit Price" : "Charges",
+                style: AppFonts.text14.semiBold.style,
+              ),
+            ),
+            5.horizontalSpace,
+            SizedBox(
+              width: 90,
+              child: Text(
+                type == QuotationItemType.material ? "Total" : "Total",
+                style: AppFonts.text14.semiBold.style,
+              ),
+            ),
+            SizedBox(width: 20),
+          ],
+        ),
+        5.verticalSpace,
+
+        ...filteredItems.map((item) {
+          final index = notifier.quotationItems.indexOf(item);
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: CustomTextField(
+                    controller: item.productController,
+                    fieldName: '',
+                    titleVisibility: false,
+                    skipValidation: true,
                   ),
-                  5.horizontalSpace,
+                ),
+                5.horizontalSpace,
+
+                if (item.type == QuotationItemType.material)
                   SizedBox(
                     width: 50,
                     child: CustomTextField(
@@ -188,50 +259,35 @@ class AddQuotationScreen extends StatelessWidget {
                       titleVisibility: false,
                       skipValidation: true,
                       keyboardType: TextInputType.number,
-                      onChanged: (_) => notifier.notifyListeners(), // triggers total recalculation
-                    ),
-                  ),
-                  5.horizontalSpace,
-                  SizedBox(
-                    width: 80,
-                    child: CustomTextField(
-                      controller: item.unitPriceController,
-                      fieldName: '',
-                      titleVisibility: false,
-                      skipValidation: true,
-                      keyboardType: TextInputType.number,
                       onChanged: (_) => notifier.notifyListeners(),
                     ),
                   ),
-                  10.horizontalSpace,
-                  SizedBox(width: 70, child: Text(item.lineTotal.toStringAsFixed(2))),
-                  GestureDetector(
-                    onTap: () => notifier.removeItem(index),
-                    child: Icon(Icons.delete, color: Colors.red),
-                  ),
-                ],
-              ),
-            );
-          }),
-          10.verticalSpace,
+                if (item.type == QuotationItemType.material) 5.horizontalSpace,
 
-          Align(
-            alignment: Alignment.centerLeft,
-            child: CustomButton(
-              fullWidth: false,
-              height: 35,
-              iconOnLeft: true,
-              padding: const EdgeInsets.symmetric(horizontal: 15.0),
-              textStyle: AppFonts.text14.regular.style,
-              borderColor: AppColors.primary,
-              backgroundColor: AppColors.white,
-              icon: LucideIcons.plus,
-              onPressed: notifier.addItem,
-              text: 'Add Row',
+                SizedBox(
+                  width: 100,
+                  child: CustomTextField(
+                    controller: item.unitPriceController,
+                    fieldName: '',
+                    titleVisibility: false,
+                    skipValidation: true,
+                    keyboardType: TextInputType.number,
+                    onChanged: (_) => notifier.notifyListeners(),
+                  ),
+                ),
+                10.horizontalSpace,
+
+                SizedBox(width: 90, child: Text(item.lineTotal.toStringAsFixed(2))),
+
+                GestureDetector(
+                  onTap: () => notifier.removeItem(index),
+                  child: const Icon(Icons.delete, color: Colors.red),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
+          );
+        }),
+      ],
     );
   }
 
@@ -241,8 +297,8 @@ class AddQuotationScreen extends StatelessWidget {
       child: CustomTextField(
         controller: notifier.notesController,
         isMaxLines: true,
-        fieldName: '',
-        hintText: "Add Notes",
+        fieldName: "Notes",
+        hintText: "Add any additional notes here",
         titleVisibility: false,
       ),
     );
@@ -272,7 +328,7 @@ class AddQuotationScreen extends StatelessWidget {
       child: CustomButton(
         text: "Submit Quotation",
         onPressed: () async {
-          await notifier.submitQuotation();
+          await notifier.submitQuotation(context);
           Navigator.pop(context);
         },
       ),
