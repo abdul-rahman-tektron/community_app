@@ -28,7 +28,7 @@ class QuotationListScreen extends StatelessWidget {
               body: notifier.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : notifier.jobs.isEmpty
-                  ? const Center(child: Text("No jobs found"))
+                  ? const Center(child: Text("No Quotations found"))
                   : SingleChildScrollView(
                 child: Column(
                   children: [
@@ -187,9 +187,12 @@ class QuotationListScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Quotation ID: ${quotation.quotationResponceId}', style: AppFonts.text14.medium.style),
-          5.verticalSpace,
-          Text('Vendor ID: ${quotation.vendorId}', style: AppFonts.text12.regular.grey.style),
+          Row(
+            children: [
+              Expanded(child: Text('Vendor: ${quotation.vendorId}', style: AppFonts.text16.regular.style)),
+              Text('Quotation ID: ${quotation.quotationRequestId}', style: AppFonts.text14.medium.style),
+            ],
+          ),
           10.verticalSpace,
           quotation.jobQuotationResponseItems?.isNotEmpty ?? false
               ? Column(
@@ -199,7 +202,8 @@ class QuotationListScreen extends StatelessWidget {
               _buildServiceCharge(serviceCharge),
               _buildTotalWithVat(totalWithVat),
               _buildSiteVisitRequired(job.siteVisitRequired ?? false),
-              _buildCompletionAvailability("2 Days", "12 Jul", "10:00 AM"),
+              _buildRemarksNotes(job.remarks ?? ""),
+              // _buildCompletionAvailability("2 Days", "12 Jul", "10:00 AM"),
               _buildFooterActions(context, notifier, quotation),
             ],
           )
@@ -343,6 +347,14 @@ class QuotationListScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildRemarksNotes(String remarks) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Text("Remarks: ${remarks}", style: AppFonts.text14.regular.style),
+    );
+
+  }
+
   Widget _buildCompletionAvailability(String completion, String date, String time) {
     return Padding(
       padding: const EdgeInsets.only(top: 12),
@@ -375,7 +387,7 @@ class QuotationListScreen extends StatelessWidget {
     // final quotation = quotation.jobQuotationRequest?.firstWhere((q) => q.hasQuotationResponse == true);
 
     return Padding(
-      padding: const EdgeInsets.only(top: 20),
+      padding: const EdgeInsets.only(top: 10),
       child: Row(
         children: [
           Expanded(
@@ -410,8 +422,8 @@ class QuotationListScreen extends StatelessWidget {
                 // Decline logic
               },
               backgroundColor: AppColors.white,
-              borderColor: AppColors.primary,
-              textStyle: AppFonts.text14.regular.style,
+              borderColor: AppColors.error,
+              textStyle: AppFonts.text14.regular.red.style,
               text: 'Decline',
             ),
           ),
@@ -433,7 +445,7 @@ class QuotationListScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 8),
       decoration: BoxDecoration(color: const Color(0xFFE6E6E6), borderRadius: BorderRadius.circular(5)),
-      child: Text(qty, style: AppFonts.text12.regular.style),
+      child: qty == '0' ? Text("-", style: AppFonts.text12.regular.style) : Text(qty, style: AppFonts.text12.regular.style),
     );
   }
 }

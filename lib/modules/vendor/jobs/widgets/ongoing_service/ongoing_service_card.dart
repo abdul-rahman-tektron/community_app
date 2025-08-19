@@ -49,8 +49,6 @@ class OngoingServiceCard extends StatelessWidget {
                 Text(job.address ?? '-', style: AppFonts.text14.regular.style), // static if no location
               ],
             ),
-            8.verticalSpace,
-            _buildTimeAndEmployeeRow(),
             10.verticalSpace,
             _buildProgressBar(),
           ],
@@ -86,11 +84,38 @@ class OngoingServiceCard extends StatelessWidget {
 
   Widget _buildProgressBar() {
     // If you want to use estimatedAmount or progress (you need to decide)
-    print("job.status");
-    print(job.status);
-    return CustomLinearProgressIndicator(
-      percentage: AppStatus.fromName(job.status ?? "")?.percentage ?? 0, // Static or customize as needed
-      borderRadius: 6,
+    return Row(
+      children: [
+        _buildIconBox(),
+        10.horizontalSpace,
+        Expanded(
+          child: Column(
+            children: [
+              _buildTimeAndEmployeeRow(),
+              5.verticalSpace,
+              CustomLinearProgressIndicator(
+                percentage: AppStatus.fromName(job.status ?? "")?.percentage ?? 0, // Static or customize as needed
+                borderRadius: 6,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildIconBox() {
+    return Container(
+      padding: const EdgeInsets.all(5),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE6E6E6),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: const Icon(
+        LucideIcons.clockFading,
+        color: Colors.grey,
+        size: 22,
+      ),
     );
   }
 
@@ -120,24 +145,6 @@ class OngoingServiceCard extends StatelessWidget {
             ?.name ?? "", style: AppFonts.text12.regular.grey.style,
           ),
         ),
-        // static if no actual time
-        if(employee?.employeeName != null) ...[
-          10.horizontalSpace,
-        Row(
-          children: [
-            CircleAvatar(
-              radius: 10.r,
-              backgroundColor: Colors.grey.shade300,
-              child: Text(
-                (employee?.employeeName?.isNotEmpty == true ? employee!.employeeName![0] : "A").toUpperCase(),
-                style: AppFonts.text10.medium.white.style,
-              ),
-            ),
-            6.horizontalSpace,
-            Text(employee?.employeeName ?? "Ali Hassan", style: AppFonts.text12.regular.grey.style),
-          ],
-        )
-    ]
       ],
     );
   }

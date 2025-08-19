@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:community_app/core/model/customer/map/map_data.dart';
 import 'package:community_app/modules/customer/edit_profile/edit_profile_notifier.dart';
 import 'package:community_app/res/colors.dart';
@@ -67,10 +69,7 @@ class EditProfileScreen extends StatelessWidget {
   }
 
   Widget titleWidget(BuildContext context, EditProfileNotifier editProfileNotifier) {
-    return Text(
-      "Edit Profile",
-      style: AppFonts.text20.regular.style,
-    );
+    return Text("Edit Profile", style: AppFonts.text20.regular.style);
   }
 
   Widget imageWidget(BuildContext context, EditProfileNotifier editProfileNotifier) {
@@ -78,19 +77,32 @@ class EditProfileScreen extends StatelessWidget {
       children: [
         Container(
           decoration: BoxDecoration(
-              border: Border.all(color: AppColors.primary, width: 2),
-              borderRadius: BorderRadius.circular(100.h)
+            border: Border.all(color: AppColors.primary, width: 2),
+            borderRadius: BorderRadius.circular(100.h),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(100.h),
-            child: editProfileNotifier.uploadedUserProfile != null ? Image.file(
-              editProfileNotifier.uploadedUserProfile!,
-              height: 120.h,
-              width: 120.h,
-              fit: BoxFit.cover,
-            ) : Image.asset(
-              AppImages.userPlaceHolder,
-              height: 120.h, width: 120.h, fit: BoxFit.cover,),),
+            child: editProfileNotifier.uploadedUserProfile != null
+                ? Image.file(
+                    editProfileNotifier.uploadedUserProfile!,
+                    height: 120.h,
+                    width: 120.h,
+                    fit: BoxFit.cover,
+                  )
+                : editProfileNotifier.userData?.image != null
+                ? Image.memory(
+                    base64Decode(editProfileNotifier.userData?.image ?? ""),
+                    height: 120.h,
+                    width: 120.h,
+                    fit: BoxFit.cover,
+                  )
+                : Image.asset(
+                    AppImages.userPlaceHolder,
+                    height: 120.h,
+                    width: 120.h,
+                    fit: BoxFit.cover,
+                  ),
+          ),
         ),
         Positioned(
           right: 0,
@@ -102,12 +114,12 @@ class EditProfileScreen extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(100.h)
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(100.h),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(100.h),
-                child: Icon(LucideIcons.userRoundPen, size: 25, color: AppColors.white,),
+                child: Icon(LucideIcons.userRoundPen, size: 25, color: AppColors.white),
               ),
             ),
           ),
@@ -116,7 +128,10 @@ class EditProfileScreen extends StatelessWidget {
     );
   }
 
-  Future<void> uploadImageWithDialog(BuildContext context, EditProfileNotifier editProfileNotifier) async {
+  Future<void> uploadImageWithDialog(
+    BuildContext context,
+    EditProfileNotifier editProfileNotifier,
+  ) async {
     showImageSourceDialog(context, (file) {
       editProfileNotifier.uploadedUserProfile = file;
 
@@ -173,7 +188,10 @@ class EditProfileScreen extends StatelessWidget {
         10.horizontalSpace,
         InkWell(
           onTap: () async {
-            final result = await Navigator.of(context, rootNavigator: true).pushNamed(AppRoutes.mapLocation);
+            final result = await Navigator.of(
+              context,
+              rootNavigator: true,
+            ).pushNamed(AppRoutes.mapLocation);
             if (result != null && result is MapData) {
               editProfileNotifier.addressController.text = result.address;
               editProfileNotifier.buildingController.text = result.building;
@@ -190,7 +208,7 @@ class EditProfileScreen extends StatelessWidget {
             ),
             child: Icon(LucideIcons.mapPin, color: AppColors.white, size: 20.sp),
           ),
-        )
+        ),
       ],
     );
   }
@@ -213,11 +231,7 @@ class EditProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget saveButton(BuildContext context,
-      EditProfileNotifier editProfileNotifier) {
-    return CustomButton(
-      text: "Save",
-      onPressed: () => editProfileNotifier.saveData(context),
-    );
+  Widget saveButton(BuildContext context, EditProfileNotifier editProfileNotifier) {
+    return CustomButton(text: "Save", onPressed: () => editProfileNotifier.saveData(context));
   }
 }

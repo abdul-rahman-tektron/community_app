@@ -113,6 +113,7 @@ class EditProfileNotifier extends BaseChangeNotifier {
         password: updated?.password ?? existingLogin.password,
         loginEnable: updated?.loginEnable ?? existingLogin.loginEnable,
         customerType: updated?.customerType ?? existingLogin.customerType,
+        image: updated?.image ?? existingLogin.image,
       );
 
       // Save merged LoginResponse back to Hive

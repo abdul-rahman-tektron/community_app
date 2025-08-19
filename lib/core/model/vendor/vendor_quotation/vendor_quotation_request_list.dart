@@ -57,10 +57,12 @@ class VendorQuotationRequestData {
   String? remarks;
   bool? deleted;
   bool? active;
+  bool? siteVisit;
   DateTime? createdDate;
   String? createdBy;
   dynamic modifiedDate;
   dynamic modifiedBy;
+  num? quotationAmount;
 
   VendorQuotationRequestData({
     this.quotationId,
@@ -79,10 +81,12 @@ class VendorQuotationRequestData {
     this.remarks,
     this.deleted,
     this.active,
+    this.siteVisit,
     this.createdDate,
     this.createdBy,
     this.modifiedDate,
     this.modifiedBy,
+    this.quotationAmount,
   });
 
   factory VendorQuotationRequestData.fromJson(Map<String, dynamic> json) => VendorQuotationRequestData(
@@ -102,10 +106,12 @@ class VendorQuotationRequestData {
     remarks: json["remarks"],
     deleted: json["deleted"],
     active: json["active"],
+    siteVisit: json["siteVisit"],
     createdDate: json["createdDate"] == null ? null : DateTime.parse(json["createdDate"]),
     createdBy: json["createdBy"],
     modifiedDate: json["modifiedDate"],
     modifiedBy: json["modifiedBy"],
+    quotationAmount: json["quotationAmount"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -125,9 +131,11 @@ class VendorQuotationRequestData {
     "remarks": remarks,
     "deleted": deleted,
     "active": active,
+    "siteVisit": siteVisit,
     "createdDate": createdDate?.toIso8601String(),
     "createdBy": createdBy,
     "modifiedDate": modifiedDate,
     "modifiedBy": modifiedBy,
+    "quotationAmount": quotationAmount,
   };
 }

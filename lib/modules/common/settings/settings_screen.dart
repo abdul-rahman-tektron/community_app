@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:community_app/modules/common/settings/settings_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
@@ -80,7 +82,8 @@ class SettingsScreen extends StatelessWidget {
                   width: 120.h,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
-                    child: Image.asset(
+                    child: settingsNotifier.userData?.image != null ? Image.memory(
+                        base64Decode(settingsNotifier.userData?.image ?? ""), fit: BoxFit.cover) : Image.asset(
                       AppImages.userPlaceHolder,
                       fit: BoxFit.cover,
                     ),

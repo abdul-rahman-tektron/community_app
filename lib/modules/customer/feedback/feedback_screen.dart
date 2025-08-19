@@ -10,12 +10,13 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class FeedbackScreen extends StatelessWidget {
-  const FeedbackScreen({super.key});
+  final int? jobId;
+  const FeedbackScreen({super.key, this.jobId});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => FeedbackNotifier(),
+      create: (context) => FeedbackNotifier(jobId),
       child: Consumer<FeedbackNotifier>(
         builder: (context, feedbackNotifier, child) {
           return buildBody(context, feedbackNotifier);
@@ -59,8 +60,9 @@ class FeedbackScreen extends StatelessWidget {
               child: CustomButton(text: "Submit", onPressed: () {
                 feedbackNotifier.apiUpdateCustomerJobCompletion(
                   context,
-                   20054,
-                   "Sana",
+                   feedbackNotifier,
+                   jobId ?? 0,
+                   "Admin",
                 );
               }),
             ),

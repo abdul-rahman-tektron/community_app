@@ -29,7 +29,7 @@ class QuotationScreen extends StatelessWidget {
 
   Widget buildBody(BuildContext context, QuotationNotifier quotationNotifier) {
     return DefaultTabController(
-      length: 3,
+      length: 2,
       initialIndex: quotationNotifier.selectedIndex,
       child: Scaffold(
         body: Column(
@@ -74,7 +74,7 @@ class QuotationScreen extends StatelessWidget {
           tabs: [
             Tab(text: "New Request"),
             Tab(text: "Quotation"),
-            Tab(text: "Site Visit"),
+            // Tab(text: "Site Visit"),
           ],
         ),
       ),
@@ -85,7 +85,7 @@ class QuotationScreen extends StatelessWidget {
     return Expanded(child: TabBarView(children: [
       NewRequestScreen(),
       SentQuotationScreen(),
-      SiteVisitScreen()
+      // SiteVisitScreen()
     ],),);
   }
 }

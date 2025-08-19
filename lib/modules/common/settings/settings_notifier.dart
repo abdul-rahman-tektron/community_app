@@ -35,7 +35,9 @@ class SettingsNotifier extends BaseChangeNotifier {
   void handleNavigation(BuildContext context, String routeKey) {
     switch (routeKey) {
       case 'edit-profile':
-        Navigator.pushNamed(context, '/edit-profile');
+        Navigator.pushNamed(context, '/edit-profile').then((value) {
+          initializeData();
+        },);
         break;
       case 'change-password':
         Navigator.pushNamed(context, '/change-password');

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -36,5 +37,13 @@ class FileUploadHelper {
     final fileName = '${DateTime.now().millisecondsSinceEpoch}_${basename(file.path)}';
     final savedPath = '${appDir.path}/$fileName';
     return await file.copy(savedPath);
+  }
+
+  static Future<File> base64ToFile(String base64Str, {required String fileName}) async {
+    final bytes = base64Decode(base64Str);
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/$fileName');
+    await file.writeAsBytes(bytes);
+    return file;
   }
 }

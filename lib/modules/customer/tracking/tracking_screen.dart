@@ -18,10 +18,8 @@ class TrackingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => TrackingNotifier(jobId)
-        ..loadMarkerIcons()
-        ..updateEmployeePosition(
-          const LatLng(25.23420588161868, 55.2654526622921),
-        ),
+        ..loadMarkerIcons(),
+
       child: Consumer<TrackingNotifier>(
         builder: (context, notifier, child) {
           return Scaffold(
@@ -30,7 +28,9 @@ class TrackingScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 10.0),
                 child: CustomButton(
                   text: "Call - Abdul Rahman",
-                  onPressed: () {},
+                  onPressed: () {
+                    notifier.openDialer(notifier.partyInfo?.employeePhoneNumber ?? "");
+                  },
                 ),
               ),
             ],

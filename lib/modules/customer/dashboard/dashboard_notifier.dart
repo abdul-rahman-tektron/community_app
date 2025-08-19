@@ -125,9 +125,6 @@ class CustomerDashboardNotifier extends BaseChangeNotifier {
     try {
       final result = await CommonRepository.instance.apiServiceDropdown();
 
-      print("result from api");
-      print(result);
-
       if (result is List<ServiceDropdownData>) {
         categoriesData = result;
         notifyListeners();

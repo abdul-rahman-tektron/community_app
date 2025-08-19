@@ -63,7 +63,7 @@ class NewServicesScreen extends StatelessWidget {
                     keyboardType: TextInputType.datetime,
                     startDate: DateTime.now(),
                     initialDate: DateTime.now(),
-                    needTime: true,),
+                  ),
                   15.verticalSpace,
                   CustomTextField(controller: newServicesNotifier.mobileNumberController, fieldName: "Mobile Number",  keyboardType: TextInputType.phone,),
                   15.verticalSpace,
@@ -108,19 +108,25 @@ class NewServicesScreen extends StatelessWidget {
                         ),
                         10.horizontalSpace,
                         Expanded(
-                          child: Text.rich(
-                            TextSpan(
-                              children: [
+                          child: Row(
+                            children: [
+                              Text.rich(
                                 TextSpan(
-                                  text: "Site Visit Required? ",
-                                  style: AppFonts.text14.regular.style,
+                                  children: [
+                                    TextSpan(
+                                      text: "Site Visit Required? ",
+                                      style: AppFonts.text14.regular.style,
+                                    ),
+                                  ],
                                 ),
-                                TextSpan(
-                                  text: "*",
-                                  style: AppFonts.text14.regular.style.copyWith(color: AppColors.error),
-                                ),
-                              ],
-                            ),
+                              ),
+                              Tooltip(
+                                message: "If you are unsure about the issue, the vendor will visit and inspect the site before providing the final quotation.",
+                                triggerMode: TooltipTriggerMode.tap,
+                                showDuration: Duration(seconds: 5),
+                                child: Icon(LucideIcons.info, size: 18),
+                              )
+                            ],
                           ),
                         ),
                       ],

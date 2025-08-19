@@ -32,6 +32,7 @@ class LoginResponse {
   dynamic password;
   bool? loginEnable;
   String? customerType;
+  String? image;
 
   LoginResponse({
     this.email,
@@ -57,6 +58,7 @@ class LoginResponse {
     this.password,
     this.loginEnable,
     this.customerType,
+    this.image,
   });
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) => LoginResponse(
@@ -83,6 +85,7 @@ class LoginResponse {
     password: json["password"],
     loginEnable: json["loginEnable"],
     customerType: json["customerType"],
+    image: json["image"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -109,5 +112,6 @@ class LoginResponse {
     "password": password,
     "loginEnable": loginEnable,
     "customerType": customerType,
+    "image": image,
   };
 }

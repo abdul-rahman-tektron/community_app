@@ -14,11 +14,18 @@ class UpcomingServicesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Group by jobStatusCategory enum
+    // Group by jobStatusCategory enum, mapping 'paymentpending' to completed
     final Map<JobStatusCategory, List<CustomerOngoingJobsData>> grouped = {
       for (var status in JobStatusCategory.values)
         status: upcomingJobs
-            .where((job) => CommonUtils.jobStatusFromString(job.jobStatusCategory) == status)
+            .where((job) {
+          final jobStatus = CommonUtils.jobStatusFromString(job.jobStatusCategory);
+          // Map 'paymentpending' to completed
+          if (job.jobStatusCategory?.toLowerCase() == "paymentpending") {
+            return status == JobStatusCategory.completed;
+          }
+          return jobStatus == status;
+        })
             .toList(),
     };
 
@@ -29,7 +36,7 @@ class UpcomingServicesWidget extends StatelessWidget {
           ...JobStatusCategory.values.map((status) {
             final jobs = grouped[status]!;
             if (jobs.isEmpty) return const SizedBox.shrink();
-      
+
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -42,7 +49,7 @@ class UpcomingServicesWidget extends StatelessWidget {
                     case JobStatusCategory.completed:
                       return CompletedServiceCard(service: job);
                     case JobStatusCategory.unknown:
-                    return SizedBox.shrink();
+                      return const SizedBox.shrink();
                   }
                 }),
               ],
@@ -51,19 +58,5 @@ class UpcomingServicesWidget extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _statusLabel(JobStatusCategory status) {
-    switch (status) {
-      case JobStatusCategory.tracking:
-        return "Tracking";
-      case JobStatusCategory.inProgress:
-        return "In Progress";
-      case JobStatusCategory.completed:
-        return "Completed";
-      case JobStatusCategory.unknown:
-      default:
-        return "Other";
-    }
   }
 }

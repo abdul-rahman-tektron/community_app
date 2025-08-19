@@ -13,7 +13,7 @@ class JobStatusTrackingResponse {
   String? message;
   String? uniqueId;
   DateTime? timestamp;
-  List<JobStatusTrackingData>? data;
+  JobStatusData? data;
 
   JobStatusTrackingResponse({
     this.success,
@@ -28,7 +28,7 @@ class JobStatusTrackingResponse {
     message: json["message"],
     uniqueId: json["uniqueId"],
     timestamp: json["timestamp"] == null ? null : DateTime.parse(json["timestamp"]),
-    data: json["data"] == null ? [] : List<JobStatusTrackingData>.from(json["data"]!.map((x) => JobStatusTrackingData.fromJson(x))),
+    data: json["data"] == null ? null : JobStatusData.fromJson(json["data"]),
   );
 
   Map<String, dynamic> toJson() => {
@@ -36,7 +36,79 @@ class JobStatusTrackingResponse {
     "message": message,
     "uniqueId": uniqueId,
     "timestamp": timestamp?.toIso8601String(),
-    "data": data == null ? [] : List<dynamic>.from(data!.map((x) => x.toJson())),
+    "data": data?.toJson(),
+  };
+}
+
+class JobStatusData {
+  List<JobStatusTrackingData>? statusTracking;
+  List<PartyInfo>? partyInfo;
+
+  JobStatusData({
+    this.statusTracking,
+    this.partyInfo,
+  });
+
+  factory JobStatusData.fromJson(Map<String, dynamic> json) => JobStatusData(
+    statusTracking: json["statusTracking"] == null ? [] : List<JobStatusTrackingData>.from(json["statusTracking"]!.map((x) => JobStatusTrackingData.fromJson(x))),
+    partyInfo: json["partyInfo"] == null ? [] : List<PartyInfo>.from(json["partyInfo"]!.map((x) => PartyInfo.fromJson(x))),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "statusTracking": statusTracking == null ? [] : List<dynamic>.from(statusTracking!.map((x) => x.toJson())),
+    "partyInfo": partyInfo == null ? [] : List<dynamic>.from(partyInfo!.map((x) => x.toJson())),
+  };
+}
+
+class PartyInfo {
+  String? customerName;
+  double? longitude;
+  double? latitude;
+  String? mobile;
+  String? vendorName;
+  double? vendorLongitude;
+  double? vendorLatitude;
+  String? vendorMobile;
+  String? employeePhoneNumber;
+  String? employeeName;
+
+  PartyInfo({
+    this.customerName,
+    this.longitude,
+    this.latitude,
+    this.mobile,
+    this.vendorName,
+    this.vendorLongitude,
+    this.vendorLatitude,
+    this.vendorMobile,
+    this.employeePhoneNumber,
+    this.employeeName,
+  });
+
+  factory PartyInfo.fromJson(Map<String, dynamic> json) => PartyInfo(
+    customerName: json["customerName"],
+    longitude: json["longitude"],
+    latitude: json["latitude"],
+    mobile: json["mobile"],
+    vendorName: json["vendorName"],
+    vendorLongitude: json["vendorLongitude"]?.toDouble(),
+    vendorLatitude: json["vendorLatitude"]?.toDouble(),
+    vendorMobile: json["vendorMobile"],
+    employeePhoneNumber: json["employeePhoneNumber"],
+    employeeName: json["employeeName"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "customerName": customerName,
+    "longitude": longitude,
+    "latitude": latitude,
+    "mobile": mobile,
+    "vendorName": vendorName,
+    "vendorLongitude": vendorLongitude,
+    "vendorLatitude": vendorLatitude,
+    "vendorMobile": vendorMobile,
+    "employeePhoneNumber": employeePhoneNumber,
+    "employeeName": employeeName,
   };
 }
 

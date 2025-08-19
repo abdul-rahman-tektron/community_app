@@ -13,7 +13,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'site_visit_detail_notifier.dart';
 
 class SiteVisitDetailScreen extends StatelessWidget {
-  final String requestId;
+  final String? requestId;
   const SiteVisitDetailScreen({super.key, required this.requestId});
 
   @override
@@ -52,11 +52,16 @@ class SiteVisitDetailScreen extends StatelessWidget {
                   ],
 
                   /// If employee assigned but quotation not updated → show "Update Quotation"
-                  if (notifier.isEmployeeAssigned && !notifier.isQuotationUpdated)
+                  if (notifier.isEmployeeAssigned && !notifier.isQuotationUpdated) ...[
+                    Text("Assigned Employees", style: AppFonts.text16.semiBold.style),
+                    5.verticalSpace,
+                    _buildAssignEmployeeList(notifier),
+                    15.verticalSpace,
                     CustomButton(
                       text: "Update Quotation",
                       onPressed: () => notifier.navigateToUpdateQuotation(context),
                     ),
+                  ],
 
                   /// If quotation updated → show a read-only confirmation
                   if (notifier.isQuotationUpdated)
@@ -144,7 +149,7 @@ class SiteVisitDetailScreen extends StatelessWidget {
                   ),
               ],
             ),
-            trailing: GestureDetector(
+            trailing: notifier.isEmployeeAssigned && !notifier.isQuotationUpdated ? null : GestureDetector(
               onTap: () => notifier.removeEmployee(e),
               child: Icon(LucideIcons.trash, color: Colors.red),
             ),

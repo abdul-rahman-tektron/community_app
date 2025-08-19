@@ -2,6 +2,7 @@ import 'package:community_app/modules/customer/payment/payment_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
@@ -14,12 +15,13 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class PaymentScreen extends StatelessWidget {
-  const PaymentScreen({super.key});
+  final int? jobId;
+  const PaymentScreen({super.key, this.jobId});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => PaymentNotifier(),
+      create: (context) => PaymentNotifier(jobId),
       child: Consumer<PaymentNotifier>(
         builder: (context, paymentNotifier, child) {
           return buildBody(context, paymentNotifier);
@@ -414,7 +416,7 @@ class PaymentScreen extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.all(15.w),
       child: CustomButton(onPressed: () {
-        Navigator.pushNamed(context, AppRoutes.feedback);
+        notifier.apiUpdateJobStatus(context, AppStatus.paymentCompleted.id);
       }, text: "PAY AED 68.25"),
     );
   }

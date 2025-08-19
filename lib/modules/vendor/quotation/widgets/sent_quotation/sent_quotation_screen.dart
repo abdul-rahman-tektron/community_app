@@ -21,9 +21,10 @@ class SentQuotationScreen extends StatelessWidget {
   }
 
   Widget buildBody(BuildContext context, SentQuotationNotifier notifier) {
-    final filteredQuotations = notifier.quotations
-        .where((q) => q.quotationResponseStatus?.toLowerCase() != "accepted")
-        .toList();
+    final filteredQuotations = notifier.quotations.where((request) {
+      final status = request.quotationResponseStatus?.toLowerCase();
+      return status != "accepted" && status != "";
+    }).toList();
 
     return Scaffold(
       body: notifier.isLoading

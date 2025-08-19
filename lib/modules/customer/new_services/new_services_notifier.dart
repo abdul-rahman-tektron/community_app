@@ -106,7 +106,6 @@ class NewServicesNotifier extends BaseChangeNotifier {
       }
 
       await apiCreateJob(context);
-      // Navigator.pushNamed(context, AppRoutes.newServicesConfirmation, arguments: "67534670");
     } catch (e, stackTrace) {
       ToastHelper.showError('An error occurred. Please try again.');
       print(e);
@@ -137,7 +136,7 @@ class NewServicesNotifier extends BaseChangeNotifier {
         customerId: userData?.customerId ?? 0,
         jobId: int.parse(selectedServiceId ?? "0"),
         serviceId: int.parse(selectedServiceId ?? "0"),
-        expectedDate: expectedDateController.text.toDateTimeFromDdMmYyyyHhMmA(),
+        expectedDate: expectedDateController.text.toDateTimeFromDdMmYyyy(),
         contactNumber: mobileNumberController.text,
         priority: selectedPriority,
         remarks: remarksController.text,

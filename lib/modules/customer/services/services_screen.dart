@@ -45,6 +45,7 @@ class ServicesScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 15.0),
                   child: tabBar(context, servicesNotifier),
                 ),
+                5.verticalSpace,
                 tabBarView(context, servicesNotifier),
               ],
             ),

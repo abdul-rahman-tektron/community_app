@@ -49,8 +49,6 @@ class AddQuotationNotifier extends BaseChangeNotifier {
 
       if (result is JobInfoDetailResponse) {
         jobDetail = result;
-        print("jobDetail test");
-        print(jobDetail);
         notifyListeners();
       } else {
         debugPrint("Unexpected result type from apiDashboard");
@@ -60,16 +58,18 @@ class AddQuotationNotifier extends BaseChangeNotifier {
     }
   }
 
-  Future<void> apiUpdateJobStatus(BuildContext context, int? statusId) async {
+  Future<void> apiUpdateJobStatus(BuildContext context, int? statusId,
+      {bool? isReject = false}) async {
     if (statusId == null) return;
     try {
       notifyListeners();
 
       final parsed = await CommonRepository.instance.apiUpdateJobStatus(
-        UpdateJobStatusRequest(jobId: jobId, statusId: statusId),
+        UpdateJobStatusRequest(jobId: jobId, statusId: statusId, notes: "Testing"),
       );
 
       if (parsed is CommonResponse && parsed.success == true) {
+        if(isReject ?? false) ToastHelper.showSuccess("Quotation Rejected successfully!");
         Navigator.pop(context);
       }
 
@@ -94,7 +94,7 @@ class AddQuotationNotifier extends BaseChangeNotifier {
         endDate: DateTime.now(),
         quotationDetails: notesController.text,
         quotationAmount: grandTotal.toInt(),
-        createdBy: "VendorApp", // Can be dynamic
+        createdBy: userData?.name ?? "", // Can be dynamic
         status: "Submitted",
         jobQuotationResponseItems: quotationItems.map((item) {
           return JobQuotationResponseItem(
@@ -107,9 +107,13 @@ class AddQuotationNotifier extends BaseChangeNotifier {
       );
 
       // Call API
-      await VendorQuotationRepository.instance.apiVendorCreateJobQuotationRequest(request);
-      await apiUpdateJobStatus(context, AppStatus.quotationSubmitted.id);
-      ToastHelper.showSuccess("Quotation submitted successfully!");
+      final response = await VendorQuotationRepository.instance.apiVendorCreateJobQuotationRequest(request);
+
+      if(response is CommonResponse && response.success == true) {
+        ToastHelper.showSuccess("Quotation submitted successfully!");
+        await apiUpdateJobStatus(context, AppStatus.quotationSubmitted.id);
+      }
+
     } catch (e) {
       ToastHelper.showError("Failed to submit quotation. Please try again.");
     }

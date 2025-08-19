@@ -3,11 +3,13 @@ import 'dart:io';
 
 import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/core/model/common/error/common_response.dart';
+import 'package:community_app/core/model/customer/job/job_completion_details_response.dart';
 import 'package:community_app/core/model/customer/job/job_completion_request.dart';
 import 'package:community_app/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
 import 'package:community_app/core/model/vendor/assign_employee/assign_employee_request.dart';
 import 'package:community_app/core/model/vendor/jobs/job_info_detail_response.dart';
 import 'package:community_app/core/remote/services/common_repository.dart';
+import 'package:community_app/core/remote/services/customer/customer_jobs_repository.dart';
 import 'package:community_app/core/remote/services/vendor/vendor_dashboard_repository.dart';
 import 'package:community_app/core/remote/services/vendor/vendor_jobs_repository.dart';
 import 'package:community_app/modules/common/image_viewer_screen.dart';
@@ -54,6 +56,7 @@ class ProgressUpdateNotifier extends BaseChangeNotifier {
   Future<void> initializeData() async {
     await apiJobInfoDetail();
     updatePhaseFromStatus(AppStatus.fromName(currentStatus ?? ""));
+    if(currentPhase == JobPhase.inProgress || currentPhase == JobPhase.completed) await loadJobCompletionDetails();
   }
 
   TextEditingController notesController = TextEditingController();
@@ -70,6 +73,11 @@ class ProgressUpdateNotifier extends BaseChangeNotifier {
 
   void goToInProgress() {
     currentPhase = JobPhase.inProgress;
+    notifyListeners();
+  }
+
+  void goToInitiated() {
+    currentPhase = JobPhase.initiated;
     notifyListeners();
   }
 
@@ -128,7 +136,7 @@ class ProgressUpdateNotifier extends BaseChangeNotifier {
       if (response is CommonResponse && response.success == true) {
         await apiUpdateJobStatus(AppStatus.employeeAssigned.id);
         ToastHelper.showSuccess("Employees assigned successfully");
-        goToInProgress();
+        goToInitiated();
       } else {
         ToastHelper.showError("Something went wrong, please try again.");
       }
@@ -145,11 +153,21 @@ class ProgressUpdateNotifier extends BaseChangeNotifier {
 
     try {
       List<JobCompletionPhotoPair> encodedPhotoPairs = [];
+
       for (var pair in photoPairs) {
         final beforeBase64 = base64Encode(await pair.before.readAsBytes());
-        final afterBase64 = pair.after != null ? base64Encode(await pair.after!.readAsBytes()) : null;
 
-        encodedPhotoPairs.add(JobCompletionPhotoPair(beforePhoto: beforeBase64, afterPhoto: afterBase64));
+        // If the job is still initiated, send empty afterPhoto
+        final afterBase64 = currentPhase == JobPhase.initiated
+            ? "" // empty string
+            : pair.after != null
+            ? base64Encode(await pair.after!.readAsBytes())
+            : null; // optional for safety
+
+        encodedPhotoPairs.add(JobCompletionPhotoPair(
+          beforePhoto: beforeBase64,
+          afterPhoto: afterBase64,
+        ));
       }
 
       final request = JobCompletionRequest(
@@ -168,6 +186,44 @@ class ProgressUpdateNotifier extends BaseChangeNotifier {
       }
     } catch (e) {
       ToastHelper.showError("Error submitting job completion: $e");
+    }
+  }
+
+  Future<void> loadJobCompletionDetails() async {
+    try {
+      final response = await CustomerJobsRepository.instance
+          .apiJobCompletionDetails(jobId.toString());
+
+      if (response is JobCompletionDetailsResponse) {
+        photoPairs.clear();
+        if (response.photos != null) {
+          int index = 0; // unique index for file names
+          for (var photo in response.photos!) {
+            // Before photo
+            final beforeFile = await FileUploadHelper.base64ToFile(
+              photo.beforePhotoUrl!,
+              fileName: "before_$index.jpg",
+            );
+
+            // After photo (may be null)
+            File? afterFile;
+            if (photo.afterPhotoUrl != null && photo.afterPhotoUrl!.isNotEmpty) {
+              afterFile = await FileUploadHelper.base64ToFile(
+                photo.afterPhotoUrl!,
+                fileName: "after_$index.jpg",
+              );
+            }
+
+            photoPairs.add(PhotoPair(before: beforeFile, after: afterFile));
+            index++;
+          }
+        }
+
+        notes = response.notes ?? "";
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint("Error loading job completion details: $e");
     }
   }
 

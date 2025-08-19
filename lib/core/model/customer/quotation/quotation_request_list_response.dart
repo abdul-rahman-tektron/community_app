@@ -54,6 +54,7 @@ class CustomerRequestListData {
   DateTime? createdDate;
   dynamic modifiedBy;
   dynamic modifiedDate;
+  bool? siteVisitRequired;
   List<CustomerRequestMediaList>? mediaList;
   List<dynamic>? distributions;
   dynamic jobQuotationRequest;
@@ -72,6 +73,7 @@ class CustomerRequestListData {
     this.createdDate,
     this.modifiedBy,
     this.modifiedDate,
+    this.siteVisitRequired,
     this.mediaList,
     this.distributions,
     this.jobQuotationRequest,
@@ -90,6 +92,7 @@ class CustomerRequestListData {
     createdBy: json["createdBy"],
     createdDate: json["createdDate"] == null ? null : DateTime.parse(json["createdDate"]),
     modifiedBy: json["modifiedBy"],
+    siteVisitRequired: json["siteVisitRequired"],
     modifiedDate: json["modifiedDate"],
     mediaList: json["mediaList"] == null ? [] : List<CustomerRequestMediaList>.from(json["mediaList"]!.map((x) => CustomerRequestMediaList.fromJson(x))),
     distributions: json["distributions"] == null ? [] : List<dynamic>.from(json["distributions"]!.map((x) => x)),
@@ -110,6 +113,7 @@ class CustomerRequestListData {
     "createdDate": createdDate?.toIso8601String(),
     "modifiedBy": modifiedBy,
     "modifiedDate": modifiedDate,
+    "siteVisitRequired": siteVisitRequired,
     "mediaList": mediaList == null ? [] : List<dynamic>.from(mediaList!.map((x) => x.toJson())),
     "distributions": distributions == null ? [] : List<dynamic>.from(distributions!.map((x) => x)),
     "jobQuotationRequest": jobQuotationRequest,

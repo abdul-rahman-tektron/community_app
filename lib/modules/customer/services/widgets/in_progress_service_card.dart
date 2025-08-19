@@ -16,15 +16,15 @@ class InProgressServiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
-      padding: EdgeInsets.all(12),
+      padding: EdgeInsets.all(12.w),
       decoration: AppStyles.commonDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildServiceId(),
           10.verticalSpace,
-          _buildProgressRow(),
-          10.verticalSpace,
+          // _buildProgressRow(),
+          // 10.verticalSpace,
           _buildTechnicianDetails(),
           20.verticalSpace,
           _buildProgressBar(),
@@ -34,19 +34,17 @@ class InProgressServiceCard extends StatelessWidget {
   }
 
   Widget _buildServiceId() {
-    return Text.rich(
-      TextSpan(
-        children: [
+    return Row(
+      children: [
+        Expanded(child: Text(service.serviceName ?? "", style: AppFonts.text16.bold.style)),
+        Text.rich(
           TextSpan(
-            text: "Job ID: ",
-            style: AppFonts.text16.regular.style,
+            children: [
+              TextSpan(text: "#${service.jobId ?? 'N/A'}", style: AppFonts.text14.regular.style),
+            ],
           ),
-          TextSpan(
-            text: "#${service.jobId ?? '-'}",
-            style: AppFonts.text16.regular.style,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -134,12 +132,41 @@ class InProgressServiceCard extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressBar() {
-    // No progressPercent in CustomerOngoingJobsData - keep static or remove
-    // Optionally: you can map jobStatusCategory to a progress % if needed.
-
-    return CustomLinearProgressIndicator(
-      percentage: AppStatus.fromName(service.status ?? "")?.percentage ?? 0,
+  Widget _buildIconBox() {
+    return Container(
+      padding: const EdgeInsets.all(5),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE6E6E6),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: const Icon(
+        LucideIcons.clockFading,
+        color: Colors.grey,
+        size: 22,
+      ),
     );
   }
+
+  Widget _buildProgressBar() {
+    return Row(
+      children: [
+        _buildIconBox(),
+        SizedBox(width: 10.w),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(service.status ?? "", style: AppFonts.text14.regular.style),
+              5.verticalSpace,
+              CustomLinearProgressIndicator(
+                percentage: AppStatus.fromName(service.status ?? "")?.percentage ?? 0, // Static or customize as needed
+                borderRadius: 6,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
 }

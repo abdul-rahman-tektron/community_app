@@ -114,7 +114,7 @@ class CustomerJobsRepository extends BaseRepository {
     final token = await SecureStorageService.getToken();
 
     final response = await networkRepository.call(
-      method: Method.put,
+      method: Method.post,
       pathUrl: ApiUrls.pathUpdateCustomerCompletion,
       body: jsonEncode(requestParams.toJson()),
       headers: buildHeaders(token: token),

@@ -1,6 +1,12 @@
 import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/core/model/common/delete_account/delete_Account_request.dart';
+import 'package:community_app/core/model/common/error/common_response.dart';
 import 'package:community_app/core/remote/services/common_repository.dart';
 import 'package:community_app/core/remote/services/customer/customer_auth_repository.dart';
+import 'package:community_app/utils/helpers/toast_helper.dart';
+import 'package:community_app/utils/router/routes.dart';
+import 'package:community_app/utils/storage/hive_storage.dart';
+import 'package:community_app/utils/storage/secure_storage.dart';
 import 'package:flutter/material.dart';
 
 class DeleteAccountNotifier extends BaseChangeNotifier {
@@ -20,10 +26,15 @@ class DeleteAccountNotifier extends BaseChangeNotifier {
   //Delete Account Api call
   Future apiDeleteAccount(BuildContext context) async {
     final result = await CustomerAuthRepository.instance.apiDeleteCustomer(
-      userData?.customerId.toString() ?? "0",
+      DeleteAccountRequest(customerId: userData?.customerId ?? 0, modifiedBy: userData?.name ?? ""),
     );
 
-    print("result of Delete");
-    print(result);
+    if (result is CommonResponse && result.success == true) {
+      ToastHelper.showSuccess('Account deleted successfully.');
+      await SecureStorageService.clearData();
+      await HiveStorageService.clearOnLogout();
+      Navigator.pushNamedAndRemoveUntil(
+          context, AppRoutes.login, (route) => false);
+    }
   }
 }

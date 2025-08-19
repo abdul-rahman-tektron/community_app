@@ -12,6 +12,7 @@ class QuotationRequestRequest {
   int? jobId;
   int? serviceId;
   int? vendorId;
+  String? vendorName;
   int? customerId;
   int? fromCustomerId;
   bool? active;
@@ -23,6 +24,7 @@ class QuotationRequestRequest {
     this.jobId,
     this.serviceId,
     this.vendorId,
+    this.vendorName,
     this.customerId,
     this.fromCustomerId,
     this.active,
@@ -35,6 +37,7 @@ class QuotationRequestRequest {
     jobId: json["jobId"],
     serviceId: json["serviceId"],
     vendorId: json["vendorId"],
+    vendorName: json["vendorName"],
     customerId: json["customerId"],
     fromCustomerId: json["FromCustomerId"],
     active: json["active"],
@@ -47,6 +50,7 @@ class QuotationRequestRequest {
     "jobId": jobId,
     "serviceId": serviceId,
     "vendorId": vendorId,
+    "vendorName": vendorName,
     "customerId": customerId,
     "FromCustomerId": fromCustomerId,
     "active": active,

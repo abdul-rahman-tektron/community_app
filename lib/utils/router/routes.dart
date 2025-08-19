@@ -35,6 +35,7 @@ import 'package:community_app/modules/vendor/jobs/widgets/job_history_detail/job
 import 'package:community_app/modules/vendor/jobs/widgets/ongoing_service/progress_update/progress_update_screen.dart';
 import 'package:community_app/modules/vendor/quotation/widgets/add_quotation/add_quotation_screen.dart';
 import 'package:community_app/modules/vendor/quotation/widgets/quotation_details/quotation_details_screen.dart';
+import 'package:community_app/modules/vendor/quotation/widgets/site_visit_detail/site_visit_detail_screen.dart';
 import 'package:community_app/modules/vendor/registration/registration_handler.dart';
 import 'package:flutter/material.dart';
 
@@ -79,6 +80,7 @@ class AppRoutes {
   static const String vendorRegistrationBank = '/vendor-registration-bank';
   static const String vendorBottomBar = '/vendor-bottom-bar';
   static const String addQuotation = '/add-quotation';
+  static const String siteVisitDetail = '/site-visit-detail';
   static const String jobHistoryDetail = '/job-history-detail';
   static const String quotationDetails = '/quotation-details';
   static const String progressUpdate = '/progress-update';
@@ -127,6 +129,11 @@ class AppRouter {
         final serviceId = args['serviceId'] as int?;
         final quotationId = args['quotationId'] as int?;
         screen = AddQuotationScreen(jobId: jobId, serviceId: serviceId, quotationId: quotationId);
+        break;
+
+      case AppRoutes.siteVisitDetail:
+        final args = settings.arguments as String?;
+        screen = SiteVisitDetailScreen(requestId: args);
         break;
       case AppRoutes.jobHistoryDetail:
         final jobId = settings.arguments as int;
@@ -190,10 +197,12 @@ class AppRouter {
         screen = JobVerificationScreen(jobId: args);
         break;
       case AppRoutes.payment:
-        screen = PaymentScreen();
+        final jobId = settings.arguments as int?;
+        screen = PaymentScreen(jobId: jobId,);
         break;
       case AppRoutes.feedback:
-        screen = FeedbackScreen();
+        final jobId = settings.arguments as int?;
+        screen = FeedbackScreen(jobId: jobId,);
         break;
       case AppRoutes.serviceDetails:
         screen = ServiceDetailsScreen();

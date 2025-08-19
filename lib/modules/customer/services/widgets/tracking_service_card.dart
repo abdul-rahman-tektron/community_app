@@ -1,4 +1,5 @@
 import 'package:community_app/core/model/customer/job/ongoing_jobs_response.dart';
+import 'package:community_app/modules/customer/services/services_notifier.dart';
 import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,6 +11,7 @@ import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_linear_progress_indicator.dart';
+import 'package:provider/provider.dart';
 
 class TrackingServiceCard extends StatelessWidget {
   final CustomerOngoingJobsData job;
@@ -22,7 +24,7 @@ class TrackingServiceCard extends StatelessWidget {
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
-      padding: EdgeInsets.all(15.w),
+      padding: EdgeInsets.all(12.w),
       decoration: AppStyles.commonDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,13 +40,17 @@ class TrackingServiceCard extends StatelessWidget {
   }
 
   Widget _buildJobId() {
-    return Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(text: "Job ID: ", style: AppFonts.text16.regular.style),
-          TextSpan(text: "#${job.jobId ?? 'N/A'}", style: AppFonts.text16.regular.style),
-        ],
-      ),
+    return Row(
+      children: [
+        Expanded(child: Text(job.serviceName ?? "", style: AppFonts.text16.bold.style)),
+        Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(text: "#${job.jobId ?? 'N/A'}", style: AppFonts.text14.regular.style),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -55,8 +61,6 @@ class TrackingServiceCard extends StatelessWidget {
         Expanded(
           child: Row(
             children: [
-              _buildIconBox(),
-              SizedBox(width: 10.w),
               _buildArrivalText(arrival),
             ],
           ),
@@ -68,7 +72,12 @@ class TrackingServiceCard extends StatelessWidget {
           borderColor: AppColors.primary,
           textStyle: AppFonts.text14.regular.style,
           onPressed: () {
-            Navigator.pushNamed(context, AppRoutes.tracking, arguments: job.jobId);
+            Navigator.pushNamed(
+                context, AppRoutes.tracking, arguments: job.jobId).then((
+                value) {
+              final notifier = context.read<ServicesNotifier>();
+              notifier.initializeData();
+            });
           },
           text: "Track",
         ),
@@ -86,7 +95,7 @@ class TrackingServiceCard extends StatelessWidget {
       child: const Icon(
         LucideIcons.clockFading,
         color: Colors.grey,
-        size: 20,
+        size: 22,
       ),
     );
   }
@@ -103,12 +112,24 @@ class TrackingServiceCard extends StatelessWidget {
   }
 
   Widget _buildProgressBar() {
-    // If you want to use estimatedAmount or progress (you need to decide)
-    print("job.status");
-    print(job.status);
-    return CustomLinearProgressIndicator(
-      percentage: AppStatus.fromName(job.status ?? "")?.percentage ?? 0, // Static or customize as needed
-      borderRadius: 6,
+    return Row(
+      children: [
+        _buildIconBox(),
+        SizedBox(width: 10.w),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(job.status ?? "", style: AppFonts.text14.regular.style),
+              5.verticalSpace,
+              CustomLinearProgressIndicator(
+                percentage: AppStatus.fromName(job.status ?? "")?.percentage ?? 0, // Static or customize as needed
+                borderRadius: 6,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

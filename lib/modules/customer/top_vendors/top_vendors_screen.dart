@@ -1,17 +1,13 @@
-import 'dart:convert';
-
 import 'package:community_app/core/model/customer/top_vendors/top_vendors_response.dart';
 import 'package:community_app/modules/customer/top_vendors/top_vendors_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
-import 'package:community_app/res/images.dart';
-import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/ratings_helper.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class TopVendorsScreen extends StatelessWidget {
@@ -125,10 +121,11 @@ class TopVendorsScreen extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.memory(
-                base64Decode(vendor.image ?? ""),
+                vendor.imageBytes ?? Uint8List(0),
                 height: 70,
                 width: 70,
                 fit: BoxFit.cover,
+                gaplessPlayback: true,
               ),
             ),
             const SizedBox(width: 15),
@@ -147,9 +144,9 @@ class TopVendorsScreen extends StatelessWidget {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Text(vendor.rating ?? "0", style: const TextStyle(fontSize: 13)),
+                      Text(double.parse(vendor.rating ?? "0").toStringAsFixed(1), style: const TextStyle(fontSize: 13)),
                       const SizedBox(width: 5),
-                      RatingsHelper(rating: vendor.rating ?? 0),
+                      RatingsHelper(rating: double.parse(vendor.rating ?? "0")),
                       const SizedBox(width: 3),
                       Text('(${vendor.reviewCount ?? "0"})', style: const TextStyle(fontSize: 12)),
                     ],

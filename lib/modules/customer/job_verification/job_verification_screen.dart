@@ -5,6 +5,7 @@ import 'package:community_app/modules/customer/job_verification/expand_video_pla
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -36,7 +37,7 @@ class JobVerificationScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0),
                 child: CustomButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, AppRoutes.payment);
+                    notifier.apiUpdateJobStatus(context, AppStatus.jobVerifiedPaymentPending.id);
                   },
                   text: "Proceed Payment",
                 ),

@@ -16,6 +16,7 @@ import 'package:location/location.dart';
 
 class TopVendorsNotifier extends BaseChangeNotifier {
   final List<int> _selected = [];
+  final List<String> _selectedName = [];
 
   LocationData? currentLocation;
 
@@ -64,6 +65,7 @@ class TopVendorsNotifier extends BaseChangeNotifier {
         jobId: jobId,
         serviceId: serviceId,
         vendorId: selectedVendorIds.isNotEmpty ? selectedVendorIds.first : null,
+        vendorName: selectedVendorNames.isNotEmpty ? selectedVendorNames.first : null,
         customerId: userData?.customerId ?? 0,
         fromCustomerId: userData?.customerId ?? 0,
         active: true,
@@ -112,6 +114,9 @@ class TopVendorsNotifier extends BaseChangeNotifier {
 
   List<int> get selectedVendorIds =>
       _selected.map((index) => topVendors[index].vendorId ?? 0).toList();
+
+  List<String> get selectedVendorNames =>
+      _selected.map((index) => topVendors[index].vendorName ?? '').toList();
 
   bool isSelected(int index) => _selected.contains(index);
 

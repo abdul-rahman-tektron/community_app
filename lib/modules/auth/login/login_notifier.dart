@@ -8,19 +8,15 @@ import 'package:community_app/core/model/common/login/login_response.dart';
 import 'package:community_app/core/model/common/login/register_token_request.dart';
 import 'package:community_app/core/model/common/remember_me/remember_me_model.dart';
 import 'package:community_app/core/remote/services/common_repository.dart';
-import 'package:community_app/res/api_constants.dart';
 import 'package:community_app/res/strings.dart';
 import 'package:community_app/utils/enums.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:community_app/utils/helpers/use_pass_service.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/storage/hive_storage.dart';
-import 'package:community_app/utils/storage/secure_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_uae_pass/flutter_uae_pass.dart';
-import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 class LoginNotifier extends BaseChangeNotifier {
   // Controllers
@@ -221,6 +217,11 @@ class LoginNotifier extends BaseChangeNotifier {
   Future<void> _handleLoginSuccess(LoginResponse result, BuildContext context) async {
 
     _handleRememberMe();
+
+    if(result.deleted ?? false) {
+      ToastHelper.showError('This account doesn\'t exists or has been deleted. kindly register again.');
+      return;
+    }
 
     ToastHelper.showSuccess('Login successful');
 

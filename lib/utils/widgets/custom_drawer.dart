@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:community_app/core/model/common/login/login_response.dart';
 import 'package:community_app/core/model/common/user/update_user_response.dart';
 import 'package:community_app/res/colors.dart';
@@ -72,7 +74,9 @@ class CustomDrawer extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(50),
-            child: Image.asset(
+            child: user?.image != null ? Image.memory(base64Decode(user?.image ?? ""), height: 50,
+              width: 50,
+              fit: BoxFit.cover,) : Image.asset(
               AppImages.loginImage,
               height: 50,
               width: 50,

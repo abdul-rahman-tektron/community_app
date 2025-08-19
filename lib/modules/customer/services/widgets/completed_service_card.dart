@@ -1,4 +1,5 @@
 import 'package:community_app/core/model/customer/job/ongoing_jobs_response.dart';
+import 'package:community_app/modules/customer/services/services_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
@@ -10,6 +11,7 @@ import 'package:community_app/utils/widgets/custom_linear_progress_indicator.dar
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:provider/provider.dart';
 
 class CompletedServiceCard extends StatelessWidget {
   final CustomerOngoingJobsData service;
@@ -20,31 +22,35 @@ class CompletedServiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
-      padding: EdgeInsets.all(12),
+      padding: EdgeInsets.all(12.w),
       decoration: AppStyles.commonDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildServiceId(),
           10.verticalSpace,
-          _buildProgressRow(),
+          // _buildProgressRow(),
           10.verticalSpace,
-          _buildCheckProgressButton(context),
-          20.verticalSpace,
           _buildProgressBar(),
+          20.verticalSpace,
+          _buildCheckProgressButton(context),
         ],
       ),
     );
   }
 
   Widget _buildServiceId() {
-    return Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(text: "Job ID: ", style: AppFonts.text16.regular.style),
-          TextSpan(text: "#${service.jobId ?? '-'}", style: AppFonts.text16.regular.style),
-        ],
-      ),
+    return Row(
+      children: [
+        Expanded(child: Text(service.serviceName ?? "", style: AppFonts.text16.bold.style)),
+        Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(text: "#${service.jobId ?? 'N/A'}", style: AppFonts.text14.regular.style),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -67,18 +73,45 @@ class CompletedServiceCard extends StatelessWidget {
         color: const Color(0xffeff7ef),
         borderRadius: BorderRadius.circular(5),
       ),
-      child: const Icon(LucideIcons.check, color: Colors.green, size: 20),
+      child: Icon(LucideIcons.circleCheckBig300, color: Colors.green, size: 22),
     );
   }
 
   Widget _buildCheckProgressButton(BuildContext context) {
     return CustomButton(
-      text: "Check Progress",
+      text: service.status == AppStatus.jobVerifiedPaymentPending.name
+          ? "Initiate Payment"
+          : service.status == AppStatus.paymentCompleted.name
+          ? "Add Feedback"
+          : "Verify Progress",
       backgroundColor: AppColors.white,
       borderColor: AppColors.primary,
       textStyle: AppFonts.text14.regular.style,
       onPressed: () {
-        Navigator.pushNamed(context, AppRoutes.jobVerification, arguments: service.jobId.toString());
+        if (service.status == AppStatus.jobVerifiedPaymentPending.name) {
+          Navigator.pushNamed(
+              context, AppRoutes.payment, arguments: service.jobId).then((
+              value) {
+            final notifier = context.read<ServicesNotifier>();
+            notifier.initializeData();
+          });
+
+        } else if (service.status == AppStatus.paymentCompleted.name) {
+          Navigator.pushNamed(
+              context, AppRoutes.feedback, arguments: service.jobId).then((
+              value) {
+            final notifier = context.read<ServicesNotifier>();
+            notifier.initializeData();
+          });
+
+        } else {
+          Navigator.pushNamed(context, AppRoutes.jobVerification,
+              arguments: service.jobId.toString()).then((
+              value) {
+            final notifier = context.read<ServicesNotifier>();
+            notifier.initializeData();
+          });
+        }
       },
       height: 35,
     );
@@ -89,8 +122,24 @@ class CompletedServiceCard extends StatelessWidget {
   }
 
   Widget _buildProgressBar() {
-    // No progressPercent in CustomerOngoingJobsData, set static or 100 since it's completed
-
-    return CustomLinearProgressIndicator(percentage: AppStatus.fromName(service.status ?? "")?.percentage ?? 0);
+    return Row(
+      children: [
+        _buildIconBox(),
+        SizedBox(width: 10.w),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(service.status ?? "", style: AppFonts.text14.regular.style),
+              5.verticalSpace,
+              CustomLinearProgressIndicator(
+                percentage: AppStatus.fromName(service.status ?? "")?.percentage ?? 0, // Static or customize as needed
+                borderRadius: 6,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }

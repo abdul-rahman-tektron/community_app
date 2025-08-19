@@ -67,6 +67,9 @@ class ProgressUpdateScreen extends StatelessWidget {
           ],
         );
 
+      case JobPhase.initiated:
+        return _buildBeforePhotos(context, notifier);
+
       case JobPhase.inProgress:
         return Column(
           children: [
@@ -96,9 +99,6 @@ class ProgressUpdateScreen extends StatelessWidget {
             ),
           ],
         );
-
-      case JobPhase.initiated:
-        return _buildBeforePhotos(context, notifier);
     }
   }
 
@@ -154,7 +154,7 @@ class ProgressUpdateScreen extends StatelessWidget {
           text: "Start Job",
           onPressed: notifier.photoPairs.isNotEmpty
               ? () async {
-                  // Update status to 'Employee Assigned' or equivalent
+                  await notifier.submitJobCompletion(context);
                   await notifier.apiUpdateJobStatus(
                     AppStatus.workStartedInProgress.id,
                   );
@@ -560,16 +560,6 @@ class ProgressUpdateScreen extends StatelessWidget {
           style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
         ),
       ],
-    );
-  }
-
-  Widget _buildNotesField(ProgressUpdateNotifier notifier) {
-    return CustomTextField(
-      controller: notifier.notesController,
-      fieldName: "Notes",
-      hintText: "Add any additional notes here",
-      isMaxLines: true,
-      onChanged: notifier.updateOverallNotes,
     );
   }
 }

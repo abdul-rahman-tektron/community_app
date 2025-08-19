@@ -1,12 +1,11 @@
-// To parse this JSON data, do
-//
-//     final jobInfoDetailResponse = jobInfoDetailResponseFromJson(jsonString);
-
 import 'dart:convert';
+import 'dart:typed_data';
 
-JobInfoDetailResponse jobInfoDetailResponseFromJson(String str) => JobInfoDetailResponse.fromJson(json.decode(str));
+JobInfoDetailResponse jobInfoDetailResponseFromJson(String str) =>
+    JobInfoDetailResponse.fromJson(json.decode(str));
 
-String jobInfoDetailResponseToJson(JobInfoDetailResponse data) => json.encode(data.toJson());
+String jobInfoDetailResponseToJson(JobInfoDetailResponse data) =>
+    json.encode(data.toJson());
 
 class JobInfoDetailResponse {
   String? customerName;
@@ -15,7 +14,8 @@ class JobInfoDetailResponse {
   String? address;
   DateTime? expectedDate;
   String? priority;
-  String? fileContent;
+  String? fileContent; // base64 string from API
+  Uint8List? fileBytes; // decoded once & cached
   String? remarks;
 
   JobInfoDetailResponse({
@@ -26,19 +26,28 @@ class JobInfoDetailResponse {
     this.expectedDate,
     this.priority,
     this.fileContent,
+    this.fileBytes,
     this.remarks,
   });
 
-  factory JobInfoDetailResponse.fromJson(Map<String, dynamic> json) => JobInfoDetailResponse(
-    customerName: json["customerName"],
-    serviceName: json["serviceName"],
-    phoneNumber: json["phoneNumber"],
-    address: json["address"],
-    expectedDate: json["expectedDate"] == null ? null : DateTime.parse(json["expectedDate"]),
-    priority: json["priority"],
-    fileContent: json["fileContent"],
-    remarks: json["remarks"],
-  );
+  factory JobInfoDetailResponse.fromJson(Map<String, dynamic> json) {
+    final fileStr = json["fileContent"] as String?;
+    return JobInfoDetailResponse(
+      customerName: json["customerName"],
+      serviceName: json["serviceName"],
+      phoneNumber: json["phoneNumber"],
+      address: json["address"],
+      expectedDate: json["expectedDate"] == null
+          ? null
+          : DateTime.parse(json["expectedDate"]),
+      priority: json["priority"],
+      fileContent: fileStr,
+      fileBytes: (fileStr != null && fileStr.isNotEmpty)
+          ? base64Decode(fileStr)
+          : null,
+      remarks: json["remarks"],
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     "customerName": customerName,

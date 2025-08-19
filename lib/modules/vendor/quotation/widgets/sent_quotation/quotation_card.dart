@@ -35,10 +35,19 @@ class QuotationCard extends StatelessWidget {
             quotation.serviceName ?? "-",
             style: AppFonts.text14.medium.style,
           ),
-          15.verticalSpace,
+          if (quotation.remarks?.isNotEmpty ?? false) ...[
+            10.verticalSpace,
+            Text(
+              "Remarks: ${quotation.remarks ?? "-"}",
+              style: AppFonts.text14.regular.style,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+          10.verticalSpace,
           _buildStatusRow(),
-          15.verticalSpace,
-          _buildActionButtons(),
+          10.verticalSpace,
+          _buildBottomRow(),
         ],
       ),
     );
@@ -49,15 +58,13 @@ class QuotationCard extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            quotation.customerName ?? "-",
+            quotation.customerName ?? "",
             style: AppFonts.text16.semiBold.style,
           ),
         ),
-        _iconLabelRow(
-          icon: LucideIcons.clock,
-          label: quotation.createdDate?.formatDateTime(withTime: true) ?? "-",
-          bgColor: const Color(0xfffdf5e7),
-          iconColor: Colors.orange,
+        Text(
+          "#${quotation.jobId ?? '-'}",
+          style: AppFonts.text14.regular.style,
         ),
       ],
     );
@@ -66,21 +73,19 @@ class QuotationCard extends StatelessWidget {
   Widget _buildStatusRow() {
     return Row(
       children: [
-        Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(
-                text: "AED ",
-                style: AppFonts.text14.semiBold.style,
-              ),
-              TextSpan(
-                text: (quotation.modifiedBy ?? 10000).toStringAsFixed(2),
-                style: AppFonts.text20.semiBold.style,
-              ),
-            ],
+        Expanded(
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(text: "AED ", style: AppFonts.text14.semiBold.style),
+                TextSpan(
+                  text: (quotation.quotationAmount ?? 0).toStringAsFixed(2),
+                  style: AppFonts.text20.semiBold.style,
+                ),
+              ],
+            ),
           ),
         ),
-        const Spacer(),
         _buildStatusTag(quotation.quotationResponseStatus ?? "Status"),
       ],
     );
@@ -117,6 +122,63 @@ class QuotationCard extends StatelessWidget {
     );
   }
 
+  Widget _buildBottomRow() {
+    return Row(
+      children: [
+        Expanded(
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: const Color(0xfffdf5e7),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: const Icon(
+                  LucideIcons.calendar300,
+                  color: Colors.orange,
+                  size: 18,
+                ),
+              ),
+              SizedBox(width: 7.w),
+              Text(
+                quotation.expectedDate != null
+                    ? quotation.expectedDate!.formatDate()
+                    : "-",
+                style: AppFonts.text12.regular.style,
+              ),
+            ],
+          ),
+        ),
+        if ((quotation.quotationResponseStatus ?? "").toLowerCase() !=
+            "rejected") ...[
+          CustomButton(
+            text: "View Details",
+            height: 32,
+            borderColor: AppColors.primary,
+            backgroundColor: AppColors.white,
+            textStyle: AppFonts.text14.regular.style,
+            fullWidth: false,
+            onPressed: onViewDetails,
+          ),
+        ],
+        if ((quotation.quotationResponseStatus ?? "").toLowerCase() ==
+            "rejected") ...[
+          10.horizontalSpace,
+          CustomButton(
+            text: "Resend",
+            fullWidth: false,
+            height: 32,
+            borderColor: AppColors.error,
+            backgroundColor: AppColors.white,
+            textStyle: AppFonts.text14.regular.red.style,
+            onPressed: onResend ?? () {},
+          ),
+        ],
+      ],
+    );
+  }
+
   Widget _buildActionButtons() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -130,18 +192,6 @@ class QuotationCard extends StatelessWidget {
           fullWidth: false,
           onPressed: onViewDetails,
         ),
-        if ((quotation.quotationResponseStatus ?? "").toLowerCase() == "rejected") ...[
-          10.horizontalSpace,
-          CustomButton(
-            text: "Resend",
-            fullWidth: false,
-            height: 35,
-            borderColor: AppColors.primary,
-            backgroundColor: AppColors.white,
-            textStyle: AppFonts.text14.regular.style,
-            onPressed: onResend,
-          ),
-        ]
       ],
     );
   }
@@ -161,10 +211,17 @@ class QuotationCard extends StatelessWidget {
     );
   }
 
-  Widget _iconBox({required IconData icon, required Color bgColor, required Color iconColor}) {
+  Widget _iconBox({
+    required IconData icon,
+    required Color bgColor,
+    required Color iconColor,
+  }) {
     return Container(
       padding: const EdgeInsets.all(5),
-      decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(5)),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(5),
+      ),
       child: Icon(icon, color: iconColor, size: 15),
     );
   }

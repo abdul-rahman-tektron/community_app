@@ -7,6 +7,7 @@ import 'package:community_app/modules/customer/quotation_list/quotation_request_
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
+import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
@@ -77,8 +78,7 @@ class QuotationRequestListScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 15),
       child: Column(
         children: [
-          Text("Request List", style: AppFonts.text20.semiBold.style),
-          // _buildGradientUnderline("Quotation List", AppFonts.text20.semiBold.style),
+          Text("Job Request List", style: AppFonts.text20.semiBold.style),
         ],
       ),
     );
@@ -114,29 +114,51 @@ class QuotationRequestListScreen extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         width: double.infinity,
         decoration: AppStyles.commonDecoration,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: ListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(
-            "${notifier.getServiceNameById(request.serviceId)} - ${request.jobId}",
-            style: AppFonts.text14.bold.style,
-          ),
-          leading: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Image.memory(
-              base64Decode(request.mediaList?[0].fileContent ?? ""),
-              height: 50,
-              width: 50,
-              fit: BoxFit.cover,
+        padding: const EdgeInsets.all(15),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  notifier.getServiceNameById(request.serviceId),
+                  style: AppFonts.text14.bold.style,
+                ),
+                Text(
+                  "#${request.jobId}",
+                  style: AppFonts.text14.bold.style,
+                ),
+              ],
             ),
-          ),
-          subtitle: Text(
-            "${request.remarks}",
-            style: AppFonts.text12.medium.style,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          trailing: Icon(LucideIcons.chevronRight),
+            10.verticalSpace,
+            Text(
+              "Remarks: ${request.remarks}",
+              style: AppFonts.text12.medium.style,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            10.verticalSpace,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if(request.siteVisitRequired ?? false) Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: const Color(0xffe7f3f9),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Text("Site Visit Required", style: AppFonts.text14.regular.style.copyWith(color: Colors.blue)),
+                ),
+                Text(
+                  "${request.expectedDate?.formatDate()}",
+                  style: AppFonts.text12.medium.style,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

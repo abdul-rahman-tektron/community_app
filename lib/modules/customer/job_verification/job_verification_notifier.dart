@@ -1,6 +1,12 @@
 import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/core/model/common/error/common_response.dart';
 import 'package:community_app/core/model/customer/job/job_completion_details_response.dart';
+import 'package:community_app/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
+import 'package:community_app/core/remote/services/common_repository.dart';
 import 'package:community_app/core/remote/services/customer/customer_jobs_repository.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
+import 'package:community_app/utils/helpers/toast_helper.dart';
+import 'package:community_app/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -20,7 +26,8 @@ class JobVerificationNotifier extends BaseChangeNotifier {
 
   Future<void> fetchJobCompletionDetails(String jobId) async {
     try {
-      final response = await CustomerJobsRepository.instance.apiJobCompletionDetails(jobId);
+      final response = await CustomerJobsRepository.instance
+          .apiJobCompletionDetails(jobId);
       if (response is JobCompletionDetailsResponse) {
         fileData = response.photos ?? [];
         notes = response.notes ?? "";
@@ -37,16 +44,48 @@ class JobVerificationNotifier extends BaseChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> apiUpdateJobStatus(BuildContext context, int? statusId) async {
+    if (statusId == null) return;
+    try {
+      notifyListeners();
+      final parsed = await CommonRepository.instance.apiUpdateJobStatus(
+        UpdateJobStatusRequest(
+          jobId: int.parse(jobId ?? "0"),
+          statusId: statusId,
+        ),
+      );
+
+      if (parsed is CommonResponse && parsed.success == true) {
+        ToastHelper.showSuccess(
+          "Status updated to: ${AppStatus.fromId(statusId)?.name ?? ""}",
+        );
+        Navigator.pushNamed(
+          context,
+          AppRoutes.payment,
+          arguments: int.parse(jobId ?? "0"),
+        );
+      }
+    } catch (e) {
+      ToastHelper.showError('Error updating status: $e');
+    } finally {
+      notifyListeners();
+    }
+  }
+
   void _initializeVideoControllerIfNeeded() {
     // Find the first video URL (before or after)
     String? videoUrl;
 
     for (var photo in fileData) {
-      if (photo.isBeforeVideo == true && photo.beforePhotoUrl != null && photo.beforePhotoUrl!.isNotEmpty) {
+      if (photo.isBeforeVideo == true &&
+          photo.beforePhotoUrl != null &&
+          photo.beforePhotoUrl!.isNotEmpty) {
         videoUrl = photo.beforePhotoUrl;
         break;
       }
-      if (photo.isAfterVideo == true && photo.afterPhotoUrl != null && photo.afterPhotoUrl!.isNotEmpty) {
+      if (photo.isAfterVideo == true &&
+          photo.afterPhotoUrl != null &&
+          photo.afterPhotoUrl!.isNotEmpty) {
         videoUrl = photo.afterPhotoUrl;
         break;
       }
@@ -102,36 +141,38 @@ class JobVerificationNotifier extends BaseChangeNotifier {
     isFullscreen = !isFullscreen;
     notifyListeners();
 
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => Scaffold(
-        backgroundColor: Colors.black,
-        body: SafeArea(
-          child: Stack(
-            children: [
-              Center(
-                child: AspectRatio(
-                  aspectRatio: videoController!.value.aspectRatio,
-                  child: VideoPlayer(videoController!),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          backgroundColor: Colors.black,
+          body: SafeArea(
+            child: Stack(
+              children: [
+                Center(
+                  child: AspectRatio(
+                    aspectRatio: videoController!.value.aspectRatio,
+                    child: VideoPlayer(videoController!),
+                  ),
                 ),
-              ),
-              Positioned(
-                top: 20,
-                left: 20,
-                child: IconButton(
-                  color: Colors.white,
-                  icon: const Icon(Icons.close),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    isFullscreen = false;
-                    notifyListeners();
-                  },
+                Positioned(
+                  top: 20,
+                  left: 20,
+                  child: IconButton(
+                    color: Colors.white,
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      isFullscreen = false;
+                      notifyListeners();
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    ));
+    );
   }
 
   @override
@@ -140,4 +181,3 @@ class JobVerificationNotifier extends BaseChangeNotifier {
     super.dispose();
   }
 }
-

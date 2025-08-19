@@ -9,12 +9,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:community_app/utils/extensions.dart';
 
-class NewRequestCard extends StatelessWidget {
+class SiteVisitCard extends StatelessWidget {
   final VendorQuotationRequestData request;
   final VoidCallback? onQuotationTap;
   final VoidCallback? onCallTap;
 
-  const NewRequestCard({
+  const SiteVisitCard({
     super.key,
     required this.request,
     this.onQuotationTap,
@@ -65,20 +65,8 @@ class NewRequestCard extends StatelessWidget {
 
   Widget _buildCategoryRow(String serviceName) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Container(
-        //   padding: const EdgeInsets.all(5),
-        //   decoration: BoxDecoration(
-        //     color: const Color(0xfffdf5e7),
-        //     borderRadius: BorderRadius.circular(5),
-        //   ),
-        //   child: const Icon(
-        //     LucideIcons.wrench,
-        //     color: Colors.orange,
-        //     size: 18,
-        //   ),
-        // ),
-        // SizedBox(width: 10.w),
         Text(
           serviceName,
           style: AppFonts.text14.medium.style,
@@ -116,27 +104,41 @@ class NewRequestCard extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.all(5),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xfffdf5e7),
+                  color: const Color(0xffe7f3f9),
                   borderRadius: BorderRadius.circular(5),
                 ),
-                child: const Icon(
-                  LucideIcons.calendar300,
-                  color: Colors.orange,
-                  size: 18,
-                ),
+                child: Text("Site Visit Required", style: AppFonts.text14.regular.style.copyWith(color: Colors.blue)),
               ),
-              SizedBox(width: 7.w),
-              Text(
-                request.expectedDate != null
-                    ? request.expectedDate!.formatDate()
-                    : "-",
-                style: AppFonts.text12.regular.style,
-              )
+              10.verticalSpace,
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xfffdf5e7),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: const Icon(
+                      LucideIcons.calendar300,
+                      color: Colors.orange,
+                      size: 18,
+                    ),
+                  ),
+                  SizedBox(width: 7.w),
+                  Text(
+                    request.expectedDate != null
+                        ? request.expectedDate!.formatDate()
+                        : "-",
+                    style: AppFonts.text12.regular.style,
+                  )
+                ],
+              ),
             ],
           ),
         ),
@@ -146,7 +148,7 @@ class NewRequestCard extends StatelessWidget {
           backgroundColor: AppColors.white,
           borderColor: AppColors.primary,
           textStyle: AppFonts.text14.regular.style,
-          text: 'Add Quotation',
+          text: 'Assign Employee',
           onPressed: onQuotationTap ?? () {},
         ),
       ],

@@ -1,17 +1,18 @@
-// To parse this JSON data, do
-//
-//     final topVendorResponse = topVendorResponseFromJson(jsonString);
-
 import 'dart:convert';
+import 'dart:typed_data';
 
-List<TopVendorResponse> topVendorResponseFromJson(String str) => List<TopVendorResponse>.from(json.decode(str).map((x) => TopVendorResponse.fromJson(x)));
+List<TopVendorResponse> topVendorResponseFromJson(String str) =>
+    List<TopVendorResponse>.from(
+      json.decode(str).map((x) => TopVendorResponse.fromJson(x)),
+    );
 
-String topVendorResponseToJson(List<TopVendorResponse> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+String topVendorResponseToJson(List<TopVendorResponse> data) =>
+    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class TopVendorResponse {
   int? iIdentity;
   int? vendorId;
-  dynamic vendorName;
+  String? vendorName;
   int? serviceId;
   dynamic service;
   bool? deleted;
@@ -21,7 +22,8 @@ class TopVendorResponse {
   dynamic modifiedDate;
   dynamic modifiedBy;
   String? description;
-  String? image;
+  String? image; // base64 string
+  Uint8List? imageBytes; // decoded once and cached
   String? address;
   dynamic rating;
   dynamic reviewCount;
@@ -41,31 +43,40 @@ class TopVendorResponse {
     this.modifiedBy,
     this.description,
     this.image,
+    this.imageBytes,
     this.address,
     this.rating,
     this.reviewCount,
     this.averageResponseTime,
   });
 
-  factory TopVendorResponse.fromJson(Map<String, dynamic> json) => TopVendorResponse(
-    iIdentity: json["iIdentity"],
-    vendorId: json["vendorId"],
-    vendorName: json["vendorName"],
-    serviceId: json["serviceId"],
-    service: json["service"],
-    deleted: json["deleted"],
-    active: json["active"],
-    createdDate: json["createdDate"] == null ? null : DateTime.parse(json["createdDate"]),
-    createdBy: json["createdBy"],
-    modifiedDate: json["modifiedDate"],
-    modifiedBy: json["modifiedBy"],
-    description: json["description"],
-    image: json["image"],
-    address: json["address"],
-    rating: json["rating"],
-    reviewCount: json["reviewCount"],
-    averageResponseTime: json["averageResponseTime"],
-  );
+  factory TopVendorResponse.fromJson(Map<String, dynamic> json) {
+    final imageStr = json["image"] as String?;
+    return TopVendorResponse(
+      iIdentity: json["iIdentity"],
+      vendorId: json["vendorId"],
+      vendorName: json["vendorName"],
+      serviceId: json["serviceId"],
+      service: json["service"],
+      deleted: json["deleted"],
+      active: json["active"],
+      createdDate: json["createdDate"] == null
+          ? null
+          : DateTime.parse(json["createdDate"]),
+      createdBy: json["createdBy"],
+      modifiedDate: json["modifiedDate"],
+      modifiedBy: json["modifiedBy"],
+      description: json["description"],
+      image: imageStr,
+      imageBytes: (imageStr != null && imageStr.isNotEmpty)
+          ? base64Decode(imageStr)
+          : null,
+      address: json["address"],
+      rating: json["rating"],
+      reviewCount: json["reviewCount"],
+      averageResponseTime: json["averageResponseTime"],
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     "iIdentity": iIdentity,

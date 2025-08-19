@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:community_app/utils/router/routes.dart';
 
 class SiteVisitDetailNotifier extends ChangeNotifier {
-  final String requestId;
+  final String? requestId;
 
   SiteVisitDetailNotifier(this.requestId);
 

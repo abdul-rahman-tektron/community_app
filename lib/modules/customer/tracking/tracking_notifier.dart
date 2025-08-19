@@ -12,15 +12,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TrackingNotifier extends BaseChangeNotifier {
   int? jobId;
   LatLng? _employeePosition;
-  LatLng _customerPosition = const LatLng(25.267416939850616, 55.33019577131006);
-  List<LatLng> _routePoints = [];
+  LatLng _customerPosition = const LatLng(25.268938, 55.305338);
 
   List<JobStatusTrackingData> jobStatusTrackingData = [];
   List<JobStatusResponse> jobStatus = [];
+  PartyInfo? partyInfo;
 
   TrackingNotifier(this.jobId) {
     initializeData();
@@ -33,7 +34,6 @@ class TrackingNotifier extends BaseChangeNotifier {
 
   BitmapDescriptor? _employeeIcon;
   BitmapDescriptor? _customerIcon;
-  BitmapDescriptor? _transitIcon;
 
   String? _estimatedDuration;  // e.g. "15 mins"
   String? _estimatedDistance;  // e.g. "10 km"
@@ -96,19 +96,6 @@ class TrackingNotifier extends BaseChangeNotifier {
       );
     }
 
-    if (_transitIcon != null && _routePoints.isNotEmpty) {
-      final transitPoint = _getMidpointAlongPolyline(_routePoints);
-      result.add(
-        Marker(
-          markerId: const MarkerId('transit'),
-          position: transitPoint,
-          icon: _transitIcon!,
-          infoWindow: const InfoWindow(title: 'In Transit'),
-          anchor: const Offset(0.5, 0.5),
-        ),
-      );
-    }
-
     return result;
   }
 
@@ -121,8 +108,11 @@ class TrackingNotifier extends BaseChangeNotifier {
           .apiJobStatusTracking(JobStatusTrackingRequest(jobId: jobId)) as JobStatusTrackingResponse;
 
       if (parsed.success == true && parsed.data != null) {
-        jobStatusTrackingData = parsed.data!;
+        jobStatusTrackingData = parsed.data?.statusTracking ?? [];
+        partyInfo = parsed.data?.partyInfo?[0] ?? PartyInfo() ;
 
+        updateEmployeePosition(LatLng(partyInfo?.vendorLatitude ?? 0, partyInfo?.vendorLongitude ?? 0));
+        updateCustomerPosition(LatLng(partyInfo?.latitude ?? 0, partyInfo?.longitude ?? 0));
         print("jobStatusTrackingData");
         print(jobStatusTrackingData);
       }
@@ -133,6 +123,16 @@ class TrackingNotifier extends BaseChangeNotifier {
     } finally {
       isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> openDialer(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    if (!await launchUrl(launchUri)) {
+      throw 'Could not launch $phoneNumber';
     }
   }
 
@@ -197,11 +197,6 @@ class TrackingNotifier extends BaseChangeNotifier {
     _customerIcon = await MapIconHelper.createCustomMarkerIcon(
       iconData: LucideIcons.house,
       backgroundColor: Color(0xff3f89cc),
-      iconColor: Colors.white,
-    );
-
-    _transitIcon = await MapIconHelper.createCustomTransitIcon(
-      backgroundColor: Color(0xffe05240),
       iconColor: Colors.white,
     );
 
@@ -277,7 +272,6 @@ class TrackingNotifier extends BaseChangeNotifier {
     }
 
     _coloredRouteSegments = segments;
-    _routePoints = segments.expand((seg) => seg.points).toList();
 
     _estimatedDuration = _formatDuration(totalDurationSec);
     _estimatedDistance = _formatDistance(totalDistanceMeters);
@@ -311,47 +305,6 @@ class TrackingNotifier extends BaseChangeNotifier {
     } else {
       return '$meters m';
     }
-  }
-
-  double _calculateDistance(LatLng p1, LatLng p2) {
-    const R = 6371000; // meters
-    final lat1 = p1.latitude * (pi / 180);
-    final lat2 = p2.latitude * (pi / 180);
-    final dLat = (p2.latitude - p1.latitude) * (pi / 180);
-    final dLng = (p2.longitude - p1.longitude) * (pi / 180);
-
-    final a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(lat1) * cos(lat2) * sin(dLng / 2) * sin(dLng / 2);
-    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
-    return R * c;
-  }
-
-  LatLng _interpolateLatLng(LatLng p1, LatLng p2, double fraction) =>
-      LatLng(
-        p1.latitude + (p2.latitude - p1.latitude) * fraction,
-        p1.longitude + (p2.longitude - p1.longitude) * fraction,
-      );
-
-  LatLng _getMidpointAlongPolyline(List<LatLng> points) {
-    if (points.isEmpty) throw ArgumentError('Points list cannot be empty');
-    if (points.length == 1) return points.first;
-
-    final totalDistance = List.generate(points.length - 1, (i) => _calculateDistance(points[i], points[i + 1]))
-        .reduce((a, b) => a + b);
-    final halfDistance = totalDistance / 2;
-
-    double accumulatedDistance = 0;
-    for (var i = 0; i < points.length - 1; i++) {
-      final segmentDistance = _calculateDistance(points[i], points[i + 1]);
-      if (accumulatedDistance + segmentDistance >= halfDistance) {
-        final remaining = halfDistance - accumulatedDistance;
-        final fraction = remaining / segmentDistance;
-        return _interpolateLatLng(points[i], points[i + 1], fraction);
-      }
-      accumulatedDistance += segmentDistance;
-    }
-
-    return points.last;
   }
 }
 
