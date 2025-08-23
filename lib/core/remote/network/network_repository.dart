@@ -89,7 +89,7 @@ class NetworkRepository {
     try {
       _logger.i("Request => ${method.name} $url");
       if (body != null) _logger.d("Request Body: $body");
-      log("Request Body: $body");
+      // log("Request Body: $body");
 
       late Response response;
 

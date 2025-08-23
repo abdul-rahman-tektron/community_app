@@ -87,12 +87,12 @@ class PartyInfo {
 
   factory PartyInfo.fromJson(Map<String, dynamic> json) => PartyInfo(
     customerName: json["customerName"],
-    longitude: json["longitude"],
-    latitude: json["latitude"],
+    longitude: _toDouble(json["longitude"]),
+    latitude: _toDouble(json["latitude"]),
     mobile: json["mobile"],
     vendorName: json["vendorName"],
-    vendorLongitude: json["vendorLongitude"]?.toDouble(),
-    vendorLatitude: json["vendorLatitude"]?.toDouble(),
+    vendorLongitude: _toDouble(json["vendorLongitude"]),
+    vendorLatitude: _toDouble(json["vendorLatitude"]),
     vendorMobile: json["vendorMobile"],
     employeePhoneNumber: json["employeePhoneNumber"],
     employeeName: json["employeeName"],
@@ -110,6 +110,14 @@ class PartyInfo {
     "employeePhoneNumber": employeePhoneNumber,
     "employeeName": employeeName,
   };
+}
+
+double? _toDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) return double.tryParse(value);
+  return null;
 }
 
 class JobStatusTrackingData {

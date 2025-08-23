@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/core/model/customer/explore/explore_service_response.dart';
+import 'package:community_app/core/remote/services/customer/customer_explore_repository.dart';
 import 'package:community_app/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -56,71 +60,83 @@ class SortMeta {
 ];
 
 /// Notifier
+
 class ExploreNotifier extends BaseChangeNotifier {
   final searchController = TextEditingController();
   final serviceController = TextEditingController();
 
+  List<ExploreServiceData> exploreServices = [];
   SortOption? selectedSortOption;
 
-  final List<ServiceItem> _allServices = [
-    ServiceItem(service: "AC Repair", vendorName: "Farnek LLC", price: 120, rating: 4.5),
-    ServiceItem(service: "Plumbing", vendorName: "AlNajma AlFareeda LLC And Co", price: 80, rating: 4.2),
-    ServiceItem(service: "Cleaning", vendorName: "Wasl LLC", price: 60, rating: 4.7),
-    ServiceItem(service: "Painting", vendorName: "IMDAAD LLC", price: 150, rating: 4.0),
-    ServiceItem(service: "Pest Control", vendorName: "Emrill Services", price: 100, rating: 4.3),
-  ];
-
-  List<ServiceItem> filteredServices = [];
+  bool isLoading = false; // ✅ loader flag
 
   String selectedCategory = 'All';
-  RangeValues selectedPriceRange = const RangeValues(0, 200);
+  RangeValues? selectedPriceRange;
   DistanceFilter? selectedDistance;
 
+  Timer? _debounce; // 👈 debounce timer
 
   ExploreNotifier({String? initialCategory}) {
     selectedCategory = initialCategory ?? 'All';
-    filteredServices = List.from(_allServices);
-    searchController.addListener(_filterServices);
+    initializeData();
 
-    // Trigger filter once with initial category
-    _filterServices();
+    // Listen to search text with debounce
+    searchController.addListener(() {
+      _onSearchChanged();
+    });
   }
 
-  void _filterServices() {
-    final query = searchController.text.toLowerCase();
+  Future<void> initializeData() async {
+    await fetchExploreServices();
+  }
 
-    filteredServices = _allServices.where((service) {
-      final matchQuery = service.service.toLowerCase().contains(query);
-      final matchPrice = service.price >= selectedPriceRange.start &&
-          service.price <= selectedPriceRange.end;
-      final matchCategory = selectedCategory == 'All' || service.service == selectedCategory;
-      // Note: Distance filter can be implemented here when ready
-      return matchQuery && matchPrice && matchCategory;
-    }).toList();
+  void _onSearchChanged() {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      fetchExploreServices(search: searchController.text);
+    });
+  }
 
-    // Apply sorting
-    if (selectedSortOption != null) {
-      switch (selectedSortOption!.type) {
-        case SortType.price:
-          filteredServices.sort((a, b) => selectedSortOption!.ascending
-              ? a.price.compareTo(b.price)
-              : b.price.compareTo(a.price));
-          break;
-        case SortType.rating:
-          filteredServices.sort((a, b) => selectedSortOption!.ascending
-              ? a.rating.compareTo(b.rating)
-              : b.rating.compareTo(a.rating));
-          break;
-        case SortType.bestDeals:
-          filteredServices.sort((a, b) =>
-              ((b.rating / b.price) * 100).compareTo((a.rating / a.price) * 100));
-          break;
+  /// Call API with filters
+  Future<void> fetchExploreServices({
+    String? search,
+  }) async {
+    try {
+      isLoading = true;
+      notifyListeners();
+
+      final response = await CustomerExploreRepository.instance.apiExploreService(
+        search: search,
+        sortBy: _mapSortToApi(selectedSortOption),
+        // ✅ Only send if not full default range
+        minPrice: (selectedPriceRange != null && selectedPriceRange!.start > 0)
+            ? selectedPriceRange!.start.toInt()
+            : null,
+        maxPrice: (selectedPriceRange != null && selectedPriceRange!.end < 2000)
+            ? selectedPriceRange!.end.toInt()
+            : null,
+        serviceId: selectedCategory != 'All'
+            ? _mapCategoryToId(selectedCategory)
+            : null,
+      );
+
+      if (response is ExploreServiceResponse && response.success == true) {
+        exploreServices = response.data ?? [];
+      } else {
+        exploreServices = [];
       }
+    } catch (e, stack) {
+      print("Error fetching explore services: $e");
+      print("Error fetching explore services: $stack");
+      exploreServices = [];
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
-
-    notifyListeners();
   }
 
+
+  /// Update filters and fetch API
   void updateFilters({
     String? category,
     RangeValues? priceRange,
@@ -129,22 +145,21 @@ class ExploreNotifier extends BaseChangeNotifier {
     if (category != null) selectedCategory = category;
     if (priceRange != null) selectedPriceRange = priceRange;
     if (distance != null) selectedDistance = distance;
-    _filterServices();
+
+    fetchExploreServices();
   }
 
   void clearFilters() {
     selectedCategory = 'All';
     selectedDistance = null;
-    selectedPriceRange = const RangeValues(0, 200);
+    selectedPriceRange = null;
     selectedSortOption = null;
     serviceController.clear();
     searchController.clear();
-    _filterServices();
+    fetchExploreServices();
   }
 
-  /// Updates the sorting option.
-  /// Toggles ascending if the same sort type is selected again.
-  /// Otherwise, sets ascending to true for a new type.
+  /// Updates sorting option and fetches API
   void updateSortOption(SortOption option) {
     final isSameType = selectedSortOption?.type == option.type;
     final isTogglable = _isSortTypeTogglable(option.type);
@@ -158,21 +173,58 @@ class ExploreNotifier extends BaseChangeNotifier {
       selectedSortOption = SortOption(type: option.type, ascending: true);
     }
 
-    _filterServices();
+    fetchExploreServices();
   }
 
-  bool _isSortTypeTogglable(SortType type) {
-    // If you have the sortMetaList in scope, else hardcode:
-    switch (type) {
+  /// Map SortOption -> API param
+  String? _mapSortToApi(SortOption? option) {
+    if (option == null) return null;
+    switch (option.type) {
       case SortType.price:
+        return option.ascending ? "price_asc" : "price_desc";
       case SortType.rating:
-        return true;
+        return option.ascending ? "rating_asc" : "rating_desc";
       case SortType.bestDeals:
-      default:
-        return false;
+        return "bestDeals";
     }
   }
 
-  List<String> get availableCategories =>
-      ['All', ..._allServices.map((e) => e.service).toSet()];
+  /// Map category name -> serviceId (if your API requires IDs)
+  int? _mapCategoryToId(String category) {
+    switch (category) {
+      case "AC Repair":
+        return 1;
+      case "Plumbing":
+        return 2;
+      case "Cleaning":
+        return 3;
+      case "Painting":
+        return 4;
+      case "Pest Control":
+        return 5;
+      default:
+        return null;
+    }
+  }
+
+  bool _isSortTypeTogglable(SortType type) {
+    return type == SortType.price || type == SortType.rating;
+  }
+
+  List<String> get availableCategories => [
+    'All',
+    'AC Repair',
+    'Plumbing',
+    'Cleaning',
+    'Painting',
+    'Pest Control',
+  ];
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    searchController.dispose();
+    serviceController.dispose();
+    super.dispose();
+  }
 }

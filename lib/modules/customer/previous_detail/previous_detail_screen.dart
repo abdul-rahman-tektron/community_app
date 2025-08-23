@@ -1,7 +1,11 @@
+import 'dart:convert';
+
+import 'package:community_app/core/model/customer/job/customer_history_detail_response.dart';
 import 'package:community_app/modules/customer/previous_detail/previous_detail_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
+import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +15,8 @@ import 'package:provider/provider.dart';
 
 class PreviousDetailScreen extends StatelessWidget {
   final int jobId;
-  const PreviousDetailScreen({super.key,required this.jobId});
+
+  const PreviousDetailScreen({super.key, required this.jobId});
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +30,7 @@ class PreviousDetailScreen extends StatelessWidget {
 
           return Scaffold(
             appBar: CustomAppBar(),
-            persistentFooterButtons: [
-              _buildActionButtons(context, notifier),
-            ],
+            persistentFooterButtons: [_buildActionButtons(context, notifier)],
             body: SafeArea(
               child: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
@@ -37,7 +40,10 @@ class PreviousDetailScreen extends StatelessWidget {
                     15.verticalSpace,
                     _buildVendorInfo(notifier),
                     15.verticalSpace,
-                    _buildWorkDetails(notifier.imagePairs, notifier.notes),
+                    _buildWorkDetails(
+                      notifier,
+                      notifier.customerHistoryDetailData?.jobDetail?.remarks ?? "",
+                    ),
                     15.verticalSpace,
                     _buildBillingSection(context, notifier),
                     15.verticalSpace,
@@ -57,14 +63,23 @@ class PreviousDetailScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(notifier.serviceName, style: AppFonts.text20.semiBold.style),
+        Text(notifier.customerHistoryDetailData?.jobDetail?.vendorName ?? "", style: AppFonts.text20.semiBold.style),
         5.verticalSpace,
-        Text("Ref#: ${notifier.jobRef}", style: AppFonts.text14.regular.grey.style),
+        Text(
+          "#${notifier.customerHistoryDetailData?.jobDetail?.jobId ?? ""}",
+          style: AppFonts.text14.regular.grey.style,
+        ),
         5.verticalSpace,
         _infoRow("Status", notifier.status),
-        _infoRow("Requested", notifier.requestedDate),
-        _infoRow("Completed", notifier.completedDate ?? "-"),
-        _infoRow("Priority", notifier.priority ?? "-"),
+        _infoRow(
+          "Requested",
+          notifier.customerHistoryDetailData?.jobDetail?.requestedDate?.formatDate() ?? "-",
+        ),
+        _infoRow(
+          "Completed",
+          notifier.customerHistoryDetailData?.jobDetail?.completedDate?.formatDate() ?? "-",
+        ),
+        _infoRow("Priority", notifier.customerHistoryDetailData?.jobDetail?.priority ?? "-"),
       ],
     );
   }
@@ -75,8 +90,7 @@ class PreviousDetailScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
-              child: Text(label, style: AppFonts.text14.regular.style)),
+          Expanded(child: Text(label, style: AppFonts.text14.regular.style)),
           Text(value, style: AppFonts.text14.bold.style),
         ],
       ),
@@ -94,15 +108,23 @@ class PreviousDetailScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(notifier.vendorName, style: AppFonts.text14.semiBold.style),
+                Text(
+                  notifier.customerHistoryDetailData?.jobDetail?.vendorName ?? "",
+                  style: AppFonts.text14.semiBold.style,
+                ),
                 5.verticalSpace,
-                Text("Contact: ${notifier.vendorPhone}", style: AppFonts.text14.regular.style),
+                Text(
+                  "Contact: ${notifier.customerHistoryDetailData?.jobDetail?.vendorPhoneNumber ?? ""}",
+                  style: AppFonts.text14.regular.style,
+                ),
               ],
             ),
           ),
           CustomButton(
             height: 40,
-            onPressed: () => notifier.callVendor(),
+            onPressed: () => notifier.openDialer(
+              notifier.customerHistoryDetailData?.jobDetail?.vendorPhoneNumber ?? "",
+            ),
             icon: Icons.phone,
             iconOnLeft: true,
             backgroundColor: AppColors.white,
@@ -117,14 +139,25 @@ class PreviousDetailScreen extends StatelessWidget {
   }
 
   /// Work Details
-  Widget _buildWorkDetails(List<ImagePair> images, String notes) {
+  Widget _buildWorkDetails(PreviousDetailNotifier notifier, String notes) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text("Work Details", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        5.verticalSpace,
+        _buildAfterPhotos(notifier),
         10.verticalSpace,
-        _buildAfterPhotos(images),
-        10.verticalSpace,
+        if (notifier.customerHistoryDetailData?.jobDetail?.employeeName?.isNotEmpty ?? false)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Employee Name:", style: AppFonts.text16.semiBold.style),
+              5.verticalSpace,
+              Text(notifier.customerHistoryDetailData?.jobDetail?.employeeName ?? "", style: AppFonts.text14.regular.style),
+              10.verticalSpace,
+            ],
+          ),
+
         if (notes.isNotEmpty)
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,45 +171,45 @@ class PreviousDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAfterPhotos(List<ImagePair> imagePairs) {
+  Widget _buildAfterPhotos(PreviousDetailNotifier notifier) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: imagePairs.length,
+      itemCount: notifier.customerHistoryDetailData?.completionDetails?.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 1,
         childAspectRatio: 2.9,
         mainAxisSpacing: 10,
       ),
       itemBuilder: (context, index) {
-        final pair = imagePairs[index];
-        return _buildBeforeAfterCard(pair);
+        final pair = notifier.customerHistoryDetailData?.completionDetails?[index];
+        return _buildBeforeAfterCard(pair ?? CompletionDetail());
       },
     );
   }
 
-  Widget _buildBeforeAfterCard(ImagePair pair) {
+  Widget _buildBeforeAfterCard(CompletionDetail pair) {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: AppStyles.commonDecoration,
       child: Row(
         children: [
-          Expanded(child: _buildImageWithLabel("Before", pair.before, pair.isVideo)),
+          Expanded(child: _buildImageWithLabel("Before", pair.beforePhotoUrl, false)),
           const Icon(Icons.arrow_forward, color: Colors.grey, size: 28),
-          Expanded(child: _buildImageWithLabel("After", pair.after, pair.isVideo)),
+          Expanded(child: _buildImageWithLabel("After", pair.afterPhotoUrl, false)),
         ],
       ),
     );
   }
 
-  Widget _buildImageWithLabel(String label, String url, bool isVideo) {
+  Widget _buildImageWithLabel(String label, String?   url, bool isVideo) {
     return Column(
       children: [
         Stack(
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(url, height: 90, width: 90, fit: BoxFit.cover),
+              child: Image.memory(base64Decode(url ?? ""), height: 90, width: 90, fit: BoxFit.cover),
             ),
             if (isVideo)
               const Positioned.fill(
@@ -200,8 +233,14 @@ class PreviousDetailScreen extends StatelessWidget {
         children: [
           Text("Billing", style: AppFonts.text16.semiBold.style),
           10.verticalSpace,
-          _infoRow("Total Amount:", "AED ${notifier.totalAmount.toStringAsFixed(2)}"),
-          _infoRow("Payment Method:", notifier.paymentMethod),
+          _infoRow(
+            "Total Amount:",
+            "AED ${notifier.customerHistoryDetailData?.jobDetail?.totalAmount?.toStringAsFixed(2) ?? ""}",
+          ),
+          _infoRow(
+            "Payment Method:",
+            notifier.customerHistoryDetailData?.jobDetail?.paymentMethod ?? "",
+          ),
           10.verticalSpace,
           CustomButton(
             onPressed: () => notifier.openInvoice(context),
@@ -216,7 +255,7 @@ class PreviousDetailScreen extends StatelessWidget {
             radius: 50,
             text: "Download Invoice",
             textStyle: AppFonts.text14.regular.style.copyWith(color: Colors.purple),
-          )
+          ),
         ],
       ),
     );
@@ -229,60 +268,39 @@ class PreviousDetailScreen extends StatelessWidget {
       children: [
         Text("Feedbacks", style: AppFonts.text16.semiBold.style),
         15.verticalSpace,
-        Text("Service Feedback", style: AppFonts.text14.semiBold.style),
-        10.verticalSpace,
-        notifier.hasFeedback
+        notifier.customerHistoryDetailData?.jobDetail?.rating != null
             ? Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: List.generate(5, (index) {
-                return Icon(
-                  index < notifier.serviceRating ? Icons.star : Icons.star_border,
-                  color: Colors.amber,
-                );
-              }),
-            ),
-            5.verticalSpace,
-            Text(notifier.serviceReview, style: AppFonts.text14.regular.style),
-          ],
-        )
-            : ElevatedButton(
-          onPressed: () => notifier.addFeedback(context),
-          child: const Text("Add Feedback"),
-        ),
-        25.verticalSpace,
-        Text("Vendor Feedback", style: AppFonts.text14.semiBold.style),
-        10.verticalSpace,
-        notifier.hasFeedback
-            ? Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: List.generate(5, (index) {
-                return Icon(
-                  index < notifier.vendorRating ? Icons.star : Icons.star_border,
-                  color: Colors.amber,
-                );
-              }),
-            ),
-            5.verticalSpace,
-            Text(notifier.vendorReview, style: AppFonts.text14.regular.style),
-          ],
-        )
-            : ElevatedButton(
-          onPressed: () => notifier.addFeedback(context),
-          child: const Text("Add Feedback"),
-        ),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: List.generate(5, (index) {
+                      return Icon(
+                        index <
+                                int.parse(
+                                  notifier.customerHistoryDetailData?.jobDetail?.rating
+                                          .toString() ??
+                                      "0",
+                                )
+                            ? Icons.star
+                            : Icons.star_border,
+                        color: Colors.amber,
+                      );
+                    }),
+                  ),
+                  5.verticalSpace,
+                  Text(
+                    notifier.customerHistoryDetailData?.jobDetail?.feedbackComments ?? "",
+                    style: AppFonts.text14.regular.style,
+                  ),
+                ],
+              )
+            : SizedBox.shrink(),
       ],
     );
   }
 
   /// Actions (Rebook & Support)
   Widget _buildActionButtons(BuildContext context, PreviousDetailNotifier notifier) {
-    return CustomButton(
-      onPressed: () => notifier.rebookService(),
-      text: "Rebook Service",
-    );
+    return CustomButton(onPressed: () => notifier.rebookService(), text: "Rebook Service");
   }
 }

@@ -7,6 +7,7 @@ import 'package:community_app/modules/vendor/registration/registration_trading.d
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
+import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/helpers/file_upload_helper.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:community_app/utils/regex.dart';
@@ -217,6 +218,101 @@ void showForgotPasswordPopup(BuildContext context) {
                       );
                     } else if (response is ErrorResponse) {
                       ToastHelper.showError("Invalid email");
+                    }
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ),
+  );
+}
+
+void showSiteVisitRequestPopup(BuildContext context, {
+  required Future<String?> Function(DateTime date, String remarks) onSubmit,
+}) {
+  final TextEditingController remarksController = TextEditingController();
+  final TextEditingController dateController = TextEditingController();
+  final ValueNotifier<bool> isLoading = ValueNotifier(false);
+
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    barrierColor: AppColors.primary.withOpacity(0.4),
+    builder: (popupContext) => Dialog(
+      backgroundColor: AppColors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+      child: ValueListenableBuilder<bool>(
+        valueListenable: isLoading,
+        builder: (_, loading, __) {
+          return Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                /// Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Site Visit Request",
+                      style: AppFonts.text20.semiBold.style,
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(popupContext),
+                      child: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+                20.verticalSpace,
+
+                /// Message
+                Text(
+                  "Please provide the reason for your site visit request.",
+                  style: AppFonts.text14.regular.style,
+                ),
+                15.verticalSpace,
+
+                /// Preferred Date Input
+                CustomTextField(
+                  controller: dateController,
+                  fieldName: "Preferred Date for Site Visit",
+                  keyboardType: TextInputType.datetime,
+                  startDate: DateTime.now(),
+                  initialDate: DateTime.now(),
+                ),
+                15.verticalSpace,
+
+                /// Remarks Input
+                CustomTextField(
+                  controller: remarksController,
+                  fieldName: "Reason",
+                  isMaxLines: true,
+                ),
+                20.verticalSpace,
+
+                /// Submit Button
+                CustomButton(
+                  text: "Submit Request",
+                  isLoading: loading,
+                  onPressed: () async {
+                    if (remarksController.text.trim().isEmpty) {
+                      ToastHelper.showError("Remarks are required");
+                      return;
+                    }
+
+                    isLoading.value = true;
+                    final result = await onSubmit(dateController.text.toDateTimeFromDdMmYyyy(), remarksController.text.trim());
+                    isLoading.value = false;
+
+                    if (result != null && result.isNotEmpty) {
+                      Navigator.pop(popupContext);
+                      ToastHelper.showSuccess(result);
+                    } else {
+                      ToastHelper.showError("Failed to submit request");
                     }
                   },
                 ),

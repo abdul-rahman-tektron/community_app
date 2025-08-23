@@ -25,8 +25,17 @@ class HiveStorageService {
     await _box.put(HiveKeys.onboardingCompleted, completed);
   }
 
-  static bool isOnboardingCompleted() {
+  static bool getOnboardingCompleted() {
     return _box.get(HiveKeys.onboardingCompleted, defaultValue: false);
+  }
+
+  /// Option Selection COMPLETED
+  static Future<void> setOptionSelectionCompleted(bool completed) async {
+    await _box.put(HiveKeys.optionSelectionCompleted, completed);
+  }
+
+  static bool getOptionSelectionCompleted() {
+    return _box.get(HiveKeys.optionSelectionCompleted, defaultValue: false);
   }
 
   /// USER FLOW
@@ -78,6 +87,7 @@ class HiveStorageService {
     // List of keys you want to preserve even after logout
     final List<String> preserveKeys = [
       HiveKeys.rememberMe,
+      HiveKeys.onboardingCompleted,
       // Add more keys in future as needed
     ];
 
@@ -98,5 +108,4 @@ class HiveStorageService {
       await _box.put(entry.key, entry.value);
     }
   }
-
 }

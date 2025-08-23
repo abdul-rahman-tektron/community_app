@@ -1,4 +1,5 @@
 import 'package:community_app/res/colors.dart';
+import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -86,7 +87,6 @@ class VendorDashboardScreen extends StatelessWidget {
   }
 
   Widget _buildLicenseStatusCard(VendorDashboardNotifier notifier) {
-    final license = notifier.licenseStatus;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
@@ -101,11 +101,18 @@ class VendorDashboardScreen extends StatelessWidget {
         children: [
           Text("Trade License Status", style: AppFonts.text16.semiBold.style),
           10.verticalSpace,
-          _buildKeyValueRow("License ID", license.licenseId),
+          _buildKeyValueRow("License ID", notifier.documentData?.documentNumber ?? ""),
           5.verticalSpace,
-          _buildKeyValueRow("Expiry Date", license.expiryDate.toLocal().toString().split(' ')[0]),
+          _buildKeyValueRow(
+            "Expiry Date",
+            notifier.documentData?.documentExpiryDate?.formatDate() ?? "",
+          ),
           5.verticalSpace,
-          _buildKeyValueRow("Status", license.status, valueColor: Colors.green),
+          _buildKeyValueRow(
+            "Status",
+            notifier.documentData?.active ?? false ? "Active" : "Inactive",
+            valueColor: notifier.documentData?.active ?? false ? Colors.green : Colors.red,
+          ),
         ],
       ),
     );
@@ -119,7 +126,9 @@ class VendorDashboardScreen extends StatelessWidget {
         Flexible(
           child: Text(
             value,
-            style: AppFonts.text14.regular.style.copyWith(color: valueColor ?? AppColors.textPrimary),
+            style: AppFonts.text14.regular.style.copyWith(
+              color: valueColor ?? AppColors.textPrimary,
+            ),
             textAlign: TextAlign.end,
             overflow: TextOverflow.ellipsis,
           ),
@@ -155,11 +164,18 @@ class VendorDashboardScreen extends StatelessWidget {
                   Container(
                     width: 36.w,
                     height: 36.w,
-                    decoration: BoxDecoration(color: stat.iconBgColor, borderRadius: BorderRadius.circular(8.r)),
+                    decoration: BoxDecoration(
+                      color: stat.iconBgColor,
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
                     child: Icon(stat.icon, color: stat.iconColor, size: 20.w),
                   ),
                   15.horizontalSpace,
-                  Text(stat.count.toString(), style: AppFonts.text24.semiBold.style, overflow: TextOverflow.ellipsis),
+                  Text(
+                    stat.count.toString(),
+                    style: AppFonts.text24.semiBold.style,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
               15.verticalSpace,
@@ -200,7 +216,10 @@ class VendorDashboardScreen extends StatelessWidget {
                 Navigator.pushNamed(
                   context,
                   AppRoutes.vendorBottomBar,
-                  arguments: {"currentIndex": 1, "subCurrentIndex": 1}, // Quotation > Manage Quotation tab
+                  arguments: {
+                    "currentIndex": 1,
+                    "subCurrentIndex": 1,
+                  }, // Quotation > Manage Quotation tab
                 );
                 break;
               case "Assign Employee":
@@ -222,7 +241,10 @@ class VendorDashboardScreen extends StatelessWidget {
             }
           },
           child: Container(
-            decoration: BoxDecoration(color: action.iconBgColor, borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(
+              color: action.iconBgColor,
+              borderRadius: BorderRadius.circular(12),
+            ),
             padding: EdgeInsets.all(12),
             child: Row(
               children: [
@@ -249,7 +271,10 @@ class VendorDashboardScreen extends StatelessWidget {
               children: [
                 Container(
                   padding: EdgeInsets.all(8.w),
-                  decoration: BoxDecoration(color: alert.iconBgColor, borderRadius: BorderRadius.circular(8.r)),
+                  decoration: BoxDecoration(
+                    color: alert.iconBgColor,
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
                   child: Icon(alert.icon, color: alert.iconColor, size: 20.w),
                 ),
                 15.horizontalSpace,
@@ -263,9 +288,9 @@ class VendorDashboardScreen extends StatelessWidget {
   }
 
   List<PieChartSectionData> getServiceStatusPieData(
-      VendorDashboardNotifier notifier, {
-        int touchedIndex = -1,
-      }) {
+    VendorDashboardNotifier notifier, {
+    int touchedIndex = -1,
+  }) {
     final acceptedCount = notifier.acceptedCount ?? 0;
     final rejectedCount = notifier.rejectedCount ?? 0;
     final total = acceptedCount + rejectedCount;
@@ -310,7 +335,6 @@ class VendorDashboardScreen extends StatelessWidget {
     return sections;
   }
 
-
   Widget _buildServiceStatusPieChart(VendorDashboardNotifier notifier) {
     int touchedIndex = -1;
 
@@ -344,7 +368,8 @@ class VendorDashboardScreen extends StatelessWidget {
                           ),
                           borderData: FlBorderData(show: false),
                           sectionsSpace: 2,
-                          centerSpaceRadius: 35.w, // <-- dynamically scaled
+                          centerSpaceRadius: 35.w,
+                          // <-- dynamically scaled
                           sections: getServiceStatusPieData(notifier, touchedIndex: touchedIndex),
                         ),
                       ),
@@ -354,10 +379,7 @@ class VendorDashboardScreen extends StatelessWidget {
                         children: [
                           Icon(LucideIcons.pencilRuler, size: 20.w, color: AppColors.textPrimary),
                           4.verticalSpace,
-                          Text(
-                            "Jobs",
-                            style: AppFonts.text14.bold.style
-                          ),
+                          Text("Jobs", style: AppFonts.text14.bold.style),
                         ],
                       ),
                     ],

@@ -122,6 +122,7 @@ class VendorRegistrationTradingScreen extends StatelessWidget {
           CustomTextField(
             controller: vendorRegistrationNotifier.tradeLicenseIdController,
             fieldName: "Trade License number",
+            keyboardType: TextInputType.number,
             validator: (value) => Validations.validateTradeLicense(context, value),
           ),
           15.verticalSpace,

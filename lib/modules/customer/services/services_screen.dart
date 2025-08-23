@@ -94,7 +94,7 @@ class ServicesScreen extends StatelessWidget {
       child: TabBarView(
         children: [
           UpcomingServicesWidget(upcomingJobs: servicesNotifier.upcomingServices),
-          PreviousServicesWidget(previousServices: servicesNotifier.previousServices),
+          PreviousServicesWidget(historyServices: servicesNotifier.historyServices),
         ],
       ),
     );

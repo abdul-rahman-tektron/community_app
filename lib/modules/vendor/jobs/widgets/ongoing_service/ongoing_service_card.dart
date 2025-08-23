@@ -75,7 +75,7 @@ class OngoingServiceCard extends StatelessWidget {
           children: [
             Text(job.customerRequestedDate?.formatDate() ?? '-', style: AppFonts.text12.regular.style),
             5.verticalSpace,
-            Text("ID: ${job.jobId ?? '-'}", style: AppFonts.text12.regular.grey.style),
+            Text("#${job.jobId ?? '-'}", style: AppFonts.text12.regular.grey.style),
           ],
         ),
       ],

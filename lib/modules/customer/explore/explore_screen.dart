@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:community_app/core/model/customer/explore/explore_service_response.dart';
 import 'package:community_app/modules/customer/explore/explore_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
@@ -63,7 +66,10 @@ class ExploreScreen extends StatelessWidget {
                     },
                     child: Container(
                       padding: const EdgeInsets.all(13),
-                      decoration: BoxDecoration(color: AppColors.secondary, borderRadius: BorderRadius.circular(10)),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                       child: Icon(LucideIcons.listFilter, color: AppColors.white),
                     ),
                   ),
@@ -73,17 +79,35 @@ class ExploreScreen extends StatelessWidget {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: GridView.builder(
-                  itemCount: exploreNotifier.filteredServices.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 20,
-                    mainAxisSpacing: 20,
-                    childAspectRatio: 0.75,
-                  ),
-                  itemBuilder: (context, index) {
-                    final service = exploreNotifier.filteredServices[index];
-                    return _buildServiceCard(context, service);
+                child: Builder(
+                  builder: (_) {
+                    if (exploreNotifier.isLoading) {
+                      // ✅ Loader
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (exploreNotifier.exploreServices.isEmpty) {
+                      // ✅ Empty state text
+                      return const Center(
+                        child: Text(
+                          "No services found",
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                        ),
+                      );
+                    } else {
+                      // ✅ Services Grid
+                      return GridView.builder(
+                        itemCount: exploreNotifier.exploreServices.length,
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 20,
+                          mainAxisSpacing: 20,
+                          childAspectRatio: 1,
+                        ),
+                        itemBuilder: (context, index) {
+                          final service = exploreNotifier.exploreServices[index];
+                          return _buildServiceCard(context, service);
+                        },
+                      );
+                    }
                   },
                 ),
               ),
@@ -96,7 +120,8 @@ class ExploreScreen extends StatelessWidget {
 
   Widget buildFilterSheet(BuildContext context, ExploreNotifier exploreNotifier) {
     // Local state for filters UI until applied
-    RangeValues selectedPriceRange = exploreNotifier.selectedPriceRange;
+    RangeValues selectedPriceRange =
+        exploreNotifier.selectedPriceRange ?? const RangeValues(0, 2000);
     DistanceFilter? selectedDistance = exploreNotifier.selectedDistance;
     SortOption? localSortOption = exploreNotifier.selectedSortOption;
 
@@ -134,7 +159,8 @@ class ExploreScreen extends StatelessWidget {
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20), // padding around scroll content
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        // padding around scroll content
                         child: Row(
                           children: sortMetaList.map((meta) {
                             return Padding(
@@ -207,7 +233,7 @@ class ExploreScreen extends StatelessWidget {
                     RangeSlider(
                       values: selectedPriceRange,
                       min: 0,
-                      max: 200,
+                      max: 2000,
                       divisions: 20,
                       activeColor: AppColors.primary,
                       inactiveColor: const Color(0xffECECEC),
@@ -372,10 +398,11 @@ class ExploreScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildServiceCard(BuildContext context, ServiceItem service) {
+  Widget _buildServiceCard(BuildContext context, ExploreServiceData service) {
     return InkWell(
       onTap: () {
-        Navigator.pushNamed(context, AppRoutes.serviceDetails);
+        Navigator.pushNamed(
+            context, AppRoutes.serviceDetails, arguments: service.serviceId.toString());
       },
       child: Container(
         decoration: AppStyles.commonDecoration,
@@ -383,37 +410,47 @@ class ExploreScreen extends StatelessWidget {
           children: [
             /// Image - 45% height
             Expanded(
-              flex: 45,
+              flex: 53,
               child: ClipRRect(
-                borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
-                child: SizedBox.expand(child: Image.asset(AppImages.loginImage, fit: BoxFit.cover)),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10),
+                ),
+                child: SizedBox.expand(
+                  child: Image.memory(base64Decode(service.serviceImage ?? ""), fit: BoxFit.cover),
+                ),
               ),
             ),
 
             /// Content - 55% height
             Expanded(
-              flex: 55,
+              flex: 47,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(service.service, style: AppFonts.text14.semiBold.style, maxLines: 1),
+                    Text(
+                      service.serviceName ?? "",
+                      style: AppFonts.text14.semiBold.style,
+                      maxLines: 1,
+                    ),
                     4.verticalSpace,
                     Text(
-                      service.vendorName,
+                      service.vendorName ?? "",
                       style: AppFonts.text14.medium.style,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     4.verticalSpace,
-                    Text("AED ${service.price.toStringAsFixed(0)}", style: AppFonts.text16.semiBold.style),
-                    const Spacer(),
                     Row(
                       children: [
-                        RatingsHelper(rating: service.rating),
+                        RatingsHelper(rating: service.rating?.toDouble() ?? 0.0),
                         4.horizontalSpace,
-                        Text(service.rating.toString(), style: AppFonts.text12.regular.style),
+                        Text(
+                          "(${service.reviewCount?.toInt() ?? 0})",
+                          style: AppFonts.text12.regular.style,
+                        ),
                       ],
                     ),
                   ],

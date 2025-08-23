@@ -4,9 +4,15 @@ import 'dart:io';
 import 'package:community_app/core/model/common/error/common_response.dart';
 import 'package:community_app/core/model/common/error/error_response.dart';
 import 'package:community_app/core/model/common/jobs/ongoing_jobs_response.dart';
+import 'package:community_app/core/model/common/user/customer_id_request.dart';
+import 'package:community_app/core/model/customer/job/customer_history_detail_request.dart';
+import 'package:community_app/core/model/customer/job/customer_history_detail_response.dart';
 import 'package:community_app/core/model/customer/job/job_completion_request.dart';
 import 'package:community_app/core/model/vendor/assign_employee/assign_employee_request.dart';
 import 'package:community_app/core/model/vendor/jobs/ongoing_jobs_assigned_response.dart';
+import 'package:community_app/core/model/vendor/jobs/vendor_history_detail_request.dart';
+import 'package:community_app/core/model/vendor/jobs/vendor_history_detail_response.dart';
+import 'package:community_app/core/model/vendor/jobs/vendor_history_list.dart';
 import 'package:community_app/core/remote/network/api_url.dart';
 import 'package:community_app/core/remote/network/base_repository.dart';
 import 'package:community_app/utils/enums.dart';
@@ -91,6 +97,43 @@ class VendorJobsRepository extends BaseRepository {
     if (response?.statusCode == HttpStatus.ok) {
       final ongoingJobAssignedResponse = onGoingJobAssignedResponseFromJson(jsonEncode(response?.data));
       return ongoingJobAssignedResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+
+  Future<Object?> apiVendorHistoryList(VendorIdRequest requestParams) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.post,
+      pathUrl: ApiUrls.pathVendorHistoryList,
+      body: jsonEncode(requestParams.toJson()),
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final vendorHistoryListResponse = vendorHistoryListResponseFromJson(jsonEncode(response?.data));
+      return vendorHistoryListResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+  Future<Object?> apiVendorHistoryDetails(VendorHistoryDetailRequest requestParams) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.post,
+      pathUrl: ApiUrls.pathVendorHistoryDetail,
+      body: jsonEncode(requestParams.toJson()),
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final vendorHistoryDetailResponse = vendorHistoryDetailResponseFromJson(jsonEncode(response?.data));
+      return vendorHistoryDetailResponse;
     } else {
       throw ErrorResponse.fromJson(response?.data ?? {});
     }

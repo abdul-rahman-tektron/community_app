@@ -39,6 +39,12 @@ class SettingsNotifier extends BaseChangeNotifier {
           initializeData();
         },);
         break;
+
+        case 'edit-services':
+        Navigator.pushNamed(context, '/vendor-onboarding', arguments: true).then((value) {
+          initializeData();
+        },);
+        break;
       case 'change-password':
         Navigator.pushNamed(context, '/change-password');
         break;

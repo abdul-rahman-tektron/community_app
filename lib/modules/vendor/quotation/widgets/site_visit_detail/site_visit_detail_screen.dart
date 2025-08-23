@@ -13,13 +13,15 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'site_visit_detail_notifier.dart';
 
 class SiteVisitDetailScreen extends StatelessWidget {
-  final String? requestId;
-  const SiteVisitDetailScreen({super.key, required this.requestId});
+  final String? jobId;
+  final int? siteVisitId;
+  final int? customerId;
+  const SiteVisitDetailScreen({super.key, this.jobId, this.customerId, this.siteVisitId});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => SiteVisitDetailNotifier(requestId)..loadDetails(),
+      create: (_) => SiteVisitDetailNotifier(jobId, customerId, siteVisitId)..loadDetails(),
       child: Consumer<SiteVisitDetailNotifier>(
         builder: (context, notifier, _) {
           if (notifier.isLoading) {

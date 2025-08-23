@@ -17,7 +17,12 @@ class QuotationDetailsNotifier extends BaseChangeNotifier {
   String serviceName = "Painting";
   String requestedDate = "3 July 2025";
   String notes = "The quotation covers labor and materials for indoor wall painting only. Any additional work will be quoted separately.";
-
+  JobInfoDetailResponse get jobDetail => _jobDetail;
+  set jobDetail(JobInfoDetailResponse value) {
+    if (_jobDetail == value) return;
+    _jobDetail = value;
+    notifyListeners();
+  }
   JobInfoDetailResponse _jobDetail = JobInfoDetailResponse();
   QuotationResponseDetailResponse _quotationDetail = QuotationResponseDetailResponse();
 
@@ -85,12 +90,7 @@ class QuotationDetailsNotifier extends BaseChangeNotifier {
     print("Resending quotation...");
   }
 
-  JobInfoDetailResponse get jobDetail => _jobDetail;
-  set jobDetail(JobInfoDetailResponse value) {
-    if (_jobDetail == value) return;
-    _jobDetail = value;
-    notifyListeners();
-  }
+
 
   QuotationResponseDetailResponse get quotationDetail => _quotationDetail;
   set quotationDetail(QuotationResponseDetailResponse value) {

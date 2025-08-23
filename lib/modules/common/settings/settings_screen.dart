@@ -34,6 +34,7 @@ class SettingsScreen extends StatelessWidget {
                   _buildSettingsGroup(
                     [
                       _tileData(LucideIcons.userRoundPen, "Edit Profile", 'edit-profile'),
+                      if(settingsNotifier.userData?.customerType == "V") _tileData(LucideIcons.cog, "Edit Services", 'edit-services'),
                       _tileData(LucideIcons.lock, "Change Password", 'change-password'),
                       _tileData(LucideIcons.trash, "Delete Account", 'delete-account', isDestructive: true),
                     ],

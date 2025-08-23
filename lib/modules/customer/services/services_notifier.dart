@@ -1,9 +1,11 @@
-
 import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/core/model/common/user/customer_id_request.dart';
+import 'package:community_app/core/model/customer/job/customer_history_list_response.dart';
 import 'package:community_app/core/model/customer/job/ongoing_jobs_response.dart';
 import 'package:community_app/core/remote/services/customer/customer_jobs_repository.dart';
 
 import 'package:community_app/utils/enums.dart';
+import 'package:community_app/utils/helpers/toast_helper.dart';
 
 class ServiceModel {
   final String id;
@@ -40,21 +42,14 @@ class Technician {
   final String? contact;
   final String? imageUrl;
 
-  Technician({
-    required this.name,
-    this.contact,
-    this.imageUrl,
-  });
+  Technician({required this.name, this.contact, this.imageUrl});
 }
 
 class ProductUsed {
   final String name;
   final int quantity;
 
-  ProductUsed({
-    required this.name,
-    required this.quantity,
-  });
+  ProductUsed({required this.name, required this.quantity});
 }
 
 class ServicesNotifier extends BaseChangeNotifier {
@@ -62,6 +57,7 @@ class ServicesNotifier extends BaseChangeNotifier {
 
   /// Raw API model list - upcoming jobs as received from backend
   List<CustomerOngoingJobsData> upcomingServices = [];
+  List<CustomerHistoryListData> historyServices = [];
 
   /// Keep static previous services for now, still using ServiceModel UI model
   List<ServiceModel> previousServices = [
@@ -80,9 +76,7 @@ class ServicesNotifier extends BaseChangeNotifier {
       title: 'Service Y',
       date: DateTime.now().subtract(const Duration(days: 15)),
       progressStatus: 'Resolved with Maintenance',
-      productUsed: [
-        ProductUsed(name: 'Sealant', quantity: 1),
-      ],
+      productUsed: [ProductUsed(name: 'Sealant', quantity: 1)],
     ),
   ];
 
@@ -102,13 +96,16 @@ class ServicesNotifier extends BaseChangeNotifier {
     await loadUserData();
     if (userData?.customerId != null) {
       await fetchCustomerOngoingJobs(userData!.customerId!);
+      await fetchHistoryList();
     }
   }
 
   /// Fetch ongoing jobs for the customer and store raw API model data
   Future<void> fetchCustomerOngoingJobs(int customerId) async {
     try {
-      final response = await CustomerJobsRepository.instance.apiGetCustomerOngoingJobs(customerId.toString());
+      final response = await CustomerJobsRepository.instance.apiGetCustomerOngoingJobs(
+        customerId.toString(),
+      );
       if (response is CustomerOngoingJobsResponse && response.success == true) {
         upcomingServices = response.data ?? [];
 
@@ -124,7 +121,24 @@ class ServicesNotifier extends BaseChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> fetchHistoryList() async {
+    try {
+      final response = await CustomerJobsRepository.instance.apiCustomerHistoryList(
+        CustomerIdRequest(customerId: userData?.customerId ?? 0),
+      );
+      if (response is CustomerHistoryListResponse && response.success == true) {
+        historyServices = response.data ?? [];
+
+        print("historyServices");
+        print(historyServices);
+      } else {
+        historyServices = [];
+      }
+    } catch (e, stack) {
+      print("Error fetching customer History jobs: $e");
+      print("Error fetching customer History jobs: $stack");
+      historyServices = [];
+    }
+    notifyListeners();
+  }
 }
-
-
-

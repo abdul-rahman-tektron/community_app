@@ -30,6 +30,7 @@ class LoginNotifier extends BaseChangeNotifier {
   String? captchaImage;
   String generatedCaptcha = '';
   bool isChecked = false;
+  bool? isOnboarded;
   String captchaError = '';
   String loginError = '';
 
@@ -46,6 +47,7 @@ class LoginNotifier extends BaseChangeNotifier {
 
   Future<void> _init() async {
     await rememberMeData();
+    await isOnboardedData();
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
@@ -114,6 +116,13 @@ class LoginNotifier extends BaseChangeNotifier {
       passwordController.text = rememberMeModel.password;
       isChecked = true;
     }
+  }
+
+  // Load remember me data from storage
+  Future<void> isOnboardedData() async {
+    bool data = HiveStorageService.getOnboardingCompleted();
+
+    isOnboarded = data;
   }
 
   Future<void> _handleRememberMe() async {
@@ -230,11 +239,22 @@ class LoginNotifier extends BaseChangeNotifier {
     // Navigate to role-based home (example shown here)
     if(result.type == "V") {
       HiveStorageService.setUserCategory(UserRole.vendor.name);
-      Navigator.pushReplacementNamed(
-        context,
-        AppRoutes.vendorBottomBar,
-        arguments: {'currentIndex': 0},
-      );
+
+      print("isOnboarded");
+      print(isOnboarded);
+
+      if(!(isOnboarded ?? true)) {
+        Navigator.pushReplacementNamed(
+          context,
+          AppRoutes.vendorOnboarding,
+        );
+      } else {
+        Navigator.pushReplacementNamed(
+          context,
+          AppRoutes.vendorBottomBar,
+          arguments: {'currentIndex': 0},
+        );
+      }
     } else {
       HiveStorageService.setUserCategory(UserRole.tenant.name);
       Navigator.pushReplacementNamed(

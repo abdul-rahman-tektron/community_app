@@ -1,17 +1,16 @@
-import 'package:community_app/modules/customer/services/services_notifier.dart';
+import 'package:community_app/core/model/customer/job/customer_history_list_response.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
-import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
-import 'package:community_app/utils/widgets/custom_linear_progress_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:community_app/utils/extensions.dart';
 
 class PreviousServiceCard extends StatelessWidget {
-  final ServiceModel service;
+  final CustomerHistoryListData service;
 
   const PreviousServiceCard({super.key, required this.service});
 
@@ -37,21 +36,14 @@ class PreviousServiceCard extends StatelessWidget {
   Widget _buildHeaderRow() {
     return Row(
       children: [
-        Expanded(child: _buildServiceId()),
-        _buildProgressText(service.progressStatus ?? 'N/A'),
+        Expanded(child: _buildCustomerName()),
+        Text("#${service.jobId ?? 'N/A'}", style: AppFonts.text14.regular.style),
       ],
     );
   }
 
-  Widget _buildServiceId() {
-    return Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(text: "Job ID: ", style: AppFonts.text16.regular.style),
-          TextSpan(text: "#${service.id}", style: AppFonts.text16.regular.style),
-        ],
-      ),
-    );
+  Widget _buildCustomerName() {
+    return Text(service.vendorName ?? "", style: AppFonts.text16.regular.style);
   }
 
   Widget _buildProgressText(String progress) {
@@ -63,8 +55,8 @@ class PreviousServiceCard extends StatelessWidget {
   }
 
   Widget _buildDateTimeRow() {
-    final date = service.date.formatDate();
-    final time = service.date.formatTime();
+    final date = service.requestedDate?.formatDate() ?? 'N/A';
+    final time = service.requestedDate?.formatTime() ?? 'N/A';
 
     return Row(
       children: [
@@ -111,36 +103,6 @@ class PreviousServiceCard extends StatelessWidget {
     );
   }
 
-  Widget _buildProductList() {
-    final products = service.productUsed ?? [];
-
-    if (products.isEmpty) {
-      return Text("No product used", style: AppFonts.text14.regular.style);
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ...products.map(
-          (product) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0),
-            child: Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(color: Color(0xFFE6E6E6), borderRadius: BorderRadius.circular(5)),
-                  child: Text("${product.quantity}", style: AppFonts.text14.regular.style),
-                ),
-                10.horizontalSpace,
-                Expanded(flex: 4, child: Text(product.name, style: AppFonts.text14.regular.style)),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildActionButtons(BuildContext context) {
     return Row(
       children: [
@@ -152,7 +114,7 @@ class PreviousServiceCard extends StatelessWidget {
               Navigator.pushNamed(
                 context,
                 AppRoutes.previousDetails,
-                arguments: 156
+                arguments: service.jobId,
               );
             },
           ),

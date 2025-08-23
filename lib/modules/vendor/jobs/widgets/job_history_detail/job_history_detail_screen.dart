@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:community_app/core/model/vendor/jobs/vendor_history_detail_response.dart';
 import 'package:community_app/modules/vendor/jobs/widgets/job_history_detail/job_history_detail_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
@@ -33,11 +35,11 @@ class JobHistoryDetailScreen extends StatelessWidget {
                     children: [
                       _buildJobDescription(notifier),
                       15.verticalSpace,
-                      _buildAfterPhotos(notifier.imagePairs),
+                      _buildAfterPhotos(notifier),
                       15.verticalSpace,
-                      _buildNotesSection(notifier.notes),
+                      _buildNotesSection(notifier),
                       15.verticalSpace,
-                      _buildAmountSection(notifier.totalAmount),
+                      _buildAmountSection(notifier),
                     ],
                   ),
                 ),
@@ -84,32 +86,32 @@ class JobHistoryDetailScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(notifier.customerName, style: AppFonts.text16.semiBold.style),
+          Text(notifier.jobDetail.customerName ?? "", style: AppFonts.text16.semiBold.style),
           5.verticalSpace,
-          Text(notifier.serviceName, style: AppFonts.text14.regular.style),
+          Text(notifier.jobDetail.serviceName ?? "", style: AppFonts.text14.regular.style),
           5.verticalSpace,
           _iconLabelRow(
             icon: LucideIcons.phone,
-            label: notifier.phone,
+            label: notifier.jobDetail.phoneNumber ?? "",
             bgColor: const Color(0xffeff7ef),
             iconColor: Colors.green,
           ),
           5.verticalSpace,
           _iconLabelRow(
             icon: LucideIcons.mapPin,
-            label: notifier.location,
+            label: notifier.jobDetail.address ?? "",
             bgColor: const Color(0xffe7f3f9),
             iconColor: Colors.blue,
           ),
           5.verticalSpace,
-          Text("Requested Date: ${notifier.requestedDate}", style: AppFonts.text14.regular.style),
+          Text("Requested Date: ${notifier.jobDetail.expectedDate}", style: AppFonts.text14.regular.style),
           10.verticalSpace,
           Text.rich(
             TextSpan(
               children: [
                 TextSpan(text: 'Priority: ', style: AppFonts.text14.regular.style),
                 TextSpan(
-                  text: notifier.priority,
+                  text: notifier.jobDetail.priority ?? "",
                   style: AppFonts.text14.regular.red.style,
                 ),
               ],
@@ -120,7 +122,7 @@ class JobHistoryDetailScreen extends StatelessWidget {
             TextSpan(
               children: [
                 TextSpan(text: "Job Description: ", style: AppFonts.text14.semiBold.style),
-                TextSpan(text: notifier.jobDescription, style: AppFonts.text14.regular.style),
+                TextSpan(text: notifier.jobDetail.remarks ?? "", style: AppFonts.text14.regular.style),
               ],
             ),
           ),
@@ -130,7 +132,7 @@ class JobHistoryDetailScreen extends StatelessWidget {
   }
 
   /// Before & After Photos
-  Widget _buildAfterPhotos(List<ImagePair> imagePairs) {
+  Widget _buildAfterPhotos(JobHistoryDetailNotifier notifier) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -140,14 +142,14 @@ class JobHistoryDetailScreen extends StatelessWidget {
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: imagePairs.length,
+          itemCount: notifier.vendorHistoryDetailData?.completionDetails?.length ?? 0,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 1,
             childAspectRatio: 2.8,
             mainAxisSpacing: 10,
           ),
           itemBuilder: (context, index) {
-            final pair = imagePairs[index];
+            final pair = notifier.vendorHistoryDetailData?.completionDetails?[index];
             return _buildBeforeAfterCard(pair);
           },
         ),
@@ -155,7 +157,7 @@ class JobHistoryDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBeforeAfterCard(ImagePair pair) {
+  Widget _buildBeforeAfterCard(CompletionDetail? pair) {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
@@ -172,18 +174,18 @@ class JobHistoryDetailScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(child: _buildImageWithLabel("Before", pair.before, pair.isVideo)),
+          Expanded(child: _buildImageWithLabel("Before", pair?.beforePhotoUrl, false)),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 10),
             child: Icon(Icons.arrow_forward, size: 28, color: Colors.grey),
           ),
-          Expanded(child: _buildImageWithLabel("After", pair.after, pair.isVideo)),
+          Expanded(child: _buildImageWithLabel("After", pair?.afterPhotoUrl, false)),
         ],
       ),
     );
   }
 
-  Widget _buildImageWithLabel(String label, String url, bool isVideo) {
+  Widget _buildImageWithLabel(String label, String? url, bool isVideo) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -191,7 +193,7 @@ class JobHistoryDetailScreen extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(url, height: 90, width: 90, fit: BoxFit.cover),
+              child: Image.memory(base64Decode(url ?? ""), height: 90, width: 90, fit: BoxFit.cover),
             ),
             if (isVideo)
               const Positioned.fill(
@@ -210,33 +212,39 @@ class JobHistoryDetailScreen extends StatelessWidget {
   }
 
   /// Notes
-  Widget _buildNotesSection(String notes) {
-    return Container(
-      padding: const EdgeInsets.all(15),
-      decoration: AppStyles.commonDecoration,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Notes", style: AppFonts.text16.semiBold.style),
-          10.verticalSpace,
-          Text(notes, style: AppFonts.text14.regular.style),
-        ],
-      ),
+  Widget _buildNotesSection(JobHistoryDetailNotifier notifier) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text("Assigned Employee: ", style: AppFonts.text14.semiBold.style),
+            5.horizontalSpace,
+            Expanded(child: Text(notifier.vendorHistoryDetailData?.jobDetail?.assignedEmployee ?? "Test", style: AppFonts.text14.regular.style)),
+          ],
+        ),
+       10.verticalSpace,
+        Row(
+          children: [
+            Text("Notes:", style: AppFonts.text14.semiBold.style),
+            5.horizontalSpace,
+            Text(notifier.vendorHistoryDetailData?.jobDetail?.remarks ?? "Test", style: AppFonts.text14.regular.style),
+          ],
+        ),
+
+      ],
     );
   }
 
   /// Amount
-  Widget _buildAmountSection(double total) {
-    return Container(
-      padding: const EdgeInsets.all(15),
-      decoration: AppStyles.commonDecoration,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text("Total Amount", style: AppFonts.text16.semiBold.style),
-          Text("AED ${total.toStringAsFixed(2)}", style: AppFonts.text16.semiBold.red.style),
-        ],
-      ),
+  Widget _buildAmountSection(JobHistoryDetailNotifier notifier) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text("Total Amount", style: AppFonts.text16.semiBold.style),
+        Text("AED ${notifier.vendorHistoryDetailData?.jobDetail?.totalAmount?.toStringAsFixed(2) ?? ""}", style: AppFonts.text16.semiBold.red.style),
+      ],
     );
   }
 

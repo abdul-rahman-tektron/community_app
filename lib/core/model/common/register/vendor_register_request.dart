@@ -141,12 +141,16 @@ class VendorBankDetail {
 class VendorDocumentDetails {
   int? documentIdentity;
   String? documentType;
+  int? DocumentTypeId;
+  String? documentNumber;
   DateTime? documentExpiryDate;
   String? documentFile;
 
   VendorDocumentDetails({
     this.documentIdentity,
     this.documentType,
+    this.documentNumber,
+    this.DocumentTypeId = 1,
     this.documentExpiryDate,
     this.documentFile,
   });
@@ -154,6 +158,8 @@ class VendorDocumentDetails {
   factory VendorDocumentDetails.fromJson(Map<String, dynamic> json) => VendorDocumentDetails(
     documentIdentity: json["documentIdentity"],
     documentType: json["documentType"],
+    documentNumber: json["documentNumber"],
+    DocumentTypeId: json["DocumentTypeId"],
     documentExpiryDate: json["documentExpiryDate"] == null ? null : DateTime.parse(json["documentExpiryDate"]),
     documentFile: json["documentFile"],
   );
@@ -161,6 +167,8 @@ class VendorDocumentDetails {
   Map<String, dynamic> toJson() => {
     "documentIdentity": documentIdentity ?? 1,
     "documentType": documentType ?? "",
+    "documentNumber": documentNumber ?? "",
+    "DocumentTypeId": DocumentTypeId ?? 1,
     "documentExpiryDate": (documentExpiryDate ?? DateTime.now()).toIso8601String(),
     "documentFile": documentFile ?? "",
   };

@@ -30,7 +30,7 @@ class SiteVisitScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => SiteVisitDetailScreen(requestId: request.id),
+                        builder: (_) => SiteVisitDetailScreen(jobId: request.id),
                       ),
                     );
                   },

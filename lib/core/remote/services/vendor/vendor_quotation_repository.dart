@@ -4,7 +4,10 @@ import 'dart:io';
 import 'package:community_app/core/model/common/error/common_response.dart';
 import 'package:community_app/core/model/common/error/error_response.dart';
 import 'package:community_app/core/model/customer/top_vendors/top_vendors_response.dart';
+import 'package:community_app/core/model/vendor/quotation_request/create_site_viist_request.dart';
+import 'package:community_app/core/model/vendor/quotation_request/create_site_visit_response.dart';
 import 'package:community_app/core/model/vendor/quotation_request/quotation_response_detail_response.dart';
+import 'package:community_app/core/model/vendor/quotation_request/site_visit_assign_employee_request.dart';
 import 'package:community_app/core/model/vendor/vendor_quotation/create_job_quotation_request.dart';
 import 'package:community_app/core/model/vendor/vendor_quotation/vendor_quotation_request_list.dart';
 import 'package:community_app/core/remote/network/api_url.dart';
@@ -73,4 +76,43 @@ class VendorQuotationRepository extends BaseRepository {
       throw ErrorResponse.fromJson(response?.data ?? {});
     }
   }
+
+  /// POST: /Job/CreateJobQuotationResponse
+  /// Purpose: Allows a vendor to submit a quotation for a customer’s job request
+  Future<Object?> apiCreateSiteVisit(CreateSiteVisitRequest requestParams) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.post,
+      pathUrl: ApiUrls.pathCreateSiteVisitRequest,
+      body: jsonEncode(requestParams.toJson()),
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final createSiteVisitResponse = createSiteVisitResponseFromJson(jsonEncode(response?.data));
+      return createSiteVisitResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+  Future<Object?> apiSiteVisitAssignEmployee(SiteVisitAssignEmployeeRequest requestParams) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.post,
+      pathUrl: ApiUrls.pathSiteVisitAssignEmployee,
+      body: jsonEncode(requestParams.toJson()),
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final siteVisitAssignEmployeeRequest = siteVisitAssignEmployeeRequestFromJson(jsonEncode(response?.data));
+      return siteVisitAssignEmployeeRequest;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
 }

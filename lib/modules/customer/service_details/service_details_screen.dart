@@ -15,12 +15,13 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class ServiceDetailsScreen extends StatelessWidget {
-  const ServiceDetailsScreen({super.key});
+  final String? serviceId;
+  const ServiceDetailsScreen({super.key, this.serviceId});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => ServiceDetailsNotifier(),
+      create: (context) => ServiceDetailsNotifier(serviceId: serviceId),
       child: Consumer<ServiceDetailsNotifier>(
         builder: (context, notifier, child) {
           return buildBody(context, notifier);

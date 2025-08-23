@@ -1,5 +1,10 @@
 import 'dart:convert';
 
+import 'package:community_app/core/model/common/error/error_response.dart';
+import 'package:community_app/core/model/vendor/quotation_request/create_site_viist_request.dart';
+import 'package:community_app/core/model/vendor/quotation_request/create_site_visit_response.dart';
+import 'package:community_app/core/remote/services/common_repository.dart';
+import 'package:community_app/core/remote/services/vendor/vendor_quotation_repository.dart';
 import 'package:community_app/modules/vendor/quotation/widgets/add_quotation/add_quotation_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
@@ -11,6 +16,7 @@ import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_drawer.dart';
+import 'package:community_app/utils/widgets/custom_popup.dart';
 import 'package:community_app/utils/widgets/custom_textfields.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -22,12 +28,14 @@ class AddQuotationScreen extends StatelessWidget {
   final int? jobId;
   final int? serviceId;
   final int? quotationId;
+  final int? customerId;
 
   const AddQuotationScreen({
     super.key,
     this.jobId,
     this.serviceId,
     this.quotationId,
+    this.customerId,
   });
 
   @override
@@ -36,7 +44,8 @@ class AddQuotationScreen extends StatelessWidget {
       create: (_) => AddQuotationNotifier()
         ..jobId = jobId
         ..serviceId = serviceId
-        ..quotationId = quotationId,
+        ..quotationId = quotationId
+        ..customerId = customerId,
       child: Consumer<AddQuotationNotifier>(
         builder: (context, addQuotationNotifier, _) {
           return buildBody(context, addQuotationNotifier);
@@ -45,10 +54,7 @@ class AddQuotationScreen extends StatelessWidget {
     );
   }
 
-  Widget buildBody(
-    BuildContext context,
-    AddQuotationNotifier addQuotationNotifier,
-  ) {
+  Widget buildBody(BuildContext context, AddQuotationNotifier addQuotationNotifier) {
     return Scaffold(
       appBar: CustomAppBar(),
       drawer: CustomDrawer(),
@@ -57,6 +63,8 @@ class AddQuotationScreen extends StatelessWidget {
           children: [
             buildTitle(context, addQuotationNotifier),
             buildCustomerInfo(context, addQuotationNotifier),
+            Divider(),
+            buildSiteVisitRequest(context, addQuotationNotifier),
             Divider(),
             buildQuotationInfo(context, addQuotationNotifier),
             Divider(),
@@ -69,19 +77,13 @@ class AddQuotationScreen extends StatelessWidget {
     );
   }
 
-  Widget buildTitle(
-    BuildContext context,
-    AddQuotationNotifier addQuotationNotifier,
-  ) {
+  Widget buildTitle(BuildContext context, AddQuotationNotifier addQuotationNotifier) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 15.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            "Add Quotation",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
+          const Text("Add Quotation", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           CustomButton(
             text: "Reject",
             fullWidth: false,
@@ -102,10 +104,7 @@ class AddQuotationScreen extends StatelessWidget {
     );
   }
 
-  Widget buildCustomerInfo(
-    BuildContext context,
-    AddQuotationNotifier addQuotationNotifier,
-  ) {
+  Widget buildCustomerInfo(BuildContext context, AddQuotationNotifier addQuotationNotifier) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
       padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 15),
@@ -146,17 +145,11 @@ class AddQuotationScreen extends StatelessWidget {
           Text.rich(
             TextSpan(
               children: [
-                TextSpan(
-                  text: 'Priority: ',
-                  style: AppFonts.text14.regular.style,
-                ),
+                TextSpan(text: 'Priority: ', style: AppFonts.text14.regular.style),
                 TextSpan(
                   text: addQuotationNotifier.jobDetail.priority ?? "None",
-                  style: AppFonts
-                      .text14
-                      .regular
-                      .red
-                      .style, // You can change the style here if needed
+                  style:
+                      AppFonts.text14.regular.red.style, // You can change the style here if needed
                 ),
               ],
             ),
@@ -190,10 +183,83 @@ class AddQuotationScreen extends StatelessWidget {
     );
   }
 
-  Widget buildQuotationInfo(
-    BuildContext context,
-    AddQuotationNotifier notifier,
-  ) {
+  Widget buildSiteVisitRequest(BuildContext context, AddQuotationNotifier addQuotationNotifier) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 18.0, vertical: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Text("Request for Site Visit", style: AppFonts.text16.semiBold.style),
+                5.horizontalSpace,
+                Tooltip(
+                  richMessage: WidgetSpan(
+                    alignment: PlaceholderAlignment.baseline,
+                    baseline: TextBaseline.alphabetic,
+                    child: Container(
+                      constraints: const BoxConstraints(maxWidth: 250),
+                      child: Text(
+                        "If you are unsure about the job, you can request for site visit",
+                      ),
+                    ),
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: const BorderRadius.all(Radius.circular(4)),
+                  ),
+                  preferBelow: false,
+                  showDuration: Duration(seconds: 3),
+                  verticalOffset: 15,
+                  triggerMode: TooltipTriggerMode.tap,
+                  child: Icon(LucideIcons.info, size: 20, color: AppColors.primary),
+                ),
+              ],
+            ),
+          ),
+          10.horizontalSpace,
+          CustomButton(
+            text: "Request",
+            fullWidth: false,
+            backgroundColor: AppColors.background,
+            borderColor: AppColors.primary,
+            height: 35,
+            textStyle: AppFonts.text14.regular.style,
+            onPressed: () {
+              showSiteVisitRequestPopup(
+                context,
+                onSubmit: (date, remarks) async {
+                  final response = await VendorQuotationRepository.instance.apiCreateSiteVisit(
+                    CreateSiteVisitRequest(
+                      jobId: jobId,
+                      customerId: customerId,
+                      // preferredDate: date,
+                      // remarks: remarks
+                      vendorId: addQuotationNotifier.userData?.customerId ?? 0,
+                      createdBy: addQuotationNotifier.userData?.name ?? "",
+                      requestedBy: addQuotationNotifier.userData?.name ?? "",
+                      requestedTo: addQuotationNotifier.jobDetail.customerName ?? "",
+                      requestedDate: date,
+                    ),
+                  );
+
+                  if (response is CreateSiteVisitResponse) {
+                    return "Request submitted successfully!";
+                  } else if (response is ErrorResponse) {
+                    return response.title ?? "Something went wrong";
+                  }
+                  return null;
+                },
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildQuotationInfo(BuildContext context, AddQuotationNotifier notifier) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 10),
       width: double.infinity,
@@ -244,13 +310,8 @@ class AddQuotationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuotationTable(
-    AddQuotationNotifier notifier,
-    QuotationItemType type,
-  ) {
-    final filteredItems = notifier.quotationItems
-        .where((item) => item.type == type)
-        .toList();
+  Widget _buildQuotationTable(AddQuotationNotifier notifier, QuotationItemType type) {
+    final filteredItems = notifier.quotationItems.where((item) => item.type == type).toList();
 
     return Column(
       children: [
@@ -259,18 +320,13 @@ class AddQuotationScreen extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                type == QuotationItemType.material
-                    ? "Description"
-                    : "Description",
+                type == QuotationItemType.material ? "Description" : "Description",
                 style: AppFonts.text14.semiBold.style,
               ),
             ),
             5.horizontalSpace,
             if (type == QuotationItemType.material)
-              SizedBox(
-                width: 52,
-                child: Text("Qty", style: AppFonts.text14.semiBold.style),
-              ),
+              SizedBox(width: 52, child: Text("Qty", style: AppFonts.text14.semiBold.style)),
             if (type == QuotationItemType.material) 5.horizontalSpace,
             SizedBox(
               width: 100,
@@ -335,10 +391,7 @@ class AddQuotationScreen extends StatelessWidget {
                 ),
                 10.horizontalSpace,
 
-                SizedBox(
-                  width: 90,
-                  child: Text(item.lineTotal.toStringAsFixed(2)),
-                ),
+                SizedBox(width: 90, child: Text(item.lineTotal.toStringAsFixed(2))),
 
                 GestureDetector(
                   onTap: () => notifier.removeItem(index),
@@ -377,20 +430,13 @@ class AddQuotationScreen extends StatelessWidget {
           _priceRow("Subtotal", "AED ${notifier.subTotal.toStringAsFixed(2)}"),
           _priceRow("VAT (5%)", "AED ${notifier.vat.toStringAsFixed(2)}"),
           Divider(thickness: 1),
-          _priceRow(
-            "Grand Total",
-            "AED ${notifier.grandTotal.toStringAsFixed(2)}",
-            isBold: true,
-          ),
+          _priceRow("Grand Total", "AED ${notifier.grandTotal.toStringAsFixed(2)}", isBold: true),
         ],
       ),
     );
   }
 
-  Widget buildSubmitButton(
-    BuildContext context,
-    AddQuotationNotifier notifier,
-  ) {
+  Widget buildSubmitButton(BuildContext context, AddQuotationNotifier notifier) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: CustomButton(
@@ -411,15 +457,11 @@ class AddQuotationScreen extends StatelessWidget {
         children: [
           Text(
             label,
-            style: isBold
-                ? AppFonts.text16.semiBold.style
-                : AppFonts.text14.regular.style,
+            style: isBold ? AppFonts.text16.semiBold.style : AppFonts.text14.regular.style,
           ),
           Text(
             value,
-            style: isBold
-                ? AppFonts.text16.semiBold.style
-                : AppFonts.text14.regular.style,
+            style: isBold ? AppFonts.text16.semiBold.style : AppFonts.text14.regular.style,
           ),
         ],
       ),
@@ -441,17 +483,10 @@ class AddQuotationScreen extends StatelessWidget {
     );
   }
 
-  Widget _iconBox({
-    required IconData icon,
-    required Color bgColor,
-    required Color iconColor,
-  }) {
+  Widget _iconBox({required IconData icon, required Color bgColor, required Color iconColor}) {
     return Container(
       padding: const EdgeInsets.all(5),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(5),
-      ),
+      decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(5)),
       child: Icon(icon, color: iconColor, size: 20),
     );
   }

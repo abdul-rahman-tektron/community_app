@@ -29,10 +29,10 @@ class CustomerAuthRepository extends BaseRepository {
     );
 
     if (response?.statusCode == HttpStatus.ok) {
-      final registerResponse = customerRegisterRequestFromJson(jsonEncode(response?.data));
+      final registerResponse = commonResponseFromJson(jsonEncode(response?.data));
       return registerResponse;
     } else {
-      throw ErrorResponse.fromJson(response?.data ?? {});
+      return CommonResponse.fromJson(response?.data ?? {});
     }
   }
 

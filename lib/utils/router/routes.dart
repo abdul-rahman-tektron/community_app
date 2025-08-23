@@ -7,11 +7,13 @@ import 'package:community_app/modules/auth/reset_password/reset_password_screen.
 import 'package:community_app/modules/auth/user_role_selection/user_role_selection_screen.dart';
 import 'package:community_app/modules/common/change_password/change_password_screen.dart';
 import 'package:community_app/modules/common/delete_account/delete_account_screen.dart';
+
 // Common
 import 'package:community_app/modules/common/error_screen.dart';
 import 'package:community_app/modules/common/location/location_screen.dart';
 import 'package:community_app/modules/common/network_error_screen.dart';
 import 'package:community_app/modules/common/settings/settings_screen.dart';
+
 // Customer
 import 'package:community_app/modules/customer/bottom_bar/bottom_screen.dart';
 import 'package:community_app/modules/customer/edit_profile/edit_profile_screen.dart';
@@ -29,10 +31,12 @@ import 'package:community_app/modules/customer/saved_cards/saved_cards_screen.da
 import 'package:community_app/modules/customer/service_details/service_details_screen.dart';
 import 'package:community_app/modules/customer/top_vendors/top_vendors_screen.dart';
 import 'package:community_app/modules/customer/tracking/tracking_screen.dart';
+
 // Vendor
 import 'package:community_app/modules/vendor/bottom_bar/bottom_bar_screen.dart';
 import 'package:community_app/modules/vendor/jobs/widgets/job_history_detail/job_history_detail_screen.dart';
 import 'package:community_app/modules/vendor/jobs/widgets/ongoing_service/progress_update/progress_update_screen.dart';
+import 'package:community_app/modules/vendor/onboard/vendor_onboard_screen.dart';
 import 'package:community_app/modules/vendor/quotation/widgets/add_quotation/add_quotation_screen.dart';
 import 'package:community_app/modules/vendor/quotation/widgets/quotation_details/quotation_details_screen.dart';
 import 'package:community_app/modules/vendor/quotation/widgets/site_visit_detail/site_visit_detail_screen.dart';
@@ -78,6 +82,7 @@ class AppRoutes {
   static const String vendorRegistrationHandler = '/vendor-registration-handler';
   static const String vendorRegistrationTrading = '/vendor-registration-trading';
   static const String vendorRegistrationBank = '/vendor-registration-bank';
+  static const String vendorOnboarding = '/vendor-onboarding';
   static const String vendorBottomBar = '/vendor-bottom-bar';
   static const String addQuotation = '/add-quotation';
   static const String siteVisitDetail = '/site-visit-detail';
@@ -110,12 +115,16 @@ class AppRouter {
         final args = settings.arguments as Map<String, dynamic>? ?? {};
         final email = args['email'] as String?;
         final otp = args['otp'] as String?;
-        screen = ResetPasswordScreen(email: email, otp: otp,);
+        screen = ResetPasswordScreen(email: email, otp: otp);
         break;
 
       // 🧑‍🔧 Vendor
       case AppRoutes.vendorRegistrationHandler:
         screen = const VendorRegistrationHandler();
+        break;
+      case AppRoutes.vendorOnboarding:
+        final args = settings.arguments as bool? ?? false;
+        screen = VendorOnboardScreen(isEdit: args);
         break;
       case AppRoutes.vendorBottomBar:
         final args = settings.arguments as Map<String, dynamic>? ?? {};
@@ -128,12 +137,25 @@ class AppRouter {
         final jobId = args['jobId'] as int?;
         final serviceId = args['serviceId'] as int?;
         final quotationId = args['quotationId'] as int?;
-        screen = AddQuotationScreen(jobId: jobId, serviceId: serviceId, quotationId: quotationId);
+        final customerId = args['customerId'] as int?;
+        screen = AddQuotationScreen(
+          jobId: jobId,
+          serviceId: serviceId,
+          quotationId: quotationId,
+          customerId: customerId,
+        );
         break;
 
       case AppRoutes.siteVisitDetail:
-        final args = settings.arguments as String?;
-        screen = SiteVisitDetailScreen(requestId: args);
+        final args = settings.arguments as Map<String, dynamic>? ?? {};
+        final jobId = args['jobId'] as String?;
+        final customerId = args['customerId'] as int?;
+        final siteVisitId = args['siteVisitId'] as int?;
+        screen = SiteVisitDetailScreen(
+          jobId: jobId,
+          customerId: customerId,
+          siteVisitId: siteVisitId,
+        );
         break;
       case AppRoutes.jobHistoryDetail:
         final jobId = settings.arguments as int;
@@ -176,7 +198,7 @@ class AppRouter {
         break;
       case AppRoutes.tracking:
         final jobId = settings.arguments as int?;
-        screen = TrackingScreen(jobId: jobId,);
+        screen = TrackingScreen(jobId: jobId);
         break;
       case AppRoutes.topVendors:
         final args = settings.arguments as Map<String, dynamic>? ?? {};
@@ -198,18 +220,19 @@ class AppRouter {
         break;
       case AppRoutes.payment:
         final jobId = settings.arguments as int?;
-        screen = PaymentScreen(jobId: jobId,);
+        screen = PaymentScreen(jobId: jobId);
         break;
       case AppRoutes.feedback:
         final jobId = settings.arguments as int?;
-        screen = FeedbackScreen(jobId: jobId,);
+        screen = FeedbackScreen(jobId: jobId);
         break;
       case AppRoutes.serviceDetails:
-        screen = ServiceDetailsScreen();
+        final args = settings.arguments as String?;
+        screen = ServiceDetailsScreen(serviceId: args);
         break;
       case AppRoutes.previousDetails:
         final args = settings.arguments as int;
-        screen = PreviousDetailScreen(jobId: args,);
+        screen = PreviousDetailScreen(jobId: args);
         break;
 
       // 🌐 Common
@@ -259,7 +282,10 @@ Widget defaultPageTransition(
   return FadeTransition(
     opacity: animation,
     child: BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: (1 - animation.value) * 5, sigmaY: (1 - animation.value) * 5),
+      filter: ImageFilter.blur(
+        sigmaX: (1 - animation.value) * 5,
+        sigmaY: (1 - animation.value) * 5,
+      ),
       child: child,
     ),
   );

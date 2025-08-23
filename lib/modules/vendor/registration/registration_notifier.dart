@@ -1,7 +1,10 @@
 import 'dart:io';
 
 import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/core/model/common/error/common_response.dart';
+import 'package:community_app/core/model/common/error/error_response.dart';
 import 'package:community_app/core/model/common/login/login_request.dart';
+import 'package:community_app/core/model/common/register/customer_register_request.dart';
 import 'package:community_app/core/model/common/register/vendor_register_request.dart';
 import 'package:community_app/core/remote/services/common_repository.dart';
 import 'package:community_app/core/remote/services/vendor/vendor_auth_repository.dart';
@@ -31,6 +34,7 @@ class VendorRegistrationNotifier extends BaseChangeNotifier {
   final bankNameController = TextEditingController();
   final iBanNumberController = TextEditingController();
   final branchNameController = TextEditingController();
+  final swiftBicController = TextEditingController();
 
   File? _uploadedLicenseFile;
 
@@ -71,10 +75,16 @@ class VendorRegistrationNotifier extends BaseChangeNotifier {
   }
 
   Future<void> performRegistration(BuildContext context) async {
-
     try {
+
+      if(!acceptedPrivacyPolicy) {
+        ToastHelper.showError("Please accept privacy policy");
+        return;
+      }
+
       await CommonRepository.instance.apiUserLogin(
         LoginRequest(email: "admin@example.com", password: "password"),
+        isRegister: true,
       );
 
       final request = VendorRegisterRequest(
@@ -96,11 +106,13 @@ class VendorRegistrationNotifier extends BaseChangeNotifier {
           bankName: bankNameController.text.trim(),
           bankBranch: branchNameController.text.trim(),
           iban: iBanNumberController.text.trim(),
+          swiftbic: swiftBicController.text.trim(),
         ),
         documents: [
           VendorDocumentDetails(
             documentType: 'Trade License',
             documentIdentity: int.parse(tradeLicenseIdController.text.trim()),
+            documentNumber: tradeLicenseIdController.text.trim(),
             documentExpiryDate: tradeLicenseExpiryDateController.text.trim().toDateTimeFromDdMmYyyy(),
             documentFile: await uploadedLicenseFile?.toBase64() ?? "",
           )
@@ -109,7 +121,14 @@ class VendorRegistrationNotifier extends BaseChangeNotifier {
 
       final result = await VendorAuthRepository.instance.apiVendorRegister(request);
 
-      await _handleRegisterSuccess(result, context);
+      if (result is CustomerRegisterRequest) {
+        await _handleRegisterSuccess(result, context);
+      } else if (result is CommonResponse && result.success == false) {
+        ToastHelper.showError(result.message ?? 'Registration failed.');
+      } else if (result is ErrorResponse) {
+        // Here we use the friendly message helper
+        ToastHelper.showError(result.getFriendlyMessage());
+      }
     } catch (e, stackTrace) {
       ToastHelper.showError('An error occurred. Please try again.');
 

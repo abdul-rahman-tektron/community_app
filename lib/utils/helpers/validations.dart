@@ -16,9 +16,9 @@ class Validations {
     if (value == null || value.trim().isEmpty) {
       return context.locale.emailRequired;
     }
-    // if (!RegExp(RegexPatterns.email).hasMatch(value.trim())) {
-    //   return context.locale.invalidEmail;
-    // }
+    if (!RegExp(RegexPatterns.email).hasMatch(value.trim())) {
+      return context.locale.invalidEmail;
+    }
     return null;
   }
 
@@ -157,6 +157,13 @@ class Validations {
   static String? validateIBanNumber(BuildContext context, String? value) {
     if (value == null || value.trim().isEmpty) {
       return "iBan Number is required";
+    }
+    return null;
+  }
+
+  static String? validateSwiftBicNumber(BuildContext context, String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Swift Bic Number is required";
     }
     return null;
   }

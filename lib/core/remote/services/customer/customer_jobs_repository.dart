@@ -3,6 +3,10 @@ import 'dart:io';
 
 import 'package:community_app/core/model/common/error/common_response.dart';
 import 'package:community_app/core/model/common/error/error_response.dart';
+import 'package:community_app/core/model/common/user/customer_id_request.dart';
+import 'package:community_app/core/model/customer/job/customer_history_detail_request.dart';
+import 'package:community_app/core/model/customer/job/customer_history_detail_response.dart';
+import 'package:community_app/core/model/customer/job/customer_history_list_response.dart';
 import 'package:community_app/core/model/customer/job/job_completion_details_response.dart';
 import 'package:community_app/core/model/customer/job/job_status_tracking/job_status_tracking_request.dart';
 import 'package:community_app/core/model/customer/job/job_status_tracking/job_status_tracking_response.dart';
@@ -176,6 +180,42 @@ class CustomerJobsRepository extends BaseRepository {
     if (response?.statusCode == HttpStatus.ok) {
       final jobStatusResponse = jobStatusResponseFromJson(jsonEncode(response?.data));
       return jobStatusResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+  Future<Object?> apiCustomerHistoryList(CustomerIdRequest requestParams) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.post,
+      pathUrl: ApiUrls.pathCustomerHistoryList,
+      body: jsonEncode(requestParams.toJson()),
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final customerHistoryListResponse = customerHistoryListResponseFromJson(jsonEncode(response?.data));
+      return customerHistoryListResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+  Future<Object?> apiCustomerHistoryDetails(CustomerHistoryDetailRequest requestParams) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.post,
+      pathUrl: ApiUrls.pathCustomerHistoryDetail,
+      body: jsonEncode(requestParams.toJson()),
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final customerHistoryDetailResponse = customerHistoryDetailResponseFromJson(jsonEncode(response?.data));
+      return customerHistoryDetailResponse;
     } else {
       throw ErrorResponse.fromJson(response?.data ?? {});
     }

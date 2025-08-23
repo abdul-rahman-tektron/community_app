@@ -83,55 +83,55 @@ class NewServicesScreen extends StatelessWidget {
                     fieldName: "Job Description",
                     isMaxLines: true,
                     hintText: "Enter Job Description",),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Transform.scale(
-                          scale: 0.9,
-                          child: Switch(
-                            padding: EdgeInsets.zero,
-                            activeColor: AppColors.secondary,
-                            thumbColor: WidgetStateProperty.all(AppColors.white),
-                            trackColor: WidgetStateProperty.resolveWith((states) {
-                              return newServicesNotifier.siteVisitOption
-                                  ? AppColors.secondary
-                                  : AppColors.secondary.withOpacity(0.3);
-                            }),
-                            trackOutlineColor: WidgetStateProperty.all(AppColors.white),
-                            value: newServicesNotifier.siteVisitOption,
-                            onChanged: (bool value) {
-                              newServicesNotifier.setSiteVisitOption(value);
-                            },
-                          ),
-                        ),
-                        10.horizontalSpace,
-                        Expanded(
-                          child: Row(
-                            children: [
-                              Text.rich(
-                                TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: "Site Visit Required? ",
-                                      style: AppFonts.text14.regular.style,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Tooltip(
-                                message: "If you are unsure about the issue, the vendor will visit and inspect the site before providing the final quotation.",
-                                triggerMode: TooltipTriggerMode.tap,
-                                showDuration: Duration(seconds: 5),
-                                child: Icon(LucideIcons.info, size: 18),
-                              )
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // Padding(
+                  //   padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
+                  //   child: Row(
+                  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //     children: [
+                  //       Transform.scale(
+                  //         scale: 0.9,
+                  //         child: Switch(
+                  //           padding: EdgeInsets.zero,
+                  //           activeColor: AppColors.secondary,
+                  //           thumbColor: WidgetStateProperty.all(AppColors.white),
+                  //           trackColor: WidgetStateProperty.resolveWith((states) {
+                  //             return newServicesNotifier.siteVisitOption
+                  //                 ? AppColors.secondary
+                  //                 : AppColors.secondary.withOpacity(0.3);
+                  //           }),
+                  //           trackOutlineColor: WidgetStateProperty.all(AppColors.white),
+                  //           value: newServicesNotifier.siteVisitOption,
+                  //           onChanged: (bool value) {
+                  //             newServicesNotifier.setSiteVisitOption(value);
+                  //           },
+                  //         ),
+                  //       ),
+                  //       10.horizontalSpace,
+                  //       Expanded(
+                  //         child: Row(
+                  //           children: [
+                  //             Text.rich(
+                  //               TextSpan(
+                  //                 children: [
+                  //                   TextSpan(
+                  //                     text: "Site Visit Required? ",
+                  //                     style: AppFonts.text14.regular.style,
+                  //                   ),
+                  //                 ],
+                  //               ),
+                  //             ),
+                  //             Tooltip(
+                  //               message: "If you are unsure about the issue, the vendor will visit and inspect the site before providing the final quotation.",
+                  //               triggerMode: TooltipTriggerMode.tap,
+                  //               showDuration: Duration(seconds: 5),
+                  //               child: Icon(LucideIcons.info, size: 18),
+                  //             )
+                  //           ],
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
                   10.verticalSpace,
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

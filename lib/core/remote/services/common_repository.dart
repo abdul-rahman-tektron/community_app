@@ -29,7 +29,7 @@ class CommonRepository extends BaseRepository {
   /// POST: /Auth/login
   /// Purpose: Authenticates a user and retrieves an access token
   /// Stores the token in secure storage and saves user data in Hive for quick access
-  Future<Object?> apiUserLogin(LoginRequest requestParams) async {
+  Future<Object?> apiUserLogin(LoginRequest requestParams, {bool isRegister = false}) async {
     final response = await networkRepository.call(
       method: Method.post,
       pathUrl: ApiUrls.pathLogin,
@@ -42,15 +42,17 @@ class CommonRepository extends BaseRepository {
 
     if (statusCode == HttpStatus.ok) {
       final loginTokenResponse = loginResponseFromJson(jsonEncode(data));
-      await SecureStorageService.setToken(loginTokenResponse.token ?? "");
-      await HiveStorageService.setUserData(jsonEncode(loginTokenResponse));
+      if (!isRegister) {
+        await SecureStorageService.setToken(loginTokenResponse.token ?? "");
+        await HiveStorageService.setUserData(jsonEncode(loginTokenResponse));
 
-      CrashlyticsService.setUser({
-        "id": loginTokenResponse.customerId,
-        "name": loginTokenResponse.name,
-        "email": loginTokenResponse.email,
-        "role": loginTokenResponse.type,
-      });
+        CrashlyticsService.setUser({
+          "id": loginTokenResponse.customerId,
+          "name": loginTokenResponse.name,
+          "email": loginTokenResponse.email,
+          "role": loginTokenResponse.type,
+        });
+      }
       return loginTokenResponse;
     }
 

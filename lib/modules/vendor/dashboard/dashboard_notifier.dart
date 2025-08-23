@@ -14,6 +14,8 @@ class VendorDashboardNotifier extends BaseChangeNotifier {
   int? _inProgress = 0;
   int? _pendingPayment = 0;
 
+  Document? documentData;
+
   VendorDashboardNotifier() {
     initializeData();
   }
@@ -41,6 +43,7 @@ class VendorDashboardNotifier extends BaseChangeNotifier {
         pendingPayment = result.stats?.pendingPayment ?? 0;
         acceptedCount = result.stats?.accepted ?? 0;
         rejectedCount = result.stats?.rejected ?? 0;
+        documentData = result.documents?.first;
         print("acceptedCount test");
         print(acceptedCount);
         notifyListeners();

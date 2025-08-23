@@ -45,7 +45,11 @@ class NewRequestScreen extends StatelessWidget {
                           Navigator.pushNamed(
                             context,
                             AppRoutes.siteVisitDetail,
-                            arguments: request.quotationId?.toString(),
+                            arguments: {
+                              'jobId': request.jobId?.toString(),
+                              'customerId': request.fromCustomerId,
+                              'siteVisitId': request.siteVisitId,
+                            },
                           ).then((value) {
                             notifier.initializeData();
                           });
@@ -64,6 +68,7 @@ class NewRequestScreen extends StatelessWidget {
                               'jobId': request.jobId,
                               'serviceId': request.serviceId,
                               'quotationId': request.quotationId,
+                              'customerId': request.fromCustomerId,
                             },
                           ).then((value) {
                             notifier.initializeData();

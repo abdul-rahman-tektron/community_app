@@ -130,6 +130,7 @@ class VendorRegistrationBankScreen extends StatelessWidget {
           CustomTextField(
             controller: vendorRegistrationNotifier.accountNumberController,
             fieldName: "Account Number",
+            keyboardType: TextInputType.number,
             validator: (value) => Validations.validateAccountNumber(context, value),
           ),
           15.verticalSpace,
@@ -137,6 +138,12 @@ class VendorRegistrationBankScreen extends StatelessWidget {
             controller: vendorRegistrationNotifier.iBanNumberController,
             fieldName: "iBan Number",
             validator: (value) => Validations.validateIBanNumber(context, value),
+          ),
+          15.verticalSpace,
+          CustomTextField(
+            controller: vendorRegistrationNotifier.swiftBicController,
+            fieldName: "Swift / BIC Number",
+            validator: (value) => Validations.validateSwiftBicNumber(context, value),
           ),
           40.verticalSpace,
           privacyPolicyWidget(context, vendorRegistrationNotifier),

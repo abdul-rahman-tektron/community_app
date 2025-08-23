@@ -5,42 +5,81 @@ import 'package:community_app/core/model/common/dropdown/service_dropdown_respon
 import 'package:community_app/core/model/vendor/add_vendor_service/add_vendor_service_request.dart';
 import 'package:community_app/core/remote/services/common_repository.dart';
 import 'package:community_app/core/remote/services/vendor/vendor_auth_repository.dart';
+import 'package:community_app/res/images.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
+import 'package:community_app/utils/router/routes.dart';
+import 'package:community_app/utils/storage/hive_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-class OnboardNotifier extends BaseChangeNotifier {
+class VendorOnboardNotifier extends BaseChangeNotifier {
   ServiceDropdownData? selectedService;
   final TextEditingController descriptionController = TextEditingController();
   String? serviceImagePath;
   String? logoPath;
+
+  bool? isEdit;
 
   List<ServiceDropdownData> serviceData = [];
 
   // Store completed services with their data
   final Map<ServiceDropdownData, Map<String, String?>> completedServices = {};
 
-  OnboardNotifier() {
+  final Map<String, String> staticDescriptions = {
+    "Handyman Services": "Quick and reliable handyman services for repairs, installations, and general maintenance at your home or office.",
+    "Security & CCTV": "Trusted security and CCTV solutions including installation, monitoring, and system maintenance for safety and peace of mind.",
+    "Pest Control": "Safe and effective pest control treatments to eliminate insects, rodents, and termites, keeping your space clean and healthy.",
+    "Appliance Repair": "Professional repair services for home appliances like refrigerators, washing machines, ovens, and more with reliable results.",
+    "Carpentry": "Custom carpentry services for furniture, fittings, and home improvements, crafted with precision and quality workmanship.",
+    "Pet Grooming": "Complete pet grooming services including bathing, trimming, and care to keep your pets clean, healthy, and comfortable.",
+    "Laundry": "Convenient laundry services with washing, ironing, and dry cleaning to keep your clothes fresh, clean, and neatly pressed.",
+    "Plumbing": "Expert plumbing solutions for leak repairs, pipe installations, bathroom fittings, and water system maintenance with quick service.",
+    "Painting": "High-quality painting services for interiors and exteriors with professional finishing that refreshes and brightens your space.",
+    "Cleaning": "Thorough cleaning services for homes, offices, and commercial spaces, ensuring a spotless, hygienic, and welcoming environment.",
+    "Electric Works": "Certified electrical works for wiring, lighting, installations, and repairs with safe, reliable, and professional service.",
+    "AC Repair": "Specialized AC repair and maintenance services to keep your air conditioning systems efficient, reliable, and cooling properly.",
+  };
+
+  final Map<String, String> staticServiceImages = {
+    "Handyman Services": AppImages.loginImage,
+    "Security & CCTV": AppImages.loginImage,
+    "Pest Control": AppImages.loginImage,
+    "Appliance Repair": AppImages.loginImage,
+    "Carpentry": AppImages.loginImage,
+    "Pet Grooming": AppImages.loginImage,
+    "Laundry": AppImages.loginImage,
+    "Plumbing": AppImages.loginImage,
+    "Painting": AppImages.loginImage,
+    "Cleaning": AppImages.loginImage,
+    "Electric Works": AppImages.loginImage,
+    "AC Repair": AppImages.loginImage,
+  };
+
+  VendorOnboardNotifier(this.isEdit) {
     initializeData();
   }
 
   void initializeData() async {
     loadUserData();
     await apiServiceDropdown();
+    if(isEdit ?? false) await apiGetAllVendorServices();
   }
 
   void setSelectedService(ServiceDropdownData service) {
     selectedService = service;
-    // Load data if already completed
+
     if (completedServices.containsKey(service)) {
       descriptionController.text = completedServices[service]!['description'] ?? '';
       serviceImagePath = completedServices[service]!['imagePath'];
     } else {
-      descriptionController.clear();
-      serviceImagePath = null;
+      descriptionController.text = staticDescriptions[service.serviceName ?? ""] ?? '';
+      serviceImagePath = staticServiceImages[service.serviceName ?? ""];
     }
+
     notifyListeners();
   }
+
+
 
   //Service dropdown Api call
   Future<void> apiServiceDropdown() async {
@@ -70,6 +109,21 @@ class OnboardNotifier extends BaseChangeNotifier {
         image: await fileToBase64(serviceImagePath),
         createdBy: userData?.name ?? "",
       ));
+
+      if (result is List<ServiceDropdownData>) {
+        serviceData = result;
+        notifyListeners();
+      } else {
+        debugPrint("Unexpected result type from apiServiceDropDown");
+      }
+    } catch (e) {
+      debugPrint("Error in apiServiceDropdown: $e");
+    }
+  }
+
+  Future<void> apiGetAllVendorServices() async {
+    try {
+      final result = await VendorAuthRepository.instance.apiGetAllVendorServices((userData?.customerId ?? 0).toString());
 
       if (result is List<ServiceDropdownData>) {
         serviceData = result;
@@ -139,18 +193,21 @@ class OnboardNotifier extends BaseChangeNotifier {
   }
 
   /// Final submit validation
-  void submit() {
+  void submit(BuildContext context) async {
     if (completedServices.isEmpty) {
       ToastHelper.showError("Please fill in all the required details.");
       return;
     }
-    if (logoPath == null) {
-      ToastHelper.showError("Please upload the company logo.");
-      return;
-    }
+    // if (logoPath == null) {
+    //   ToastHelper.showError("Please upload the company logo.");
+    //   return;
+    // }
 
     // Proceed with submission
     print("Completed Services: $completedServices");
     print("Logo: $logoPath");
+    await HiveStorageService.setOnboardingCompleted(true);
+
+    Navigator.pushNamed(context, AppRoutes.vendorBottomBar);
   }
 }

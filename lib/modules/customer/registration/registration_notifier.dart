@@ -1,5 +1,7 @@
 import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/core/model/common/dropdown/community_dropdown_response.dart';
+import 'package:community_app/core/model/common/error/common_response.dart';
+import 'package:community_app/core/model/common/error/error_response.dart';
 import 'package:community_app/core/model/common/login/login_request.dart';
 import 'package:community_app/core/model/common/register/customer_register_request.dart';
 import 'package:community_app/core/remote/services/common_repository.dart';
@@ -57,9 +59,15 @@ class CustomerRegistrationNotifier extends BaseChangeNotifier {
 
   Future<void> performRegistration(BuildContext context) async {
 
+    if(!acceptedPrivacyPolicy) {
+      ToastHelper.showError("Please accept privacy policy");
+      return;
+    }
+
     try {
       await CommonRepository.instance.apiUserLogin(
         LoginRequest(email: "admin@example.com", password: "password"),
+        isRegister: true,
       );
 
       final request = CustomerRegisterRequest(
@@ -82,7 +90,15 @@ class CustomerRegistrationNotifier extends BaseChangeNotifier {
 
       final result = await CustomerAuthRepository.instance.apiCustomerRegister(request);
 
-      await _handleRegisterSuccess(result, context);
+      if(result is CommonResponse && result.success == true) {
+        await _handleRegisterSuccess(result, context);
+      }
+
+      if(result is CommonResponse && result.success == false) {
+        ToastHelper.showError(result.message ?? 'Registration failed.');
+        notifyListeners();
+        return;
+      }
     } catch (e) {
       ToastHelper.showError('An error occurred. Please try again.');
       notifyListeners();

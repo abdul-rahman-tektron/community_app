@@ -23,15 +23,15 @@ class JobHistoryScreen extends StatelessWidget {
           return Scaffold(
             body: ListView.builder(
               // padding: const EdgeInsets.all(15),
-              itemCount: notifier.jobHistory.length,
+              itemCount: notifier.historyServices.length,
               itemBuilder: (context, index) {
-                final job = notifier.jobHistory[index];
+                final job = notifier.historyServices[index];
                 return GestureDetector(
                   onTap: () {
                     Navigator.pushNamed(
                       context,
                       AppRoutes.jobHistoryDetail,
-                      arguments: job['id'],
+                      arguments: job.jobId ?? 0,
                     );
                   },
                   child: Container(
@@ -44,13 +44,25 @@ class JobHistoryScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(job['customerName'], style: AppFonts.text16.semiBold.style),
+                              Row(
+                                children: [
+                                  Expanded(child: Text(job.customerName ?? "", style: AppFonts.text16.semiBold.style)),
+                                  Text("#${job.jobId ?? ""}", style: AppFonts.text16.regular.style),
+                                ],
+                              ),
                               5.verticalSpace,
-                              Text("${job['service']} • ${job['location']}"),
+                              Row(
+                                children: [
+                                  Expanded(child: Text("${job.serviceName}", style: AppFonts.text14.regular.style,)),
+                                  Text("AED ${job.quotedAmount}", style: AppFonts.text14.regular.style),
+                                ],
+                              ),
+                              10.verticalSpace,
+                              Text("${job.address}", style: AppFonts.text14.regular.style,)
                             ],
                           ),
                         ),
-                        Text("AED ${job['amount']}", style: AppFonts.text14.semiBold.style),
+
                       ],
                     ),
                   ),

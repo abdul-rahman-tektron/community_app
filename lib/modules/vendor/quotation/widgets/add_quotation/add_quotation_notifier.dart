@@ -19,6 +19,7 @@ class AddQuotationNotifier extends BaseChangeNotifier {
   int? jobId;
   int? serviceId;
   int? quotationId;
+  int? customerId;
 
   final TextEditingController notesController = TextEditingController();
 

@@ -1,6 +1,9 @@
 import 'dart:io';
 
 import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/core/model/customer/job/customer_history_detail_request.dart';
+import 'package:community_app/core/model/customer/job/customer_history_detail_response.dart';
+import 'package:community_app/core/remote/services/customer/customer_jobs_repository.dart';
 import 'package:community_app/res/images.dart';
 import 'package:community_app/utils/helpers/pdf_viewer.dart';
 import 'package:flutter/material.dart';
@@ -8,9 +11,12 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:url_launcher/url_launcher.dart';
 
 class PreviousDetailNotifier extends BaseChangeNotifier {
-  final int jobId;
+  int? jobId;
+
+  CustomerHistoryDetailData? customerHistoryDetailData;
 
   /// States
   bool isLoading = true;
@@ -45,11 +51,13 @@ class PreviousDetailNotifier extends BaseChangeNotifier {
   String serviceReview = "";
 
   PreviousDetailNotifier(this.jobId) {
-    _init();
+    initializeData();
   }
 
-  Future<void> _init() async {
-    await fetchJobDetails();
+  Future<void> initializeData() async {
+    // await fetchJobDetails();
+    await loadUserData();
+    await fetchCustomerHistoryDetail();
   }
 
   /// Fetch job details from API
@@ -100,10 +108,37 @@ class PreviousDetailNotifier extends BaseChangeNotifier {
     }
   }
 
+  Future<void> fetchCustomerHistoryDetail() async {
+    try {
+      isLoading = true;
+
+      final response = await CustomerJobsRepository.instance
+          .apiCustomerHistoryDetails(
+        CustomerHistoryDetailRequest(customerId: userData?.customerId ?? 0, jobId: jobId ?? 0,),);
+      if (response is CustomerHistoryDetailResponse && response.success == true) {
+        customerHistoryDetailData = response.data;
+      } else {
+        customerHistoryDetailData = null;
+      }
+    } catch (e) {
+      print("Error fetching customer history jobs: $e");
+      customerHistoryDetailData = null;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+    notifyListeners();
+  }
+
   /// Call Vendor
-  void callVendor() {
-    // TODO: Implement call functionality (use url_launcher)
-    debugPrint("Calling $vendorPhone...");
+  Future<void> openDialer(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    if (!await launchUrl(launchUri)) {
+      throw 'Could not launch $phoneNumber';
+    }
   }
 
   /// Rebook the same service

@@ -14,6 +14,7 @@ class UserRoleSelectionNotifier extends ChangeNotifier {
     _userRole = selectedRole;
 
     HiveStorageService.setUserCategory(selectedRole.name);
+    HiveStorageService.setOptionSelectionCompleted(true);
     notifyListeners();
 
     Navigator.pushNamed(context, AppRoutes.login);
