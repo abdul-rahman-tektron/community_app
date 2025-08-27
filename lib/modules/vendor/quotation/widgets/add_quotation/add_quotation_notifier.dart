@@ -31,7 +31,7 @@ class AddQuotationNotifier extends BaseChangeNotifier {
   double get grandTotal => subTotal + vat;
 
   AddQuotationNotifier() {
-    initializeData();
+    runWithLoadingVoid(() => initializeData());
   }
 
   initializeData() async {

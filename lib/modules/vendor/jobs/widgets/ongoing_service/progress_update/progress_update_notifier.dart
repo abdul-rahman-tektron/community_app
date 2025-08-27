@@ -50,7 +50,7 @@ class ProgressUpdateNotifier extends BaseChangeNotifier {
   String? currentStatus;
 
   ProgressUpdateNotifier(this.jobId, this.customerId, this.currentStatus) {
-    initializeData();
+    runWithLoadingVoid(() => initializeData());
   }
 
   Future<void> initializeData() async {

@@ -1,6 +1,7 @@
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/utils/enums.dart';
+import 'package:community_app/utils/helpers/screen_size.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -99,7 +100,7 @@ class CustomBottomNavBar extends StatelessWidget {
                           children: [
                             Icon(
                               _icons[index],
-                              size: isSelected ? 22 : 26,
+                              size: isSelected ? ScreenSize.width < 380 ? 18 : 22 : ScreenSize.width < 380 ? 18 : 22,
                               color: isSelected ? AppColors.white : AppColors.textPrimary,
                             ),
                             AnimatedSwitcher(
@@ -115,7 +116,9 @@ class CustomBottomNavBar extends StatelessWidget {
                                 padding: const EdgeInsets.only(left: 6),
                                 child: Text(
                                   _labels[index],
-                                  style: AppFonts.text12.semiBold.white.style,
+                                  style: AppFonts.text12.semiBold.white.style.copyWith(
+                                    fontSize: ScreenSize.width < 380 ? 10 : 12,
+                                  ),
                                 ),
                               )
                                   : Padding(
@@ -123,7 +126,9 @@ class CustomBottomNavBar extends StatelessWidget {
                                 padding: const EdgeInsets.only(left: 6),
                                 child: Text(
                                   _labels[index],
-                                  style: AppFonts.text12.semiBold.style,
+                                  style: AppFonts.text12.semiBold.style.copyWith(
+                                    fontSize: ScreenSize.width < 380 ? 10 : 12,
+                                  ),
                                 ),
                               ),
                             ),

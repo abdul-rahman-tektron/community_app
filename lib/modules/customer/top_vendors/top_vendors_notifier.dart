@@ -26,16 +26,18 @@ class TopVendorsNotifier extends BaseChangeNotifier {
 
   int serviceId = 0;
   int jobId = 0;
+  int? vendorId;
+  String? vendorName;
 
   List<TopVendorResponse> topVendors = [];
 
-  TopVendorsNotifier({int? jobId, int? serviceId}) {
+  TopVendorsNotifier(BuildContext context, {int? jobId, int? serviceId, this.vendorId , this.vendorName}) {
     this.serviceId = serviceId ?? 0;
     this.jobId = jobId ?? 0;
-    initializeData();
+    initializeData(context);
   }
 
-  initializeData() async {
+  initializeData(BuildContext context) async {
     _isLoading = true;
     bool serviceEnabled = await LocationHelper.isServiceEnabled();
     if (!serviceEnabled) {
@@ -53,7 +55,12 @@ class TopVendorsNotifier extends BaseChangeNotifier {
     }
 
     await loadUserData();
-    await apiTopVendors();
+
+    if(vendorId != null) {
+      apiQuotationRequest(context);
+    } else {
+      await apiTopVendors();
+    }
     _isLoading = false;
     notifyListeners();
   }
@@ -64,16 +71,16 @@ class TopVendorsNotifier extends BaseChangeNotifier {
       final request = QuotationRequestRequest(
         jobId: jobId,
         serviceId: serviceId,
-        vendorId: selectedVendorIds.isNotEmpty ? selectedVendorIds.first : null,
-        vendorName: selectedVendorNames.isNotEmpty ? selectedVendorNames.first : null,
+        vendorId: selectedVendorIds.isNotEmpty ? selectedVendorIds.first : vendorId,
+        vendorName: selectedVendorNames.isNotEmpty ? selectedVendorNames.first : vendorName,
         customerId: userData?.customerId ?? 0,
         fromCustomerId: userData?.customerId ?? 0,
         active: true,
         createdBy: userData?.name ?? "",
         status: "Pending",
-        jobQuotationRequestItems: selectedVendorIds
+        jobQuotationRequestItems: selectedVendorIds.isNotEmpty ? selectedVendorIds
             .map((id) => JobQuotationRequestItem(vendorId: id))
-            .toList(),
+            .toList() : [JobQuotationRequestItem(vendorId: vendorId)],
       );
 
       final result = await CustomerDashboardRepository.instance.apiQuotationRequest(request);

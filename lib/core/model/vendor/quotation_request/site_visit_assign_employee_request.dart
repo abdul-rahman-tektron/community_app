@@ -33,12 +33,14 @@ class AssignEmployeeList {
   String? employeePhoneNumber;
   String? emiratesIdPhoto;
   String? emiratesIdNumber;
+  String? employeeEmail;
 
   AssignEmployeeList({
     this.employeeName,
     this.employeePhoneNumber,
     this.emiratesIdPhoto,
     this.emiratesIdNumber,
+    this.employeeEmail = "abdul.rahman@tektronixllc.ae",
   });
 
   factory AssignEmployeeList.fromJson(Map<String, dynamic> json) => AssignEmployeeList(
@@ -46,6 +48,7 @@ class AssignEmployeeList {
     employeePhoneNumber: json["employeePhoneNumber"],
     emiratesIdPhoto: json["emiratesIdPhoto"],
     emiratesIdNumber: json["emiratesIdNumber"],
+    employeeEmail: json["employeeEmail"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -53,5 +56,6 @@ class AssignEmployeeList {
     "employeePhoneNumber": employeePhoneNumber,
     "emiratesIdPhoto": emiratesIdPhoto,
     "emiratesIdNumber": emiratesIdNumber,
+    "employeeEmail": employeeEmail,
   };
 }

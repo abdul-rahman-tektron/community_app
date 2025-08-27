@@ -14,12 +14,15 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class NewServicesScreen extends StatelessWidget {
-  const NewServicesScreen({super.key});
+  final int? vendorId;
+  final String? vendorName;
+  final String? serviceName;
+  const NewServicesScreen({super.key, this.vendorId, this.vendorName, this.serviceName});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => NewServicesNotifier(),
+      create: (context) => NewServicesNotifier(vendorId, vendorName, serviceName),
       child: Consumer<NewServicesNotifier>(
         builder: (context, servicesNotifier, child) {
           return buildBody(context, servicesNotifier);
@@ -29,6 +32,8 @@ class NewServicesScreen extends StatelessWidget {
   }
 
   Widget buildBody(BuildContext context, NewServicesNotifier newServicesNotifier) {
+    print("serviceName");
+    print(serviceName);
     return SafeArea(
       child: Scaffold(
         appBar: CustomAppBar(),
@@ -48,6 +53,7 @@ class NewServicesScreen extends StatelessWidget {
                   CustomSearchDropdown<ServiceDropdownData>(
                     fieldName: "Service",
                     hintText: "Select Service",
+                    isEnable: serviceName == null,
                     controller: newServicesNotifier.serviceController,
                     items: newServicesNotifier.serviceDropdownData,
                     currentLang: 'en', // You need to inject language if needed
@@ -59,13 +65,15 @@ class NewServicesScreen extends StatelessWidget {
                   15.verticalSpace,
                   CustomTextField(
                     controller: newServicesNotifier.expectedDateController,
-                    fieldName: "Preferred Date and Time",
+                    fieldName: "Preferred Date",
                     keyboardType: TextInputType.datetime,
                     startDate: DateTime.now(),
                     initialDate: DateTime.now(),
                   ),
                   15.verticalSpace,
-                  CustomTextField(controller: newServicesNotifier.mobileNumberController, fieldName: "Mobile Number",  keyboardType: TextInputType.phone,),
+                  CustomTextField(controller: newServicesNotifier.mobileNumberController,
+                    fieldName: "Mobile Number",
+                    keyboardType: TextInputType.phone,),
                   15.verticalSpace,
                   CustomSearchDropdown<PriorityDropdownData>(
                     fieldName: "Priority",

@@ -28,7 +28,7 @@ class JobHistoryDetailNotifier extends BaseChangeNotifier {
   final int jobId;
   JobHistoryDetailNotifier(this.jobId) {
     // loadJobDetail();
-    initializeData();
+    runWithLoadingVoid(() => initializeData());
   }
 
   initializeData() async {

@@ -41,6 +41,7 @@ import 'package:community_app/modules/vendor/quotation/widgets/add_quotation/add
 import 'package:community_app/modules/vendor/quotation/widgets/quotation_details/quotation_details_screen.dart';
 import 'package:community_app/modules/vendor/quotation/widgets/site_visit_detail/site_visit_detail_screen.dart';
 import 'package:community_app/modules/vendor/registration/registration_handler.dart';
+import 'package:community_app/utils/helpers/image_viewer.dart';
 import 'package:flutter/material.dart';
 
 class AppRoutes {
@@ -57,6 +58,7 @@ class AppRoutes {
   static const String otpVerification = '/otp-verification';
   static const String resetPassword = '/reset-password';
   static const String savedCards = '/saved-cards';
+  static const String imageViewer = '/image-viewer';
 
   /// 👤 Customer
   static const String customerRegistrationPersonal = '/customer-registration-personal';
@@ -186,7 +188,11 @@ class AppRouter {
         screen = CustomerBottomScreen(currentIndex: currentIndex, initialCategory: category);
         break;
       case AppRoutes.newServices:
-        screen = NewServicesScreen();
+        final args = settings.arguments as Map<String, dynamic>? ?? {};
+        final vendorId = args['vendorId'] as int?;
+        final vendorName = args['vendorName'] as String?;
+        final serviceName = args['serviceName'] as String?;
+        screen = NewServicesScreen(vendorId: vendorId, vendorName: vendorName, serviceName: serviceName);
         break;
       case AppRoutes.newServicesConfirmation:
         final serviceId = settings.arguments as String;
@@ -204,7 +210,9 @@ class AppRouter {
         final args = settings.arguments as Map<String, dynamic>? ?? {};
         final jobId = args['jobId'] as int?;
         final serviceId = args['serviceId'] as int?;
-        screen = TopVendorsScreen(jobId: jobId, serviceId: serviceId);
+        final vendorId = args['vendorId'] as int?;
+        final vendorName = args['vendorName'] as String?;
+        screen = TopVendorsScreen(jobId: jobId, serviceId: serviceId, vendorId: vendorId, vendorName: vendorName);
         break;
       case AppRoutes.quotationList:
         final args = settings.arguments as int?;
@@ -227,8 +235,10 @@ class AppRouter {
         screen = FeedbackScreen(jobId: jobId);
         break;
       case AppRoutes.serviceDetails:
-        final args = settings.arguments as String?;
-        screen = ServiceDetailsScreen(serviceId: args);
+        final args = settings.arguments as Map<String, dynamic>? ?? {};
+        final serviceId = args['serviceId'] as int?;
+        final vendorId = args['vendorId'] as int?;
+        screen = ServiceDetailsScreen(serviceId: serviceId, vendorId: vendorId);
         break;
       case AppRoutes.previousDetails:
         final args = settings.arguments as int;
@@ -253,6 +263,10 @@ class AppRouter {
         break;
       case AppRoutes.savedCards:
         screen = SavedCardsScreen();
+        break;
+      case AppRoutes.imageViewer:
+        final args = settings.arguments as String?;
+        screen = ImageViewer(base64Image: args,);
         break;
 
       // ❗ Error

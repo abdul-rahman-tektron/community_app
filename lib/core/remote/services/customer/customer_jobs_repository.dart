@@ -220,4 +220,33 @@ class CustomerJobsRepository extends BaseRepository {
       throw ErrorResponse.fromJson(response?.data ?? {});
     }
   }
+
+  Future<Object?> apiSiteVisitCustomerResponse(int? siteVisitId, bool? isAccept) async {
+    final token = await SecureStorageService.getToken();
+
+    // Build query string dynamically
+    final queryParams = <String>[];
+
+    if (siteVisitId != null) {
+      queryParams.add("siteVisitId=$siteVisitId");
+    }
+    if (isAccept != null) {
+      queryParams.add("isAccepted=$isAccept");
+    }
+
+    final queryString = queryParams.isNotEmpty ? "?${queryParams.join("&")}" : "";
+
+    final response = await networkRepository.call(
+      method: Method.post,
+      pathUrl: "${ApiUrls.pathSiteVisitCustomerResponse}$queryString",
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final commonResponse = commonResponseFromJson(jsonEncode(response?.data));
+      return commonResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
 }

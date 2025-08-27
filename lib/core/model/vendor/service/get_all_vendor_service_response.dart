@@ -20,8 +20,8 @@ class GetAllVendorServiceResponse {
   String? createdBy;
   dynamic modifiedDate;
   dynamic modifiedBy;
-  dynamic description;
-  dynamic image;
+  String? description;
+  String? image;
   dynamic address;
   dynamic rating;
   dynamic reviewCount;

@@ -10,30 +10,30 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class AssignBottomSheet extends StatefulWidget {
-  final void Function(String name, String phone, {File? emiratesId}) onAdd;
+  final void Function(String name, String phone, String? emiratesIdNumber, {File? emiratesId}) onAdd;
+  final bool showEmiratesId; // <-- New flag
 
-  const AssignBottomSheet({super.key, required this.onAdd});
+  const AssignBottomSheet({
+    super.key,
+    required this.onAdd,
+    this.showEmiratesId = false, // <-- default hidden
+  });
 
   @override
   State<AssignBottomSheet> createState() => _AssignBottomSheetState();
 }
 
 class _AssignBottomSheetState extends State<AssignBottomSheet> {
-  late TextEditingController nameController;
-  late TextEditingController phoneController;
+  TextEditingController nameController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+  TextEditingController emiratesIdController = TextEditingController();
   File? emiratesIdFile;
-
-  @override
-  void initState() {
-    super.initState();
-    nameController = TextEditingController();
-    phoneController = TextEditingController();
-  }
 
   @override
   void dispose() {
     nameController.dispose();
     phoneController.dispose();
+    emiratesIdController.dispose();
     super.dispose();
   }
 
@@ -54,14 +54,21 @@ class _AssignBottomSheetState extends State<AssignBottomSheet> {
             Text("Enter an employee to assign", style: AppFonts.text18.bold.style),
             20.verticalSpace,
             _employeeInfoField(),
-            15.verticalSpace,
-            _uploadEmiratesIdButton(context), // <-- NEW
+            if (widget.showEmiratesId) ...[ // <-- Conditional visibility
+              15.verticalSpace,
+              _uploadEmiratesIdButton(context),
+            ],
             30.verticalSpace,
             CustomButton(
               text: "Add Employee",
               onPressed: () {
                 if (nameController.text.trim().isNotEmpty && phoneController.text.trim().isNotEmpty) {
-                  widget.onAdd(nameController.text.trim(), phoneController.text.trim(), emiratesId: emiratesIdFile);
+                  widget.onAdd(
+                    nameController.text.trim(),
+                    phoneController.text.trim(),
+                    widget.showEmiratesId ? emiratesIdController.text.trim() : null,
+                    emiratesId: emiratesIdFile,
+                  );
                   Navigator.pop(context);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -76,19 +83,28 @@ class _AssignBottomSheetState extends State<AssignBottomSheet> {
     );
   }
 
-
   Widget _employeeInfoField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CustomTextField(controller: nameController,
-            fieldName: "Employee Name",
-            skipValidation: true),
+        CustomTextField(
+          controller: nameController,
+          fieldName: "Employee Name",
+        ),
         15.verticalSpace,
-        CustomTextField(controller: phoneController,
-            fieldName: "Employee Mobile Number",
+        CustomTextField(
+          controller: phoneController,
+          fieldName: "Employee Mobile Number",
+          keyboardType: TextInputType.phone,
+        ),
+        if (widget.showEmiratesId) ...[ // <-- Conditional visibility
+          15.verticalSpace,
+          CustomTextField(
+            controller: emiratesIdController,
+            fieldName: "Emirates ID Number (Optional)",
             skipValidation: true,
-            keyboardType: TextInputType.phone),
+          ),
+        ],
       ],
     );
   }
@@ -103,13 +119,15 @@ class _AssignBottomSheetState extends State<AssignBottomSheet> {
           ),
           TextButton(
             onPressed: () => setState(() => emiratesIdFile = null),
-            child: Text("Remove Emirates ID", style: AppFonts.text14.regular.red.style,),
+            child: Text(
+              "Remove Emirates ID",
+              style: AppFonts.text14.regular.red.style,
+            ),
           ),
         ],
       );
     }
 
-    // Only show button if no file is selected
     return GestureDetector(
       onTap: () {
         showImageSourceDialog(

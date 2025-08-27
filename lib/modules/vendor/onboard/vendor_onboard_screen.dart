@@ -1,13 +1,17 @@
+import 'dart:convert';
+
 import 'package:community_app/core/model/common/dropdown/service_dropdown_response.dart';
 import 'package:community_app/modules/vendor/onboard/vendor_onboard_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/helpers/dashed_border_container.dart';
+import 'package:community_app/utils/helpers/loader.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_textfields.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -23,7 +27,9 @@ class VendorOnboardScreen extends StatelessWidget {
       create: (context) => VendorOnboardNotifier(isEdit),
       child: Consumer<VendorOnboardNotifier>(
         builder: (context, vendorOnboardNotifier, child) {
-          return buildBody(context, vendorOnboardNotifier);
+          return LoadingOverlay<VendorOnboardNotifier>(
+            child: buildBody(context, vendorOnboardNotifier),
+          );
         },
       ),
     );
@@ -170,16 +176,33 @@ class VendorOnboardScreen extends StatelessWidget {
               )
             : ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: imagePath.startsWith("assets/")
-                    ? Image.asset(imagePath, fit: BoxFit.cover, width: double.infinity)
-                    : Image.file(
-                        vendorOnboardNotifier.getFileFromPath(imagePath),
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                      ),
+                child: _buildImageWidget(vendorOnboardNotifier, imagePath),
               ),
       ),
     );
+  }
+
+  Widget _buildImageWidget(VendorOnboardNotifier vendorOnboardNotifier, String imagePath) {
+    if (imagePath.startsWith("assets/")) {
+      return Image.asset(imagePath, fit: BoxFit.cover, width: double.infinity);
+    } else if (_isBase64(imagePath)) {
+      Uint8List bytes = base64Decode(imagePath);
+      return Image.memory(bytes, fit: BoxFit.cover, width: double.infinity);
+    } else {
+      return Image.file(
+        vendorOnboardNotifier.getFileFromPath(imagePath),
+        fit: BoxFit.cover,
+        width: double.infinity,
+      );
+    }
+  }
+
+  bool _isBase64(String str) {
+    // quick check to avoid exceptions
+    final base64RegEx = RegExp(r'^[A-Za-z0-9+/=]+\Z');
+    return str.isNotEmpty &&
+        str.length % 4 == 0 &&
+        base64RegEx.hasMatch(str.replaceAll("\n", "").replaceAll("\r", ""));
   }
 
   /// Logo upload

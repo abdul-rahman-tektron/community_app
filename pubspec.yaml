@@ -39,27 +39,28 @@ dependencies:
   provider: ^6.1.5
 
   # UI + UX
-  flutter_screenutil: 5.9.3
-  toastification: 3.0.3
+  flutter_screenutil: ^5.9.3
+  toastification: ^3.0.3
   lucide_icons_flutter: ^3.0.6
-  url_launcher: 6.3.1
-  cached_network_image: 3.4.1
-  lottie: 3.3.1
-  carousel_slider: 5.1.1
+  url_launcher: ^6.3.1
+  cached_network_image: ^3.4.1
+  lottie: ^3.3.1
+  carousel_slider: ^5.1.1
+
 
   # Storage
-  flutter_secure_storage: 9.2.4
-  hive: 2.2.3
-  hive_flutter: 1.1.0
+  flutter_secure_storage: ^9.2.4
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
 
   # Utilities
-  encrypt: 5.0.3
-  intl: 0.20.2
-  logger: 2.5.0
-  connectivity_plus: 6.1.4
-  file_picker: 10.1.9
-  image_picker: 1.1.2
-  permission_handler: 12.0.0+1
+  encrypt: ^5.0.3
+  intl: ^0.20.2
+  logger: ^2.5.0
+  connectivity_plus: ^6.1.4
+  file_picker: ^10.1.9
+  image_picker: ^1.1.2
+  permission_handler: ^12.0.0+1
   horizontal_stepper_flutter: ^1.0.3
   video_player: ^2.10.0
   photo_view: ^0.15.0
@@ -70,17 +71,17 @@ dependencies:
   flutter_uae_pass: ^1.0.6
 
   #Map
-  google_maps_flutter: 2.12.2
-  geocoding: 4.0.0
-  location: 8.0.1
+  google_maps_flutter: ^2.12.2
+  geocoding: ^4.0.0
+  location: ^8.0.1
   google_places_flutter: ^2.1.0
-  flutter_polyline_points: 2.1.0
+  flutter_polyline_points: ^2.1.0
 
   # Networking
-  dio: 5.8.0+1
+  dio: ^5.8.0+1
 
   #Routing
-  go_router: 15.1.2
+  go_router: ^15.1.2
 
   # Testing
   image: ^4.5.4
@@ -138,6 +139,7 @@ flutter:
     - assets/animations/lottie/
     - assets/locales/
     - assets/video/
+    - assets/video/lottie/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

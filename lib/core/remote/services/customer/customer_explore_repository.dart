@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:community_app/core/model/common/error/error_response.dart';
 import 'package:community_app/core/model/customer/explore/explore_service_response.dart';
+import 'package:community_app/core/model/customer/explore/service_detail_request.dart';
+import 'package:community_app/core/model/customer/explore/service_detail_response.dart';
 import 'package:community_app/core/remote/network/api_url.dart';
 import 'package:community_app/core/remote/network/base_repository.dart';
 import 'package:community_app/utils/enums.dart';
@@ -39,7 +41,7 @@ class CustomerExploreRepository extends BaseRepository {
       queryParams.add("maxPrice=$maxPrice");
     }
     if (serviceId != null) {
-      queryParams.add("serviceId=$serviceId");
+      queryParams.add("servicesId=$serviceId");
     }
 
     final queryString = queryParams.isNotEmpty ? "?${queryParams.join("&")}" : "";
@@ -63,25 +65,19 @@ class CustomerExploreRepository extends BaseRepository {
 
   /// GET: /Job/GetJobsByCustomer/{customerId}
   /// Purpose: Retrieves the list of job requests (quotation requests) created by a customer
-  Future<Object?> apiServiceDetails(String vendorId, String? serviceId) async {
+  Future<Object?> apiServiceDetails(ServiceDetailRequest requestParams) async {
     final token = await SecureStorageService.getToken();
 
-    String? queryString;
-
-    if (serviceId != null) {
-      queryString = "?serviceId=$serviceId";
-    }
-
-
     final response = await networkRepository.call(
-      method: Method.get,
-      pathUrl: "${ApiUrls.pathServiceDetail}/$vendorId$queryString",
+      method: Method.post,
+      pathUrl: ApiUrls.pathServiceDetail,
+      body: jsonEncode(requestParams.toJson()),
       headers: buildHeaders(token: token),
     );
 
     if (response?.statusCode == HttpStatus.ok) {
-      // final customerRequestListResponse = customerRequestListResponseFromJson(jsonEncode(response?.data));
-      // return customerRequestListResponse;
+      final serviceDetailResponse = serviceDetailResponseFromJson(jsonEncode(response?.data));
+      return serviceDetailResponse;
     } else {
       throw ErrorResponse.fromJson(response?.data ?? {});
     }

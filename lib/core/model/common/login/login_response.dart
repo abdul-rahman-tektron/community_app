@@ -14,25 +14,25 @@ class LoginResponse {
   int? customerId;
   int? typeId;
   String? type;
-  dynamic name;
-  dynamic mobile;
-  dynamic landline;
-  dynamic alternateContactNo;
-  dynamic communityId;
-  dynamic building;
-  dynamic block;
-  dynamic address;
-  dynamic latitude;
-  dynamic longitude;
+  String? name;
+  String? mobile;
+  String? landline;
+  String? alternateContactNo;
+  int? communityId;
+  String? building;
+  String? block;
+  String? address;
+  String? latitude;
+  String? longitude;
   dynamic blacklisted;
   dynamic settlementPercentage;
   bool? deleted;
   bool? active;
-  dynamic userId;
-  dynamic password;
+  String? userId;
   bool? loginEnable;
   String? customerType;
-  String? image;
+  bool? isOnboarded;
+  dynamic image;
 
   LoginResponse({
     this.email,
@@ -55,9 +55,9 @@ class LoginResponse {
     this.deleted,
     this.active,
     this.userId,
-    this.password,
     this.loginEnable,
     this.customerType,
+    this.isOnboarded,
     this.image,
   });
 
@@ -82,9 +82,9 @@ class LoginResponse {
     deleted: json["deleted"],
     active: json["active"],
     userId: json["userId"],
-    password: json["password"],
     loginEnable: json["loginEnable"],
     customerType: json["customerType"],
+    isOnboarded: json["isOnboarded"],
     image: json["image"],
   );
 
@@ -109,9 +109,9 @@ class LoginResponse {
     "deleted": deleted,
     "active": active,
     "userId": userId,
-    "password": password,
     "loginEnable": loginEnable,
     "customerType": customerType,
+    "isOnboarded": isOnboarded,
     "image": image,
   };
 }

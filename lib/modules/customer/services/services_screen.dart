@@ -4,6 +4,7 @@ import 'package:community_app/modules/customer/services/widgets/previous_service
 import 'package:community_app/modules/customer/services/widgets/upcoming_services.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
+import 'package:community_app/utils/helpers/loader.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -93,8 +94,8 @@ class ServicesScreen extends StatelessWidget {
     return Expanded(
       child: TabBarView(
         children: [
-          UpcomingServicesWidget(upcomingJobs: servicesNotifier.upcomingServices),
-          PreviousServicesWidget(historyServices: servicesNotifier.historyServices),
+          servicesNotifier.isLoading ? Center(child: LottieLoader(),) : UpcomingServicesWidget(upcomingJobs: servicesNotifier.upcomingServices),
+          servicesNotifier.isLoading ? Center(child: LottieLoader(),) : PreviousServicesWidget(historyServices: servicesNotifier.historyServices),
         ],
       ),
     );

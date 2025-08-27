@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:community_app/modules/customer/service_details/service_details_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/images.dart';
 import 'package:community_app/res/styles.dart';
+import 'package:community_app/utils/helpers/loader.dart';
 import 'package:community_app/utils/helpers/rating_star_helper.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
@@ -15,16 +18,20 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class ServiceDetailsScreen extends StatelessWidget {
-  final String? serviceId;
-  const ServiceDetailsScreen({super.key, this.serviceId});
+  final int? serviceId;
+  final int? vendorId;
+
+  const ServiceDetailsScreen({super.key, this.serviceId, this.vendorId});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => ServiceDetailsNotifier(serviceId: serviceId),
+      create: (context) => ServiceDetailsNotifier(serviceId: serviceId, vendorId:  vendorId),
       child: Consumer<ServiceDetailsNotifier>(
         builder: (context, notifier, child) {
-          return buildBody(context, notifier);
+          return LoadingOverlay<ServiceDetailsNotifier>(
+            child: buildBody(context, notifier),
+          );
         },
       ),
     );
@@ -54,7 +61,9 @@ class ServiceDetailsScreen extends StatelessWidget {
   }
 
   Widget headerSection(BuildContext context, ServiceDetailsNotifier notifier) {
-    final String status = RatingStarHelper.getStatus(notifier.rating);
+    final String status = RatingStarHelper.getStatus(
+      notifier.serviceDetail?.vendors?[0].totalRating ?? 0,
+    );
     final Color statusColor = RatingStarHelper.getStatusColor(notifier.rating);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,9 +74,9 @@ class ServiceDetailsScreen extends StatelessWidget {
               height: 180.h,
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: NetworkImage(
-                    "https://www.southernliving.com/thmb/yT3SGvAjaMSpt6Vwt62nZLeqJkY=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/GettyImages-1327576000-fff516a82eff488db59e9b22db013034.jpg",
-                  ),
+                  image: (notifier.serviceDetail?.serviceImage?.isNotEmpty ?? false)
+                    ? MemoryImage(base64Decode(notifier.serviceDetail!.serviceImage!))
+                    : const AssetImage(AppImages.acRepair) as ImageProvider,
                   fit: BoxFit.cover,
                   colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.4), BlendMode.darken),
                 ),
@@ -91,8 +100,14 @@ class ServiceDetailsScreen extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Al Najma Al Fareeda LLC", style: AppFonts.text14.regular.style),
-                      Text("Cleaning", style: AppFonts.text20.semiBold.style),
+                      Text(
+                        notifier.serviceDetail?.vendors?[0].vendorName ?? "",
+                        style: AppFonts.text14.regular.style,
+                      ),
+                      Text(
+                        notifier.serviceDetail?.serviceName ?? "",
+                        style: AppFonts.text20.semiBold.style,
+                      ),
                     ],
                   ),
                 ],
@@ -100,11 +115,20 @@ class ServiceDetailsScreen extends StatelessWidget {
               8.verticalSpace,
               Row(
                 children: [
-                  RatingStarHelper.buildRatingStars(rating: 4.3),
+                  RatingStarHelper.buildRatingStars(rating: notifier.serviceDetail?.vendors?[0].totalRating ?? 0),
                   3.horizontalSpace,
-                  Text("4.3", style: AppFonts.text14.regular.style),
-                  Text(" · $status", style: AppFonts.text14.regular.style.copyWith(color: statusColor)),
-                  Text(" · 230 reviews", style: AppFonts.text14.regular.style),
+                  Text(
+                    notifier.serviceDetail?.vendors?[0].totalRating?.toStringAsFixed(1) ?? "",
+                    style: AppFonts.text14.regular.style,
+                  ),
+                  Text(
+                    " · $status",
+                    style: AppFonts.text14.regular.style.copyWith(color: statusColor),
+                  ),
+                  Text(
+                    " · ${notifier.serviceDetail?.vendors?[0].reviewCount ?? ""} reviews",
+                    style: AppFonts.text14.regular.style,
+                  ),
                 ],
               ),
             ],
@@ -122,14 +146,14 @@ class ServiceDetailsScreen extends StatelessWidget {
         children: [
           _iconLabelRow(
             icon: LucideIcons.mapPin,
-            label: "13th Building, Al Barsha, Deira, Dubai",
+            label: notifier.serviceDetail?.vendors?[0].address ?? "",
             bgColor: Color(0xffe7f3f9),
             iconColor: Colors.blue,
           ),
           10.verticalSpace,
           _iconLabelRow(
             icon: LucideIcons.mail,
-            label: "vendor@example.com",
+            label: notifier.serviceDetail?.vendors?[0].vendorEmail ?? "",
             bgColor: Color(0xfffdf5e7),
             iconColor: Colors.orange,
           ),
@@ -162,9 +186,9 @@ class ServiceDetailsScreen extends StatelessWidget {
   }
 
   Widget serviceDescriptionSection(BuildContext context, ServiceDetailsNotifier notifier) {
-    final String shortDesc = notifier.description.length > 150
-        ? notifier.description.substring(0, 150)
-        : notifier.description;
+    final String shortDesc = (notifier.description?.length ?? 0) > 150
+        ? notifier.description?.substring(0, 150) ?? ""
+        : notifier.description ?? "";
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 15.h),
@@ -180,8 +204,10 @@ class ServiceDetailsScreen extends StatelessWidget {
             text: TextSpan(
               style: AppFonts.text14.regular.style,
               children: [
-                TextSpan(text: notifier.showFullDescription ? notifier.description : '$shortDesc...'),
-                if (notifier.description.length > 150)
+                TextSpan(
+                  text: notifier.showFullDescription ? notifier.description : '$shortDesc...',
+                ),
+                if ((notifier.description?.length ?? 0) > 150)
                   TextSpan(
                     text: notifier.showFullDescription ? ' Show Less' : ' Show More',
                     style: AppFonts.text14.semiBold.blue.style,
@@ -199,6 +225,16 @@ class ServiceDetailsScreen extends StatelessWidget {
   }
 
   Widget reviewSection(BuildContext context, ServiceDetailsNotifier notifier) {
+    final vendor = notifier.serviceDetail?.vendors?.isNotEmpty == true
+        ? notifier.serviceDetail!.vendors![0]
+        : null;
+
+    // Convert reviewCount list to Map<int,int>
+    final Map<int, int> starCounts = {};
+    for (var rc in notifier.serviceDetail?.reviewCount ?? []) {
+      starCounts[rc.rating ?? 0] = rc.count ?? 0;
+    }
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 15.h),
       child: Column(
@@ -216,15 +252,16 @@ class ServiceDetailsScreen extends StatelessWidget {
                 ),
                 10.verticalSpace,
                 buildRatingsSummary(
-                  starCounts: {5: 120, 4: 60, 3: 30, 2: 5, 1: 12},
-                  overallRating: 4.3,
-                  totalReviews: 227,
+                  notifier: notifier,
+                  starCounts: starCounts,
+                  overallRating: vendor?.totalRating ?? 0,
+                  totalReviews: vendor?.reviewCount ?? 0,
                 ),
               ],
             ),
           ),
           20.verticalSpace,
-          ...notifier.reviews.asMap().entries.map((entry) {
+          ...(notifier.serviceDetail?.reviews ?? []).asMap().entries.map((entry) {
             final index = entry.key;
             final review = entry.value;
 
@@ -235,9 +272,9 @@ class ServiceDetailsScreen extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 20.r,
-                      backgroundImage: NetworkImage(
-                        "https://images.unsplash.com/photo-1633332755192-727a05c4013d?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D",
-                      ),
+                      backgroundImage: review.customerImage != null
+                          ? MemoryImage(base64Decode(review.customerImage ?? ""))
+                          : const AssetImage(AppImages.acRepair) as ImageProvider,
                     ),
                     10.horizontalSpace,
                     Expanded(
@@ -246,24 +283,27 @@ class ServiceDetailsScreen extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              Text(review.name, style: TextStyle(fontWeight: FontWeight.bold)),
+                              Text(review.customerName ?? "",
+                                  style: const TextStyle(fontWeight: FontWeight.bold)),
                               5.horizontalSpace,
                               Text(
-                                "(${review.daysAgo})",
+                                review.reviewDate != null
+                                    ? "(${DateTime.now().difference(review.reviewDate!).inDays} days ago)"
+                                    : "",
                                 style: TextStyle(color: Colors.grey, fontSize: 12.sp),
                               ),
                             ],
                           ),
                           3.verticalSpace,
-                          RatingStarHelper.buildRatingStars(rating: review.rating.toDouble()),
+                          RatingStarHelper.buildRatingStars(rating: (review.rating ?? 0).toDouble()),
                           3.verticalSpace,
-                          Text(review.comment, style: TextStyle(fontSize: 13.sp)),
+                          Text(review.feedback ?? "", style: TextStyle(fontSize: 13.sp)),
                         ],
                       ),
                     ),
                   ],
                 ),
-                if (index != notifier.reviews.length - 1) ...[
+                if (index != (notifier.serviceDetail?.reviews?.length ?? 0) - 1) ...[
                   15.verticalSpace,
                   Divider(height: 1.h, color: Colors.grey.shade300),
                   15.verticalSpace,
@@ -277,17 +317,19 @@ class ServiceDetailsScreen extends StatelessWidget {
   }
 
   Widget buildRatingsSummary({
+    required ServiceDetailsNotifier notifier,
     required Map<int, int> starCounts,
     required double overallRating,
     required int totalReviews,
   }) {
-    int maxCount = starCounts.values.isEmpty ? 1 : starCounts.values.reduce((a, b) => a > b ? a : b);
+    int maxCount = starCounts.values.isEmpty
+        ? 1
+        : starCounts.values.reduce((a, b) => a > b ? a : b);
 
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Left side: stars + progress bars
           Expanded(
             flex: 3,
             child: Column(
@@ -295,7 +337,7 @@ class ServiceDetailsScreen extends StatelessWidget {
               children: List.generate(5, (index) {
                 int star = 5 - index;
                 int count = starCounts[star] ?? 0;
-                double progress = maxCount == 0 ? 0 : count / maxCount;
+                double progress = totalReviews == 0 ? 0 : count / totalReviews;
 
                 return Padding(
                   padding: EdgeInsets.symmetric(vertical: 2.h),
@@ -328,25 +370,24 @@ class ServiceDetailsScreen extends StatelessWidget {
               }),
             ),
           ),
-
-          // Vertical Divider
           Container(
             width: 1.5.w,
             margin: EdgeInsets.symmetric(horizontal: 15.w),
             color: Colors.grey.shade300,
           ),
-
-          // Right side: rating & review summary
           Expanded(
             flex: 2,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("$overallRating", style: AppFonts.text24.semiBold.style),
+                Text(overallRating.toStringAsFixed(1), style: AppFonts.text24.semiBold.style),
                 RatingStarHelper.buildRatingStars(rating: overallRating),
                 10.verticalSpace,
-                Text("$totalReviews ratings and reviews", style: AppFonts.text14.regular.grey.style),
+                Text(
+                  "$totalReviews ratings and reviews",
+                  style: AppFonts.text14.regular.grey.style,
+                ),
               ],
             ),
           ),
@@ -358,9 +399,20 @@ class ServiceDetailsScreen extends StatelessWidget {
   Widget submitButton(BuildContext context, ServiceDetailsNotifier notifier) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.h, vertical: 3.h),
-      child: CustomButton(onPressed: () {
-        Navigator.pushNamed(context, AppRoutes.newServices);
-      }, text: "Enquire Now"),
+      child: CustomButton(
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            AppRoutes.newServices,
+            arguments: {
+              "vendorId": notifier.serviceDetail?.vendors?[0].vendorId ?? "",
+              "vendorName": notifier.serviceDetail?.vendors?[0].vendorName ?? "",
+              "serviceName": notifier.serviceDetail?.serviceName ?? "",
+            },
+          );
+        },
+        text: "Enquire Now",
+      ),
     );
   }
 }

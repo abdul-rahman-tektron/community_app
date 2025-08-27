@@ -513,7 +513,7 @@ class _CustomSearchDropdownState<T> extends State<CustomSearchDropdown<T>> with 
                 alignLabelWithHint: true,
               labelStyle: AppFonts.text14.regular.grey.style,
               fillColor: isDisabled
-                  ? AppColors.textSecondary
+                  ? AppColors.textSecondary.withOpacity(0.2)
                   : AppColors.white.withOpacity(0.8),
               suffixIcon: Padding(
                 padding: const EdgeInsets.only(right: 10.0, left: 10.0),

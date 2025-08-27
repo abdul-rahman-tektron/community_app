@@ -1,6 +1,8 @@
 import 'package:community_app/modules/vendor/quotation/widgets/sent_quotation/quotation_card.dart';
 import 'package:community_app/modules/vendor/quotation/widgets/sent_quotation/sent_quotation_notifier.dart';
+import 'package:community_app/res/colors.dart';
 import 'package:community_app/utils/enums.dart';
+import 'package:community_app/utils/helpers/loader.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +30,7 @@ class SentQuotationScreen extends StatelessWidget {
 
     return Scaffold(
       body: notifier.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: LottieLoader())
           : filteredQuotations.isEmpty
           ? const Center(child: Text("No quotations sent."))
           : ListView.builder(

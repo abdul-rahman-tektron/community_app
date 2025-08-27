@@ -5,7 +5,12 @@ import 'package:community_app/modules/vendor/jobs/widgets/job_history_detail/job
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
+import 'package:community_app/utils/extensions.dart';
+import 'package:community_app/utils/helpers/loader.dart';
+import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
+import 'package:community_app/utils/widgets/ratings_helper.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -21,32 +26,38 @@ class JobHistoryDetailScreen extends StatelessWidget {
       create: (_) => JobHistoryDetailNotifier(jobId),
       child: Consumer<JobHistoryDetailNotifier>(
         builder: (context, notifier, _) {
-          if (notifier.isLoading) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator()));
-          }
-
-          return Scaffold(
-            appBar: CustomAppBar(),
-            body: SafeArea(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
-                  child: Column(
-                    children: [
-                      _buildJobDescription(notifier),
-                      15.verticalSpace,
-                      _buildAfterPhotos(notifier),
-                      15.verticalSpace,
-                      _buildNotesSection(notifier),
-                      15.verticalSpace,
-                      _buildAmountSection(notifier),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+          return LoadingOverlay<JobHistoryDetailNotifier>(
+            child: buildBody(context, notifier),
           );
         },
+      ),
+    );
+  }
+
+  Widget buildBody(BuildContext context, JobHistoryDetailNotifier notifier) {
+    if (notifier.isLoading) {
+      return const Scaffold(body: Center(child: LottieLoader()));
+    }
+
+    return Scaffold(
+      appBar: CustomAppBar(),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
+            child: Column(
+              children: [
+                _buildJobDescription(context, notifier),
+                15.verticalSpace,
+                _buildAfterPhotos(notifier),
+                15.verticalSpace,
+                _buildNotesSection(notifier),
+                15.verticalSpace,
+                _buildAmountSection(notifier),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -78,7 +89,7 @@ class JobHistoryDetailScreen extends StatelessWidget {
   }
 
   /// Job Description Section
-  Widget _buildJobDescription(JobHistoryDetailNotifier notifier) {
+  Widget _buildJobDescription(BuildContext context, JobHistoryDetailNotifier notifier) {
     return Container(
       padding: const EdgeInsets.all(15),
       width: double.infinity,
@@ -104,7 +115,7 @@ class JobHistoryDetailScreen extends StatelessWidget {
             iconColor: Colors.blue,
           ),
           5.verticalSpace,
-          Text("Requested Date: ${notifier.jobDetail.expectedDate}", style: AppFonts.text14.regular.style),
+          Text("Requested Date: ${notifier.jobDetail.expectedDate?.formatDate() ?? ""}", style: AppFonts.text14.regular.style),
           10.verticalSpace,
           Text.rich(
             TextSpan(
@@ -117,6 +128,21 @@ class JobHistoryDetailScreen extends StatelessWidget {
               ],
             ),
           ),
+          10.verticalSpace,
+          if (notifier.jobDetail.fileContent != null)
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(
+                    context, AppRoutes.imageViewer, arguments: notifier.jobDetail.fileContent);
+              },
+              child: Image.memory(
+                notifier.jobDetail.fileBytes ?? Uint8List(0),
+                height: 100,
+                width: 100,
+                fit: BoxFit.cover,
+                gaplessPlayback: true,
+              ),
+            ),
           10.verticalSpace,
           Text.rich(
             TextSpan(
@@ -150,14 +176,14 @@ class JobHistoryDetailScreen extends StatelessWidget {
           ),
           itemBuilder: (context, index) {
             final pair = notifier.vendorHistoryDetailData?.completionDetails?[index];
-            return _buildBeforeAfterCard(pair);
+            return _buildBeforeAfterCard(context, pair);
           },
         ),
       ],
     );
   }
 
-  Widget _buildBeforeAfterCard(CompletionDetail? pair) {
+  Widget _buildBeforeAfterCard(context, CompletionDetail? pair) {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
@@ -174,26 +200,32 @@ class JobHistoryDetailScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(child: _buildImageWithLabel("Before", pair?.beforePhotoUrl, false)),
+          Expanded(child: _buildImageWithLabel(context, "Before", pair?.beforePhotoUrl, false)),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 10),
             child: Icon(Icons.arrow_forward, size: 28, color: Colors.grey),
           ),
-          Expanded(child: _buildImageWithLabel("After", pair?.afterPhotoUrl, false)),
+          Expanded(child: _buildImageWithLabel(context, "After", pair?.afterPhotoUrl, false)),
         ],
       ),
     );
   }
 
-  Widget _buildImageWithLabel(String label, String? url, bool isVideo) {
+  Widget _buildImageWithLabel(BuildContext context, String label, String? url, bool isVideo) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Stack(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.memory(base64Decode(url ?? ""), height: 90, width: 90, fit: BoxFit.cover),
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(
+                    context, AppRoutes.imageViewer, arguments: url);
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.memory(base64Decode(url ?? ""), height: 90, width: 90, fit: BoxFit.cover),
+              ),
             ),
             if (isVideo)
               const Positioned.fill(
@@ -229,7 +261,15 @@ class JobHistoryDetailScreen extends StatelessWidget {
           children: [
             Text("Notes:", style: AppFonts.text14.semiBold.style),
             5.horizontalSpace,
-            Text(notifier.vendorHistoryDetailData?.jobDetail?.remarks ?? "Test", style: AppFonts.text14.regular.style),
+            Text(notifier.vendorHistoryDetailData?.jobDetail?.remarks ?? "N/A", style: AppFonts.text14.regular.style),
+          ],
+        ),
+        10.verticalSpace,
+        Row(
+          children: [
+            Text("Ratings:", style: AppFonts.text14.semiBold.style),
+            5.horizontalSpace,
+           RatingsHelper(rating: notifier.vendorHistoryDetailData?.jobDetail?.rating?.toDouble() ?? 0),
           ],
         ),
 
@@ -248,7 +288,8 @@ class JobHistoryDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _iconLabelRow({required IconData icon, required String label, required Color bgColor, required Color iconColor}) {
+  Widget _iconLabelRow(
+      {required IconData icon, required String label, required Color bgColor, required Color iconColor}) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(5)),

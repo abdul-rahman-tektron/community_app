@@ -15,11 +15,11 @@ class JobHistoryNotifier extends BaseChangeNotifier {
   initializeData() async {
     await loadUserData();
     await fetchHistoryList();
-    await loadJobHistory();
   }
 
   Future<void> fetchHistoryList() async {
     try {
+      isLoading = true;
       final response = await VendorJobsRepository.instance.apiVendorHistoryList(VendorIdRequest(vendorId: userData?.customerId ?? 0));
       if (response is VendorHistoryListResponse && response.success == true) {
         historyServices = response.data ?? [];
@@ -33,30 +33,9 @@ class JobHistoryNotifier extends BaseChangeNotifier {
       print("Error fetching customer History jobs: $e");
       print("Error fetching customer History jobs: $stack");
       historyServices = [];
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
-    notifyListeners();
-  }
-
-  Future<void> loadJobHistory() async {
-    // Simulate API
-    jobHistory = [
-      {
-        "id": 1,
-        "customerName": "Ahmed Al Mazroui",
-        "service": "Painting",
-        "location": "Jumeirah, Villa 23",
-        "date": "3 July 2025",
-        "amount": 1250.00,
-      },
-      {
-        "id": 2,
-        "customerName": "Fatima Khan",
-        "service": "Plumbing",
-        "location": "Dubai Marina",
-        "date": "5 July 2025",
-        "amount": 800.00,
-      },
-    ];
-     notifyListeners();
   }
 }

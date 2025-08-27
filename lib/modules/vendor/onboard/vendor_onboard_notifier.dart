@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/core/model/common/dropdown/service_dropdown_response.dart';
 import 'package:community_app/core/model/vendor/add_vendor_service/add_vendor_service_request.dart';
+import 'package:community_app/core/model/vendor/service/get_all_vendor_service_response.dart';
 import 'package:community_app/core/remote/services/common_repository.dart';
 import 'package:community_app/core/remote/services/vendor/vendor_auth_repository.dart';
 import 'package:community_app/res/images.dart';
@@ -10,6 +11,7 @@ import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/storage/hive_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
 class VendorOnboardNotifier extends BaseChangeNotifier {
@@ -41,26 +43,26 @@ class VendorOnboardNotifier extends BaseChangeNotifier {
   };
 
   final Map<String, String> staticServiceImages = {
-    "Handyman Services": AppImages.loginImage,
-    "Security & CCTV": AppImages.loginImage,
-    "Pest Control": AppImages.loginImage,
-    "Appliance Repair": AppImages.loginImage,
-    "Carpentry": AppImages.loginImage,
-    "Pet Grooming": AppImages.loginImage,
-    "Laundry": AppImages.loginImage,
-    "Plumbing": AppImages.loginImage,
-    "Painting": AppImages.loginImage,
-    "Cleaning": AppImages.loginImage,
-    "Electric Works": AppImages.loginImage,
-    "AC Repair": AppImages.loginImage,
+    "Handyman Services": AppImages.handyMan,
+    "Security & CCTV": AppImages.security,
+    "Pest Control": AppImages.pestControl,
+    "Appliance Repair": AppImages.applianceRepair,
+    "Carpentry": AppImages.carpentry,
+    "Pet Grooming": AppImages.petGrooming,
+    "Laundry": AppImages.laundryService,
+    "Plumbing": AppImages.plumbing,
+    "Painting": AppImages.painting,
+    "Cleaning": AppImages.cleaning,
+    "Electric Works": AppImages.electrical,
+    "AC Repair": AppImages.acRepair,
   };
 
   VendorOnboardNotifier(this.isEdit) {
-    initializeData();
+    runWithLoadingVoid(() => initializeData());
   }
 
-  void initializeData() async {
-    loadUserData();
+  Future<void> initializeData() async {
+    await loadUserData();
     await apiServiceDropdown();
     if(isEdit ?? false) await apiGetAllVendorServices();
   }
@@ -68,6 +70,8 @@ class VendorOnboardNotifier extends BaseChangeNotifier {
   void setSelectedService(ServiceDropdownData service) {
     selectedService = service;
 
+    print("selectedService.serviceId");
+    print(selectedService?.serviceId);
     if (completedServices.containsKey(service)) {
       descriptionController.text = completedServices[service]!['description'] ?? '';
       serviceImagePath = completedServices[service]!['imagePath'];
@@ -97,49 +101,123 @@ class VendorOnboardNotifier extends BaseChangeNotifier {
     }
   }
 
-  //Service dropdown Api call
-  Future<void> apiAddVendorService() async {
+  Future<void> apiAddVendorService(int serviceId) async {
     try {
-      final result = await VendorAuthRepository.instance.apiAddVendorService(AddVendorServiceRequest(
+      final image = await getBase64Image(serviceImagePath);
+      final request = AddVendorServiceRequest(
         vendorName: userData?.name ?? "",
         vendorId: userData?.customerId ?? 0,
-        service: selectedService?.serviceId ?? 0,
-        serviceId: selectedService?.serviceId ?? 0,
+        serviceId: serviceId,
+        service: serviceId,
         description: descriptionController.text,
-        image: await fileToBase64(serviceImagePath),
+        image: image,
         createdBy: userData?.name ?? "",
-      ));
+      );
+
+      print("Adding service request: ${request.toJson()}");
+      final result = await VendorAuthRepository.instance.apiAddVendorService(request);
+      print("Result: $result");
 
       if (result is List<ServiceDropdownData>) {
         serviceData = result;
         notifyListeners();
-      } else {
-        debugPrint("Unexpected result type from apiServiceDropDown");
       }
     } catch (e) {
-      debugPrint("Error in apiServiceDropdown: $e");
+      debugPrint("Error in apiAddVendorService: $e");
     }
+  }
+
+  Future<void> apiUpdateVendorService(int serviceId) async {
+    try {
+      final image = await getBase64Image(serviceImagePath);
+      final request = AddVendorServiceRequest(
+        vendorName: userData?.name ?? "",
+        vendorId: userData?.customerId ?? 0,
+        serviceId: serviceId,
+        service: serviceId,
+        description: descriptionController.text,
+        image: image,
+        createdBy: userData?.name ?? "",
+      );
+
+      print("Updating service request: ${request.toJson()}");
+      final result = await VendorAuthRepository.instance.apiUpdateVendorService(request);
+      print("Result: $result");
+
+      if (result is List<ServiceDropdownData>) {
+        serviceData = result;
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint("Error in apiUpdateVendorService: $e");
+    }
+  }
+
+
+  Future<String?> getBase64Image(String? serviceImagePath) async {
+    if (serviceImagePath == null) return null;
+
+    if (serviceImagePath.startsWith("assets/")) {
+      // Asset → convert to base64
+      return await fileToBase64(serviceImagePath, isAsset: true);
+    } else if (_isBase64(serviceImagePath)) {
+      // Already base64 → return directly
+      return serviceImagePath;
+    } else {
+      // File path → convert to base64
+      return await fileToBase64(serviceImagePath);
+    }
+  }
+
+  bool _isBase64(String str) {
+    final base64RegEx = RegExp(r'^[A-Za-z0-9+/=]+\Z');
+    return str.isNotEmpty &&
+        str.length % 4 == 0 &&
+        base64RegEx.hasMatch(str.replaceAll("\n", "").replaceAll("\r", ""));
   }
 
   Future<void> apiGetAllVendorServices() async {
     try {
-      final result = await VendorAuthRepository.instance.apiGetAllVendorServices((userData?.customerId ?? 0).toString());
+      final result = await VendorAuthRepository.instance
+          .apiGetAllVendorServices((userData?.customerId ?? 0).toString());
 
-      if (result is List<ServiceDropdownData>) {
-        serviceData = result;
+      if (result is List<GetAllVendorServiceResponse>) {
+        for (final service in result) {
+          final matchedDropdown = serviceData.firstWhere(
+                (s) => s.serviceId == service.serviceId,
+            orElse: () => ServiceDropdownData(serviceId: service.serviceId, serviceName: service.service),
+          );
+
+          completedServices[matchedDropdown] = {
+            'description': service.description ?? '',
+            'imagePath': service.image ?? staticServiceImages[matchedDropdown.serviceName ?? ""],
+          };
+        }
         notifyListeners();
       } else {
-        debugPrint("Unexpected result type from apiServiceDropDown");
+        debugPrint("Unexpected result type from apiGetAllVendorServices");
       }
     } catch (e) {
-      debugPrint("Error in apiServiceDropdown: $e");
+      debugPrint("Error in apiGetAllVendorServices: $e");
     }
   }
 
-  Future<String?> fileToBase64(String? path) async {
+
+  Future<String?> fileToBase64(String? path, {bool isAsset = false}) async {
     if (path == null) return null;
-    final bytes = await File(path).readAsBytes();
-    return base64Encode(bytes);
+
+    try {
+      if (isAsset) {
+        final byteData = await rootBundle.load(path);
+        return base64Encode(byteData.buffer.asUint8List());
+      } else {
+        final bytes = await File(path).readAsBytes();
+        return base64Encode(bytes);
+      }
+    } catch (e) {
+      debugPrint("fileToBase64 error: $e");
+      return null;
+    }
   }
 
   Future<void> pickServiceImage() async {
@@ -175,14 +253,30 @@ class VendorOnboardNotifier extends BaseChangeNotifier {
       return;
     }
 
+    // Determine if this is an update or a new addition
+    final isExistingService = completedServices.containsKey(selectedService);
+
+    // Prepare serviceId safely
+    final serviceId = int.tryParse("${selectedService?.serviceId}") ?? 0;
+
+    // Call API first
+    if (isEdit ?? false) {
+      if (isExistingService) {
+        apiUpdateVendorService(serviceId); // Pass serviceId explicitly
+      } else {
+        apiAddVendorService(serviceId); // Pass serviceId explicitly
+      }
+    } else {
+      apiAddVendorService(serviceId); // Fresh onboarding
+    }
+
+    // Save in local completed map AFTER API call
     completedServices[selectedService!] = {
       'description': descriptionController.text,
       'imagePath': serviceImagePath,
     };
 
-    apiAddVendorService();
-
-    // Close the section after saving
+    // Close the section
     selectedService = null;
     notifyListeners();
   }

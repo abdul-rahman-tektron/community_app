@@ -162,7 +162,7 @@ class CustomerDashboardNotifier extends BaseChangeNotifier {
   String? get ongoingJobs => _ongoingJobs;
 
   set ongoingJobs(String? value) {
-    if (_ongoingJobs != value) return;
+    if (_ongoingJobs == value) return;
     _ongoingJobs = value;
       notifyListeners();
   }
@@ -170,7 +170,7 @@ class CustomerDashboardNotifier extends BaseChangeNotifier {
   String? get completedJobs => _completedJobs;
 
   set completedJobs(String? value) {
-    if (_completedJobs != value) return;
+    if (_completedJobs == value) return;
     _completedJobs = value;
       notifyListeners();
   }

@@ -5,6 +5,8 @@ import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/extensions.dart';
+import 'package:community_app/utils/helpers/loader.dart';
+import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_drawer.dart';
@@ -25,37 +27,45 @@ class QuotationDetailScreen extends StatelessWidget {
       create: (_) => QuotationDetailsNotifier(jobId, quotationResponseId),
       child: Consumer<QuotationDetailsNotifier>(
         builder: (context, notifier, _) {
-          return Scaffold(
-            appBar: CustomAppBar(),
-            drawer: CustomDrawer(),
-            body: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Column(
-                children: [
-                  buildTitle(context),
-                  buildCustomerInfo(context, notifier),
-                  const Divider(),
-                  10.verticalSpace,
-                  _buildQuotationTable(context, notifier), // Replaced table
-                  10.verticalSpace,
-                  const Divider(),
-                  10.verticalSpace,
-                  buildNotes(notifier),
-                  10.verticalSpace,
-                  _buildPrice(context, notifier),
-                  if (notifier.isRejected)
-                    Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: CustomButton(
-                        text: "Resend Quotation",
-                        onPressed: notifier.resendQuotation,
-                      ),
-                    ),
-                ],
-              ),
-            ),
+          return LoadingOverlay<QuotationDetailsNotifier>(
+            child: buildBody(context, notifier),
           );
         },
+      ),
+    );
+  }
+
+  Widget buildBody(BuildContext context, QuotationDetailsNotifier notifier) {
+    return SafeArea(
+      child: Scaffold(
+        appBar: CustomAppBar(),
+        drawer: CustomDrawer(),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Column(
+            children: [
+              buildTitle(context),
+              buildCustomerInfo(context, notifier),
+              const Divider(),
+              10.verticalSpace,
+              _buildQuotationTable(context, notifier), // Replaced table
+              10.verticalSpace,
+              const Divider(),
+              10.verticalSpace,
+              buildNotes(notifier),
+              10.verticalSpace,
+              _buildPrice(context, notifier),
+              if (notifier.isRejected)
+                Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: CustomButton(
+                    text: "Resend Quotation",
+                    onPressed: notifier.resendQuotation,
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -114,11 +124,17 @@ class QuotationDetailScreen extends StatelessWidget {
           ),
           10.verticalSpace,
           if (notifier.jobDetail.fileContent != null)
-            Image.memory(
-              base64Decode(notifier.jobDetail.fileContent ?? ""),
-              height: 100,
-              width: 100,
-              fit: BoxFit.cover,
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(
+                    context, AppRoutes.imageViewer, arguments: notifier.jobDetail.fileContent);
+              },
+              child: Image.memory(
+                base64Decode(notifier.jobDetail.fileContent ?? ""),
+                height: 100,
+                width: 100,
+                fit: BoxFit.cover,
+              ),
             ),
           10.verticalSpace,
           Text.rich(

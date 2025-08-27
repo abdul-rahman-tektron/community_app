@@ -6,6 +6,8 @@ import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/extensions.dart';
+import 'package:community_app/utils/helpers/loader.dart';
+import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +27,7 @@ class PreviousDetailScreen extends StatelessWidget {
       child: Consumer<PreviousDetailNotifier>(
         builder: (context, notifier, _) {
           if (notifier.isLoading) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator()));
+            return const Scaffold(body: Center(child: LottieLoader()));
           }
 
           return Scaffold(
@@ -183,33 +185,38 @@ class PreviousDetailScreen extends StatelessWidget {
       ),
       itemBuilder: (context, index) {
         final pair = notifier.customerHistoryDetailData?.completionDetails?[index];
-        return _buildBeforeAfterCard(pair ?? CompletionDetail());
+        return _buildBeforeAfterCard(context, pair ?? CompletionDetail());
       },
     );
   }
 
-  Widget _buildBeforeAfterCard(CompletionDetail pair) {
+  Widget _buildBeforeAfterCard(BuildContext context, CompletionDetail pair) {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: AppStyles.commonDecoration,
       child: Row(
         children: [
-          Expanded(child: _buildImageWithLabel("Before", pair.beforePhotoUrl, false)),
+          Expanded(child: _buildImageWithLabel(context, "Before", pair.beforePhotoUrl, false)),
           const Icon(Icons.arrow_forward, color: Colors.grey, size: 28),
-          Expanded(child: _buildImageWithLabel("After", pair.afterPhotoUrl, false)),
+          Expanded(child: _buildImageWithLabel(context, "After", pair.afterPhotoUrl, false)),
         ],
       ),
     );
   }
 
-  Widget _buildImageWithLabel(String label, String?   url, bool isVideo) {
+  Widget _buildImageWithLabel(BuildContext context, String label, String?   url, bool isVideo) {
     return Column(
       children: [
         Stack(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.memory(base64Decode(url ?? ""), height: 90, width: 90, fit: BoxFit.cover),
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, AppRoutes.imageViewer, arguments: url);
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.memory(base64Decode(url ?? ""), height: 90, width: 90, fit: BoxFit.cover),
+              ),
             ),
             if (isVideo)
               const Positioned.fill(

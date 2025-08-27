@@ -37,6 +37,7 @@ class NewRequestNotifier extends BaseChangeNotifier {
 
   Future<void> apiVendorQuotationRequestList() async {
     try {
+      isLoading = true;
     final response = await VendorQuotationRepository.instance.apiVendorQuotationRequestList(userData?.customerId.toString() ?? "");
       final parsed = response as VendorQuotationRequestListResponse;
 
@@ -50,6 +51,8 @@ class NewRequestNotifier extends BaseChangeNotifier {
       print(stackTrace);
       ToastHelper.showError('An error occurred. Please try again.');
       notifyListeners();
+    } finally {
+      isLoading = false;
     }
   }
 

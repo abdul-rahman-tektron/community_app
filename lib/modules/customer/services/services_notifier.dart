@@ -59,27 +59,6 @@ class ServicesNotifier extends BaseChangeNotifier {
   List<CustomerOngoingJobsData> upcomingServices = [];
   List<CustomerHistoryListData> historyServices = [];
 
-  /// Keep static previous services for now, still using ServiceModel UI model
-  List<ServiceModel> previousServices = [
-    ServiceModel(
-      id: '4789789',
-      title: 'Service X',
-      date: DateTime.now().subtract(const Duration(days: 10)),
-      progressStatus: 'Completed',
-      productUsed: [
-        ProductUsed(name: 'Screwdriver Set', quantity: 1),
-        ProductUsed(name: 'Wiring Kit', quantity: 2),
-      ],
-    ),
-    ServiceModel(
-      id: '5567567',
-      title: 'Service Y',
-      date: DateTime.now().subtract(const Duration(days: 15)),
-      progressStatus: 'Resolved with Maintenance',
-      productUsed: [ProductUsed(name: 'Sealant', quantity: 1)],
-    ),
-  ];
-
   int get selectedIndex => _selectedIndex;
 
   set selectedIndex(int value) {
@@ -95,8 +74,10 @@ class ServicesNotifier extends BaseChangeNotifier {
   Future<void> initializeData() async {
     await loadUserData();
     if (userData?.customerId != null) {
+      isLoading = true;
       await fetchCustomerOngoingJobs(userData!.customerId!);
       await fetchHistoryList();
+      isLoading = false;
     }
   }
 

@@ -113,7 +113,7 @@ class SiteVisitCard extends StatelessWidget {
                   color: const Color(0xffe7f3f9),
                   borderRadius: BorderRadius.circular(5),
                 ),
-                child: Text("Site Visit Required", style: AppFonts.text14.regular.style.copyWith(color: Colors.blue)),
+                child: Text("Site Visit ${(request.isAcceptedByCustomer ?? false) ? "Accepted" : "Requested"}", style: AppFonts.text14.regular.style.copyWith(color: Colors.blue)),
               ),
               10.verticalSpace,
               Row(
@@ -142,7 +142,7 @@ class SiteVisitCard extends StatelessWidget {
             ],
           ),
         ),
-        CustomButton(
+        if(request.isAcceptedByCustomer ?? false) CustomButton(
           height: 30.h,
           fullWidth: false,
           backgroundColor: AppColors.white,

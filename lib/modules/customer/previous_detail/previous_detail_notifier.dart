@@ -18,8 +18,6 @@ class PreviousDetailNotifier extends BaseChangeNotifier {
 
   CustomerHistoryDetailData? customerHistoryDetailData;
 
-  /// States
-  bool isLoading = true;
 
   /// Job Info
   String serviceName = "";
@@ -58,54 +56,6 @@ class PreviousDetailNotifier extends BaseChangeNotifier {
     // await fetchJobDetails();
     await loadUserData();
     await fetchCustomerHistoryDetail();
-  }
-
-  /// Fetch job details from API
-  Future<void> fetchJobDetails() async {
-    try {
-      isLoading = true;
-      notifyListeners();
-
-      // TODO: Replace with actual API call
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Sample mock data
-      serviceName = "Painting";
-      status = "Completed";
-      jobRef = "JOB-$jobId";
-      requestedDate = "2025-08-01";
-      completedDate = "2025-08-03";
-      priority = "High";
-      customerName = "Abdul Rahman";
-
-      vendorName = "CoolFix Maintenance LLC";
-      vendorPhone = "+971 55 123 4567";
-
-      imagePairs = [
-        ImagePair(
-          before:
-          "https://d2v5dzhdg4zhx3.cloudfront.net/web-assets/images/storypages/primary/ProductShowcasesampleimages/JPEG/Product+Showcase-1.jpg",
-          after:
-          "https://www.seoclerk.com/pics/407226-2eWiCl1471372939.jpg",
-        ),
-      ];
-      notes = "The painting was completed as requested. Applied 2 coats of paint and replaced damaged wallpaper.";
-
-      totalAmount = 250.0;
-      paymentMethod = "Credit Card";
-
-      hasFeedback = true; // set false if no feedback
-      vendorRating = 4;
-      serviceRating = 4.5;
-      vendorReview = "Great service experience! The technician arrived on time and resolved the issue professionally.";
-      serviceReview =
-      "Thank you for choosing CoolFix Maintenance. We appreciate your cooperation during the service visit.";
-    } catch (e) {
-      debugPrint("Error fetching job details: $e");
-    } finally {
-      isLoading = false;
-      notifyListeners();
-    }
   }
 
   Future<void> fetchCustomerHistoryDetail() async {

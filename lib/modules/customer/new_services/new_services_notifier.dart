@@ -16,6 +16,10 @@ import 'package:intl/intl.dart';
 class NewServicesNotifier extends BaseChangeNotifier {
   final formKey = GlobalKey<FormState>();
 
+  int? vendorId;
+  String? vendorName;
+  String? serviceName;
+
   // Controllers
   final remarksController = TextEditingController();
   final serviceController = TextEditingController();
@@ -44,7 +48,7 @@ class NewServicesNotifier extends BaseChangeNotifier {
     PriorityDropdownData(priorityId: 4, name: 'Emergency'),
   ];
 
-  NewServicesNotifier() {
+  NewServicesNotifier(this.vendorId, this.vendorName, this.serviceName) {
     initApi();
   }
 
@@ -100,10 +104,10 @@ class NewServicesNotifier extends BaseChangeNotifier {
         return;
       }
 
-      if (uploadedFile == null) {
-        ToastHelper.showInfo('Please upload a file');
-        return;
-      }
+      // if (uploadedFile == null) {
+      //   ToastHelper.showInfo('Please upload a file');
+      //   return;
+      // }
 
       await apiCreateJob(context);
     } catch (e, stackTrace) {
@@ -121,6 +125,16 @@ class NewServicesNotifier extends BaseChangeNotifier {
 
       if (result is List<ServiceDropdownData>) {
         serviceDropdownData = result;
+        if (serviceName != null) {
+          final matchedService = serviceDropdownData.firstWhere(
+                (service) {
+                  return service.serviceName == serviceName;
+                },
+            orElse: () => serviceDropdownData.first, // fallback to first
+          );
+          setCategory(matchedService);
+          serviceController.text = matchedService.serviceName ?? "";
+        }
         notifyListeners();
       } else {
         debugPrint("Unexpected result type from apiServiceDropDown");
@@ -132,6 +146,25 @@ class NewServicesNotifier extends BaseChangeNotifier {
 
   Future<void> apiCreateJob(BuildContext context) async {
     try {
+      // Build media list only if image is uploaded
+      List<JobMediaList> mediaList = [];
+      if (uploadedFile != null) {
+        mediaList.add(
+          JobMediaList(
+            type: "P",
+            fileContent: await uploadedFile!.toBase64(),
+            photoVideoType: "P",
+            customerId: userData?.customerId ?? 0,
+            jobId: 0,
+            from: "C",
+            identity: 0,
+            inRefUID: 0,
+            uid: 0,
+            vendorId: 0,
+          ),
+        );
+      }
+
       final request = CreateJobRequest(
         customerId: userData?.customerId ?? 0,
         jobId: int.parse(selectedServiceId ?? "0"),
@@ -144,20 +177,7 @@ class NewServicesNotifier extends BaseChangeNotifier {
         createdBy: "Sana",
         active: true,
         siteVisitRequired: siteVisitOption,
-        mediaList: [
-          JobMediaList(
-            type: "P",
-            fileContent: await uploadedFile?.toBase64() ?? "",
-            photoVideoType: "P",
-            customerId: userData?.customerId ?? 0,
-            jobId: 0,
-            from: "C",
-            identity: 0,
-            inRefUID: 0,
-            uid: 0,
-            vendorId: 0,
-          ),
-        ],
+        mediaList: mediaList, // empty if no file
       );
 
       final result = await CustomerJobsRepository.instance.apiNewJob(request);
@@ -183,6 +203,8 @@ class NewServicesNotifier extends BaseChangeNotifier {
       arguments: {
         'jobId': resultData.data,
         'serviceId': int.parse(selectedServiceId ?? "0"),
+        'vendorId': vendorId,
+        'vendorName': vendorName,
       },
     );
   }

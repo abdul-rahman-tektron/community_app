@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:community_app/res/images.dart';
+import 'package:community_app/utils/helpers/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
@@ -35,13 +36,13 @@ class ExpandedMediaViewer extends StatelessWidget {
             Center(
               child: isVideo
                   ? (controller == null
-                  ? const CircularProgressIndicator()
+                  ? const LottieLoader()
                   : controller.value.isInitialized
                   ? AspectRatio(
                 aspectRatio: controller.value.aspectRatio,
                 child: VideoPlayer(controller),
               )
-                  : const CircularProgressIndicator())
+                  : const LottieLoader())
                   : Image.asset(
                 AppImages.loginImage, // Replace with dynamic image path if needed
                 fit: BoxFit.contain,

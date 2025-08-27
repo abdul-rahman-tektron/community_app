@@ -47,8 +47,8 @@ class AppStatus {
   static const jobInitiated = AppStatusData(1, 0, "Job Initiated");
   static const quotationRequested = AppStatusData(2, 5, "Quotation Requested");
   static const vendorQuotationRejected = AppStatusData(3, 8, "Vendor Quotation Rejected");
-  static const siteVisitRequestedByCustomer = AppStatusData(4, 10, "Site Visit Requested by Customer");
-  static const siteVisitRequestedByVendor = AppStatusData(5, 12, "Site Visit Requested by Vendor");
+  static const siteVisitRequestedByVendor = AppStatusData(4, 10, "Site Visit Requested by Vendor");
+  static const siteVisitAccepted = AppStatusData(5, 12, "Site Visit Accepted");
   static const siteVisitRejected = AppStatusData(6, 15, "Site Visit Rejected");
   static const quotationSubmitted = AppStatusData(7, 20, "Quotation Submitted");
   static const quotationAccepted = AppStatusData(8, 30, "Quotation Accepted");
@@ -66,8 +66,8 @@ class AppStatus {
     jobInitiated,
     quotationRequested,
     vendorQuotationRejected,
-    siteVisitRequestedByCustomer,
     siteVisitRequestedByVendor,
+    siteVisitAccepted,
     siteVisitRejected,
     quotationSubmitted,
     quotationAccepted,

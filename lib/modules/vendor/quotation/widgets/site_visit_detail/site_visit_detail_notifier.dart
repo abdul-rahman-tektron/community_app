@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/core/model/common/error/common_response.dart';
+import 'package:community_app/core/model/vendor/jobs/job_info_detail_response.dart';
 import 'package:community_app/core/model/vendor/quotation_request/site_visit_assign_employee_request.dart';
+import 'package:community_app/core/remote/services/vendor/vendor_dashboard_repository.dart';
 import 'package:community_app/core/remote/services/vendor/vendor_jobs_repository.dart';
 import 'package:community_app/core/remote/services/vendor/vendor_quotation_repository.dart';
 import 'package:community_app/utils/extensions.dart';
@@ -11,15 +13,25 @@ import 'package:flutter/material.dart';
 class AssignedEmployee {
   final String name;
   final String phone;
+  final String? emiratesIdNumber;
   final File? emiratesId;
 
-  AssignedEmployee({required this.name, required this.phone, this.emiratesId});
+  AssignedEmployee({required this.name, required this.phone, this.emiratesIdNumber, this.emiratesId});
 }
 
 class SiteVisitDetailNotifier extends BaseChangeNotifier {
   final String? jobId;
 
-  SiteVisitDetailNotifier(this.jobId, this.customerId, this.siteVisitId);
+  SiteVisitDetailNotifier(this.jobId, this.customerId, this.siteVisitId) {
+    runWithLoadingVoid(() => initializeData());
+  }
+
+  initializeData() async {
+    await loadUserData();
+    await apiJobInfoDetail();
+  }
+
+  JobInfoDetailResponse _jobDetail = JobInfoDetailResponse();
 
   bool isLoading = false;
   bool isEmployeeAssigned = false;
@@ -29,29 +41,23 @@ class SiteVisitDetailNotifier extends BaseChangeNotifier {
 
   List<AssignedEmployee> assignedEmployees = [];
 
-  Future<void> loadDetails() async {
-    isLoading = true;
-    notifyListeners();
-
+  Future<void> apiJobInfoDetail() async {
     try {
-      // TODO: Call API to fetch site visit request details by requestId
-      // Example:
-      // final response = await VendorJobsRepository.instance.apiSiteVisitDetail(requestId);
+      final result = await VendorDashboardRepository.instance.apiJobInfoDetail(jobId?.toString() ?? "0");
 
-      // Simulating:
-      await Future.delayed(const Duration(seconds: 1));
-      isEmployeeAssigned = false;
-      isQuotationUpdated = false;
+      if (result is JobInfoDetailResponse) {
+        jobDetail = result;
+      } else {
+        debugPrint("Unexpected result type from apiJobInfoDetail");
+      }
     } catch (e) {
-      ToastHelper.showError("Failed to load details: $e");
-    } finally {
-      isLoading = false;
-      notifyListeners();
+      debugPrint("Error in apiJobInfoDetail: $e");
     }
   }
 
-  void addEmployee(String name, String phone, {File? emiratesId}) {
-    assignedEmployees.add(AssignedEmployee(name: name, phone: phone, emiratesId: emiratesId));
+  void addEmployee(String name, String phone, {String? emiratesIdNumber, File? emiratesId}) {
+    assignedEmployees.add(AssignedEmployee(
+        name: name, phone: phone, emiratesIdNumber: emiratesIdNumber, emiratesId: emiratesId));
     notifyListeners();
   }
 
@@ -75,6 +81,7 @@ class SiteVisitDetailNotifier extends BaseChangeNotifier {
             return AssignEmployeeList(
               employeeName: e.name,
               employeePhoneNumber: e.phone,
+              emiratesIdNumber: e.emiratesIdNumber,
               emiratesIdPhoto: base64Id,
             );
           }),
@@ -114,5 +121,13 @@ class SiteVisitDetailNotifier extends BaseChangeNotifier {
     } catch (e) {
       ToastHelper.showError("Failed to decline request: $e");
     }
+  }
+
+  JobInfoDetailResponse get jobDetail => _jobDetail;
+
+  set jobDetail(JobInfoDetailResponse value) {
+    if (_jobDetail == value) return;
+    _jobDetail = value;
+    notifyListeners();
   }
 }

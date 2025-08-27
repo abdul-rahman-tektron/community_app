@@ -1,26 +1,13 @@
 import 'dart:async';
 
 import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/core/model/common/dropdown/service_dropdown_response.dart';
 import 'package:community_app/core/model/customer/explore/explore_service_response.dart';
+import 'package:community_app/core/remote/services/common_repository.dart';
 import 'package:community_app/core/remote/services/customer/customer_explore_repository.dart';
 import 'package:community_app/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-
-/// Models
-class ServiceItem {
-  final String service;
-  final String vendorName;
-  final double price;
-  final double rating;
-
-  ServiceItem({
-    required this.service,
-    required this.vendorName,
-    required this.price,
-    required this.rating,
-  });
-}
 
 /// Sort Option Class
 class SortOption {
@@ -66,18 +53,17 @@ class ExploreNotifier extends BaseChangeNotifier {
   final serviceController = TextEditingController();
 
   List<ExploreServiceData> exploreServices = [];
+  List<ServiceDropdownData> serviceDropdownData = [];
   SortOption? selectedSortOption;
 
-  bool isLoading = false; // ✅ loader flag
-
-  String selectedCategory = 'All';
+  String? selectedCategory;
+  int? selectedCategoryId;
   RangeValues? selectedPriceRange;
   DistanceFilter? selectedDistance;
 
   Timer? _debounce; // 👈 debounce timer
 
   ExploreNotifier({String? initialCategory}) {
-    selectedCategory = initialCategory ?? 'All';
     initializeData();
 
     // Listen to search text with debounce
@@ -87,6 +73,7 @@ class ExploreNotifier extends BaseChangeNotifier {
   }
 
   Future<void> initializeData() async {
+    await apiServiceDropdown();
     await fetchExploreServices();
   }
 
@@ -103,6 +90,7 @@ class ExploreNotifier extends BaseChangeNotifier {
   }) async {
     try {
       isLoading = true;
+      exploreServices.clear();
       notifyListeners();
 
       final response = await CustomerExploreRepository.instance.apiExploreService(
@@ -116,7 +104,7 @@ class ExploreNotifier extends BaseChangeNotifier {
             ? selectedPriceRange!.end.toInt()
             : null,
         serviceId: selectedCategory != 'All'
-            ? _mapCategoryToId(selectedCategory)
+            ? selectedCategoryId
             : null,
       );
 
@@ -189,36 +177,25 @@ class ExploreNotifier extends BaseChangeNotifier {
     }
   }
 
-  /// Map category name -> serviceId (if your API requires IDs)
-  int? _mapCategoryToId(String category) {
-    switch (category) {
-      case "AC Repair":
-        return 1;
-      case "Plumbing":
-        return 2;
-      case "Cleaning":
-        return 3;
-      case "Painting":
-        return 4;
-      case "Pest Control":
-        return 5;
-      default:
-        return null;
-    }
-  }
-
   bool _isSortTypeTogglable(SortType type) {
     return type == SortType.price || type == SortType.rating;
   }
 
-  List<String> get availableCategories => [
-    'All',
-    'AC Repair',
-    'Plumbing',
-    'Cleaning',
-    'Painting',
-    'Pest Control',
-  ];
+  //Service dropdown Api call
+  Future<void> apiServiceDropdown() async {
+    try {
+      final result = await CommonRepository.instance.apiServiceDropdown();
+
+      if (result is List<ServiceDropdownData>) {
+        serviceDropdownData = result;
+        notifyListeners();
+      } else {
+        debugPrint("Unexpected result type from apiServiceDropDown");
+      }
+    } catch (e) {
+      debugPrint("Error in apiServiceDropdown: $e");
+    }
+  }
 
   @override
   void dispose() {

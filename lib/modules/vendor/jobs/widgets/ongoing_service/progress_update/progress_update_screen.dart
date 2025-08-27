@@ -10,6 +10,8 @@ import 'package:community_app/utils/enums.dart';
 import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/helpers/dashed_border_container.dart';
+import 'package:community_app/utils/helpers/loader.dart';
+import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_textfields.dart';
@@ -23,40 +25,40 @@ class ProgressUpdateScreen extends StatelessWidget {
   final int? customerId;
   final String? status;
 
-  const ProgressUpdateScreen({
-    super.key,
-    this.jobId,
-    this.customerId,
-    this.status,
-  });
+  const ProgressUpdateScreen({super.key, this.jobId, this.customerId, this.status});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => ProgressUpdateNotifier(jobId, customerId, status),
       child: Consumer<ProgressUpdateNotifier>(
-        builder: (context, notifier, _) => Scaffold(
-          persistentFooterButtons: [_buildPersistentButtons(context, notifier)],
-          appBar: const CustomAppBar(),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(15),
-            child: Column(
-              children: [
-                buildCustomerInfo(context, notifier),
-                15.verticalSpace,
-                _buildPhaseContent(context, notifier),
-              ],
-            ),
-          ),
+        builder: (context, notifier, _) {
+          return LoadingOverlay<ProgressUpdateNotifier>(child: buildBody(context, notifier));
+        },
+      ),
+    );
+  }
+
+  Widget buildBody(BuildContext context, ProgressUpdateNotifier notifier) {
+    return Scaffold(
+      persistentFooterButtons: [
+        if (notifier.currentPhase != JobPhase.completed) _buildPersistentButtons(context, notifier),
+      ],
+      appBar: const CustomAppBar(),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(15),
+        child: Column(
+          children: [
+            buildCustomerInfo(context, notifier),
+            15.verticalSpace,
+            _buildPhaseContent(context, notifier),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildPhaseContent(
-    BuildContext context,
-    ProgressUpdateNotifier notifier,
-  ) {
+  Widget _buildPhaseContent(BuildContext context, ProgressUpdateNotifier notifier) {
     switch (notifier.currentPhase) {
       case JobPhase.assign:
         return Column(
@@ -86,26 +88,25 @@ class ProgressUpdateScreen extends StatelessWidget {
         );
 
       case JobPhase.completed:
-        return Column(
-          children: [
-            _buildAfterPhotos(context, notifier),
-            15.verticalSpace,
-            CustomTextField(
-              controller: notifier.notesController,
-              fieldName: "Work Notes",
-              hintText: "Add progress notes",
-              isMaxLines: true,
-              onChanged: notifier.updateNotes,
-            ),
-          ],
-        );
+        return Column(children: [Text(getVendorStatusMessage(notifier.currentStatus ?? ""))]);
     }
   }
 
-  Widget _buildAssignEmployeeList(
-    BuildContext context,
-    ProgressUpdateNotifier notifier,
-  ) {
+  String getVendorStatusMessage(String currentStatus) {
+    if (currentStatus == AppStatus.workCompletedAwaitingConfirmation.name) {
+      return "The work is completed. Waiting for the customer to verify it.";
+    } else if (currentStatus == AppStatus.jobVerifiedPaymentPending.name) {
+      return "Customer has verified the job. Waiting for payment initiation.";
+    } else if (currentStatus == AppStatus.paymentCompleted.name) {
+      return "Payment has been completed. You can now await customer feedback.";
+    } else if (currentStatus == AppStatus.jobClosedDone.name) {
+      return "This job is closed. All processes are completed.";
+    } else {
+      return "Status unknown.";
+    }
+  }
+
+  Widget _buildAssignEmployeeList(BuildContext context, ProgressUpdateNotifier notifier) {
     if (notifier.assignedEmployees.isEmpty) {
       return const Text("No employees assigned yet.");
     }
@@ -121,12 +122,8 @@ class ProgressUpdateScreen extends StatelessWidget {
                 subtitle: Text(e.phone),
                 trailing: e.emiratesId != null
                     ? GestureDetector(
-                        onTap: () =>
-                            notifier.openImageViewer(context, e.emiratesId!),
-                        child: const Text(
-                          "View Emirates ID",
-                          style: TextStyle(color: Colors.blue),
-                        ),
+                        onTap: () => notifier.openImageViewer(context, e.emiratesId!),
+                        child: const Text("View Emirates ID", style: TextStyle(color: Colors.blue)),
                       )
                     : null,
               ),
@@ -136,10 +133,7 @@ class ProgressUpdateScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPersistentButtons(
-    BuildContext context,
-    ProgressUpdateNotifier notifier,
-  ) {
+  Widget _buildPersistentButtons(BuildContext context, ProgressUpdateNotifier notifier) {
     switch (notifier.currentPhase) {
       case JobPhase.assign:
         return CustomButton(
@@ -155,9 +149,7 @@ class ProgressUpdateScreen extends StatelessWidget {
           onPressed: notifier.photoPairs.isNotEmpty
               ? () async {
                   await notifier.submitJobCompletion(context);
-                  await notifier.apiUpdateJobStatus(
-                    AppStatus.workStartedInProgress.id,
-                  );
+                  await notifier.apiUpdateJobStatus(AppStatus.workStartedInProgress.id);
                   notifier.goToInProgress();
                 }
               : null,
@@ -183,12 +175,11 @@ class ProgressUpdateScreen extends StatelessWidget {
                 onPressed: notifier.notes.trim().isNotEmpty
                     ? () async {
                         await notifier.submitJobCompletion(context);
-                        await notifier.apiUpdateJobStatus(
-                          AppStatus.workCompletedAwaitingConfirmation.id,
-                        ).then((value) {
-                          Navigator.pop(context);
-                        },);
-
+                        await notifier
+                            .apiUpdateJobStatus(AppStatus.workCompletedAwaitingConfirmation.id)
+                            .then((value) {
+                              Navigator.pop(context);
+                            });
                       }
                     : null,
               ),
@@ -199,17 +190,12 @@ class ProgressUpdateScreen extends StatelessWidget {
       case JobPhase.completed:
         return CustomButton(
           text: "Submit Completion",
-          onPressed: notifier.canSubmit
-              ? () => notifier.submitJobCompletion(context)
-              : null,
+          onPressed: notifier.canSubmit ? () => notifier.submitJobCompletion(context) : null,
         );
     }
   }
 
-  Widget _buildAddEmployeeButton(
-    BuildContext context,
-    ProgressUpdateNotifier notifier,
-  ) {
+  Widget _buildAddEmployeeButton(BuildContext context, ProgressUpdateNotifier notifier) {
     return GestureDetector(
       onTap: () {
         showModalBottomSheet(
@@ -220,7 +206,7 @@ class ProgressUpdateScreen extends StatelessWidget {
             borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
           ),
           builder: (_) => AssignBottomSheet(
-            onAdd: (name, phone, {emiratesId}) =>
+            onAdd: (name, phone, _, {emiratesId}) =>
                 notifier.addEmployee(name, phone, emiratesId: emiratesId),
           ),
         );
@@ -247,10 +233,7 @@ class ProgressUpdateScreen extends StatelessWidget {
     );
   }
 
-  Widget buildCustomerInfo(
-    BuildContext context,
-    ProgressUpdateNotifier notifier,
-  ) {
+  Widget buildCustomerInfo(BuildContext context, ProgressUpdateNotifier notifier) {
     final jobDetail = notifier.jobDetail;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
@@ -259,15 +242,9 @@ class ProgressUpdateScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            jobDetail.customerName ?? "Customer Name",
-            style: AppFonts.text16.semiBold.style,
-          ),
+          Text(jobDetail.customerName ?? "Customer Name", style: AppFonts.text16.semiBold.style),
           5.verticalSpace,
-          Text(
-            jobDetail.serviceName ?? "Service Name",
-            style: AppFonts.text14.regular.style,
-          ),
+          Text(jobDetail.serviceName ?? "Service Name", style: AppFonts.text14.regular.style),
           5.verticalSpace,
           _iconLabelRow(
             icon: LucideIcons.phone,
@@ -291,10 +268,7 @@ class ProgressUpdateScreen extends StatelessWidget {
           Text.rich(
             TextSpan(
               children: [
-                TextSpan(
-                  text: 'Priority: ',
-                  style: AppFonts.text14.regular.style,
-                ),
+                TextSpan(text: 'Priority: ', style: AppFonts.text14.regular.style),
                 TextSpan(
                   text: jobDetail.priority ?? "None",
                   style: AppFonts.text14.regular.red.style,
@@ -304,20 +278,26 @@ class ProgressUpdateScreen extends StatelessWidget {
           ),
           10.verticalSpace,
           if (jobDetail.fileContent != null)
-            Image.memory(
-              base64Decode(jobDetail.fileContent!),
-              height: 100,
-              width: 100,
-              fit: BoxFit.cover,
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.imageViewer,
+                  arguments: jobDetail.fileContent,
+                );
+              },
+              child: Image.memory(
+                base64Decode(jobDetail.fileContent!),
+                height: 100,
+                width: 100,
+                fit: BoxFit.cover,
+              ),
             ),
           10.verticalSpace,
           Text.rich(
             TextSpan(
               children: [
-                TextSpan(
-                  text: "Job Description: ",
-                  style: AppFonts.text14.semiBold.style,
-                ),
+                TextSpan(text: "Job Description: ", style: AppFonts.text14.semiBold.style),
                 TextSpan(
                   text: jobDetail.remarks ?? "Not Added",
                   style: AppFonts.text14.regular.style,
@@ -340,10 +320,7 @@ class ProgressUpdateScreen extends StatelessWidget {
       children: [
         Container(
           padding: const EdgeInsets.all(5),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(5),
-          ),
+          decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(5)),
           child: Icon(icon, color: iconColor, size: 20),
         ),
         10.horizontalSpace,
@@ -352,17 +329,11 @@ class ProgressUpdateScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBeforePhotos(
-    BuildContext context,
-    ProgressUpdateNotifier notifier,
-  ) {
+  Widget _buildBeforePhotos(BuildContext context, ProgressUpdateNotifier notifier) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Before Photos",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        const Text("Before Photos", style: TextStyle(fontWeight: FontWeight.bold)),
         8.verticalSpace,
         GridView.builder(
           shrinkWrap: true,
@@ -401,17 +372,11 @@ class ProgressUpdateScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAfterPhotos(
-    BuildContext context,
-    ProgressUpdateNotifier notifier,
-  ) {
+  Widget _buildAfterPhotos(BuildContext context, ProgressUpdateNotifier notifier) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "After Photos",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
+        const Text("After Photos", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         8.verticalSpace,
         GridView.builder(
           shrinkWrap: true,
@@ -508,11 +473,7 @@ class ProgressUpdateScreen extends StatelessWidget {
         border: Border.all(color: Colors.grey.shade300),
         color: Colors.white,
         boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
+          BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2)),
         ],
       ),
       child: Row(
@@ -555,10 +516,7 @@ class ProgressUpdateScreen extends StatelessWidget {
           ),
         ),
         5.verticalSpace,
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-        ),
+        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
       ],
     );
   }

@@ -250,6 +250,8 @@ class JobQuotationResponce {
   int? quotationRequestId;
   int? serviceId;
   int? vendorId;
+  int? siteVisitId;
+  bool? isAcceptedByCustomer;
   String? quotationDetails;
   double? quotationAmount;
   double? serviceCharge;
@@ -266,6 +268,8 @@ class JobQuotationResponce {
     this.quotationRequestId,
     this.serviceId,
     this.vendorId,
+    this.siteVisitId,
+    this.isAcceptedByCustomer,
     this.quotationDetails,
     this.quotationAmount,
     this.serviceCharge,
@@ -284,6 +288,8 @@ class JobQuotationResponce {
         quotationRequestId: json["quotationRequestId"],
         serviceId: json["serviceId"],
         vendorId: json["vendorId"],
+        siteVisitId: json["siteVisitId"],
+        isAcceptedByCustomer: json["isAcceptedByCustomer"],
         quotationDetails: json["quotationDetails"],
         quotationAmount: json["quotationAmount"]?.toDouble(),
         serviceCharge: json["serviceCharge"]?.toDouble(),
@@ -313,6 +319,8 @@ class JobQuotationResponce {
     "quotationRequestId": quotationRequestId,
     "serviceId": serviceId,
     "vendorId": vendorId,
+    "siteVisitId": siteVisitId,
+    "isAcceptedByCustomer": isAcceptedByCustomer,
     "quotationDetails": quotationDetails,
     "quotationAmount": quotationAmount,
     "serviceCharge": serviceCharge,

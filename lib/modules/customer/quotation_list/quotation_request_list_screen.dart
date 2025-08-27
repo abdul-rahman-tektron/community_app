@@ -8,6 +8,7 @@ import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/extensions.dart';
+import 'package:community_app/utils/helpers/loader.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
@@ -30,7 +31,7 @@ class QuotationRequestListScreen extends StatelessWidget {
             child: Scaffold(
               appBar: CustomAppBar(),
               body: notifier.isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(child: LottieLoader())
                   : notifier.requests.isEmpty
                   ? const Center(child: Text("No Requests found"))
                   : SingleChildScrollView(

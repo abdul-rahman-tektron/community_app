@@ -6,6 +6,7 @@ import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/helpers/common_utils.dart';
+import 'package:community_app/utils/helpers/loader.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -208,7 +209,7 @@ class JobVerificationScreen extends StatelessWidget {
                         height: 100.h,
                         width: 100.w,
                         color: Colors.black12,
-                        child: const Center(child: CircularProgressIndicator()),
+                        child: const Center(child: LottieLoader()),
                       ),
               ),
             ),
@@ -244,7 +245,7 @@ class CompareImagesScreen extends StatelessWidget {
                 child: PhotoView(
                   imageProvider: MemoryImage(base64Decode(beforeUrl)),
                   backgroundDecoration: const BoxDecoration(color: Colors.black),
-                  loadingBuilder: (context, event) => const Center(child: CircularProgressIndicator()),
+                  loadingBuilder: (context, event) => const Center(child: LottieLoader()),
                   errorBuilder: (context, error, stackTrace) =>
                       const Center(child: Icon(Icons.broken_image, size: 100, color: Colors.grey)),
                 ),
@@ -260,7 +261,7 @@ class CompareImagesScreen extends StatelessWidget {
                 child: PhotoView(
                   imageProvider: MemoryImage(base64Decode(afterUrl)),
                   backgroundDecoration: const BoxDecoration(color: Colors.black),
-                  loadingBuilder: (context, event) => const Center(child: CircularProgressIndicator()),
+                  loadingBuilder: (context, event) => const Center(child: LottieLoader()),
                   errorBuilder: (context, error, stackTrace) =>
                       const Center(child: Icon(Icons.broken_image, size: 100, color: Colors.grey)),
                 ),

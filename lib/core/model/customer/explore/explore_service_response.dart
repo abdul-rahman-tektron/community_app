@@ -46,11 +46,12 @@ class ExploreServiceData {
   String? serviceImage;
   String? vendorName;
   String? vendorLogo;
-  double? rating;
-  double? reviewCount;
+  int? rating;
+  int? reviewCount;
   double? minPrice;
   double? maxPrice;
   dynamic categoryName;
+  int? vendorId;
 
   ExploreServiceData({
     this.serviceId,
@@ -63,6 +64,7 @@ class ExploreServiceData {
     this.minPrice,
     this.maxPrice,
     this.categoryName,
+    this.vendorId,
   });
 
   factory ExploreServiceData.fromJson(Map<String, dynamic> json) => ExploreServiceData(
@@ -71,11 +73,12 @@ class ExploreServiceData {
     serviceImage: json["serviceImage"],
     vendorName: json["vendorName"],
     vendorLogo: json["vendorLogo"],
-    rating: (json["rating"] != null) ? (json["rating"] as num).toDouble() : null,
-    reviewCount: (json["reviewCount"] != null) ? (json["reviewCount"] as num).toDouble() : null,
-    minPrice: (json["minPrice"] != null) ? (json["minPrice"] as num).toDouble() : null,
-    maxPrice: (json["maxPrice"] != null) ? (json["maxPrice"] as num).toDouble() : null,
+    rating: json["rating"],
+    reviewCount: json["reviewCount"],
+    minPrice: json["minPrice"],
+    maxPrice: json["maxPrice"],
     categoryName: json["categoryName"],
+    vendorId: json["vendorId"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -89,5 +92,6 @@ class ExploreServiceData {
     "minPrice": minPrice,
     "maxPrice": maxPrice,
     "categoryName": categoryName,
+    "vendorId": vendorId,
   };
 }

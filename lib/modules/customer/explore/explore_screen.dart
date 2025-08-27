@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:community_app/core/model/common/dropdown/service_dropdown_response.dart';
 import 'package:community_app/core/model/customer/explore/explore_service_response.dart';
 import 'package:community_app/modules/customer/explore/explore_notifier.dart';
 import 'package:community_app/res/colors.dart';
@@ -7,6 +8,7 @@ import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/images.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/enums.dart';
+import 'package:community_app/utils/helpers/loader.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_search_dropdown.dart';
@@ -83,7 +85,7 @@ class ExploreScreen extends StatelessWidget {
                   builder: (_) {
                     if (exploreNotifier.isLoading) {
                       // ✅ Loader
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(child: LottieLoader());
                     } else if (exploreNotifier.exploreServices.isEmpty) {
                       // ✅ Empty state text
                       return const Center(
@@ -202,19 +204,19 @@ class ExploreScreen extends StatelessWidget {
                 // Category Dropdown
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: CustomSearchDropdown<String>(
+                  child: CustomSearchDropdown<ServiceDropdownData>(
                     fieldName: "Category",
                     hintText: "Select Category",
                     controller: exploreNotifier.serviceController,
-                    items: exploreNotifier.availableCategories,
+                    items: exploreNotifier.serviceDropdownData,
                     currentLang: 'en',
-                    itemLabel: (item, lang) => item,
-                    onSelected: (String? menu) {
+                    itemLabel: (item, lang) => item.serviceName ?? "",
+                    onSelected: (ServiceDropdownData? menu) {
                       setState(() {
-                        exploreNotifier.selectedCategory = menu ?? 'All';
+                        exploreNotifier.selectedCategory = menu?.serviceName ?? 'All';
+                        exploreNotifier.selectedCategoryId = menu?.serviceId ?? 0;
                       });
                     },
-                    initialValue: exploreNotifier.selectedCategory,
                   ),
                 ),
                 SizedBox(height: 20),
@@ -402,7 +404,10 @@ class ExploreScreen extends StatelessWidget {
     return InkWell(
       onTap: () {
         Navigator.pushNamed(
-            context, AppRoutes.serviceDetails, arguments: service.serviceId.toString());
+            context, AppRoutes.serviceDetails, arguments: {
+          "serviceId": service.serviceId ?? 0,
+          "vendorId": service.vendorId ?? 0,
+        });
       },
       child: Container(
         decoration: AppStyles.commonDecoration,

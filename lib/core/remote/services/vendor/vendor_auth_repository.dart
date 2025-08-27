@@ -74,6 +74,24 @@ class VendorAuthRepository extends BaseRepository {
     }
   }
 
+  Future<Object?> apiUpdateVendorService(AddVendorServiceRequest requestParams) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.post,
+      pathUrl: ApiUrls.pathUpdateVendorService,
+      body: jsonEncode(requestParams.toJson()),
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final commonResponse = commonResponseFromJson(jsonEncode(response?.data));
+      return commonResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
 
   Future<Object?> apiGetAllVendorServices(String vendorId) async {
     final token = await SecureStorageService.getToken();

@@ -168,23 +168,6 @@ class CustomerDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPromoDots(CustomerDashboardNotifier notifier) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(notifier.promotions.length, (index) {
-        final isActive = index == notifier.currentPromotionIndex;
-        return Container(
-          width: isActive ? 12 : 8,
-          height: 8,
-          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-          decoration: BoxDecoration(
-            color: isActive ? AppColors.primary : Colors.grey[300],
-            borderRadius: BorderRadius.circular(4),
-          ),
-        );
-      }),
-    );
-  }
 
 
   Widget _buildCategoryChips(BuildContext context, CustomerDashboardNotifier notifier) {
@@ -294,64 +277,6 @@ class CustomerDashboardScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15.0),
       child: Text(title, style: AppFonts.text16.semiBold.style),
-    );
-  }
-
-  double _getTextWidth(String text, TextStyle style) {
-    final TextPainter textPainter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      maxLines: 1,
-      textDirection: TextDirection.ltr,
-    )..layout();
-
-    return textPainter.width;
-  }
-
-  Widget _buildCountCard(String label, int count, Color color, IconData icon) {
-    return Expanded(
-      child: Container(
-        decoration: AppStyles.commonDecoration,
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '$count',
-                    style: AppFonts.text26.semiBold.style.copyWith(color: color),
-                  ),
-                  5.verticalSpace,
-                  Text(
-                    label,
-                    style: AppFonts.text16.regular.style,
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              top: -15,
-              right: -10,
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    icon,
-                    color: color,
-                    size: 50,
-                  ),
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
     );
   }
 

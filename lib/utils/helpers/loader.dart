@@ -3,8 +3,11 @@ import 'dart:ui';
 import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
+import 'package:community_app/res/images.dart';
 import 'package:community_app/utils/enums.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 class LoadingOverlay<T extends BaseChangeNotifier> extends StatelessWidget {
@@ -29,47 +32,35 @@ class LoadingOverlay<T extends BaseChangeNotifier> extends StatelessWidget {
                       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                       child: Container(
                         color: Colors.black12,
-                        child: Center(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(40),
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                              child: Container(
-                                width: 180,
-                                height: 180,
-                                padding: const EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withOpacity(0.08),
-                                  borderRadius: BorderRadius.circular(40),
-                                  border: Border.all(color: Colors.white.withOpacity(0.2)),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.15),
-                                      blurRadius: 30,
-                                      offset: const Offset(0, 10),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const SizedBox(
-                                      height: 80,
-                                      width: 80,
-                                      child: DotCircleSpinner(),
-                                    ),
-                                    const SizedBox(height: 18),
-                                    Text(
-                                      'Loading...',
-                                      style: AppFonts.text18.regular.white.style,
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ),
+                      child: Center(
+                      child: ClipRRect(
+                          borderRadius: BorderRadius.circular(40),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              height: 250,
+                              width: 250,
+                              child: Lottie.asset(
+                                AppImages.loaderBlue, // <-- your Lottie JSON file
+                                fit: BoxFit.fill,
+                                repeat: true,
+                                animate: true,
                               ),
                             ),
-                          ),
+                            // const SizedBox(height: 18),
+                            Text(
+                              'Loading...',
+                              style: AppFonts.text24.regular.style,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                         ),
+                      ),
+                    ),
+        ),
                       ),
                     ),
                   ),
@@ -78,6 +69,26 @@ class LoadingOverlay<T extends BaseChangeNotifier> extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class LottieLoader extends StatelessWidget {
+  const LottieLoader({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SizedBox(
+        height: 120.h,
+        width: 120.w,
+        child: Lottie.asset(
+          AppImages.loaderBlue,
+          fit: BoxFit.contain,
+          repeat: true,
+          animate: true,
+        ),
+      ),
     );
   }
 }

@@ -5,10 +5,8 @@ import 'package:community_app/core/remote/services/vendor/vendor_jobs_repository
 
 class OngoingServiceNotifier extends BaseChangeNotifier {
   List<OngoingJobsAssignedData> _ongoingJobs = [];
-  bool _isLoading = false;
 
   List<OngoingJobsAssignedData> get ongoingJobs => _ongoingJobs;
-  bool get isLoading => _isLoading;
 
   OngoingServiceNotifier() {
     initializeData();
@@ -33,9 +31,9 @@ class OngoingServiceNotifier extends BaseChangeNotifier {
     } catch (e) {
       _ongoingJobs = [];
       print("Error: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
-
-    isLoading = false;
-    notifyListeners();
   }
 }

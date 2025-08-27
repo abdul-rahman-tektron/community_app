@@ -2,6 +2,7 @@ import 'package:community_app/modules/vendor/jobs/widgets/job_history/job_histor
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/styles.dart';
+import 'package:community_app/utils/helpers/loader.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -17,7 +18,7 @@ class JobHistoryScreen extends StatelessWidget {
       child: Consumer<JobHistoryNotifier>(
         builder: (context, notifier, child) {
           if (notifier.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: LottieLoader());
           }
 
           return Scaffold(

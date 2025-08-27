@@ -61,7 +61,7 @@ class EditProfileNotifier extends BaseChangeNotifier {
 
     final updateProfileRequest = UpdateUserRequest(
       email: emailAddressController.text,
-      password: userData?.password ?? "test",
+      password: "test",
       address: addressController.text,
       latitude: latitude?.toString() ?? "0",
       longitude: longitude?.toString() ?? "0",
@@ -110,7 +110,6 @@ class EditProfileNotifier extends BaseChangeNotifier {
         deleted: updated?.deleted ?? existingLogin.deleted,
         active: updated?.active ?? existingLogin.active,
         userId: updated?.userId ?? existingLogin.userId,
-        password: updated?.password ?? existingLogin.password,
         loginEnable: updated?.loginEnable ?? existingLogin.loginEnable,
         customerType: updated?.customerType ?? existingLogin.customerType,
         image: updated?.image ?? existingLogin.image,

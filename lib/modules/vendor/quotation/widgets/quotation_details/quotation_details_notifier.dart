@@ -11,23 +11,12 @@ class QuotationDetailsNotifier extends BaseChangeNotifier {
   int? jobId;
   int? quotationResponseId;
 
-  String customerName = "Ahmed Al Mazroui";
-  String phone = "05576263567";
-  String location = "Jumeirah, Villa 23";
-  String serviceName = "Painting";
-  String requestedDate = "3 July 2025";
-  String notes = "The quotation covers labor and materials for indoor wall painting only. Any additional work will be quoted separately.";
-  JobInfoDetailResponse get jobDetail => _jobDetail;
-  set jobDetail(JobInfoDetailResponse value) {
-    if (_jobDetail == value) return;
-    _jobDetail = value;
-    notifyListeners();
-  }
+
   JobInfoDetailResponse _jobDetail = JobInfoDetailResponse();
   QuotationResponseDetailResponse _quotationDetail = QuotationResponseDetailResponse();
 
   QuotationDetailsNotifier(this.jobId, this.quotationResponseId) {
-    initializeData();
+    runWithLoadingVoid(() => initializeData());
   }
 
   Future<void> initializeData() async {
@@ -52,7 +41,6 @@ class QuotationDetailsNotifier extends BaseChangeNotifier {
   Future<void> apiQuotationResponseDetail() async {
     try {
       final result = await VendorQuotationRepository.instance.apiQuotationDetail(quotationResponseId?.toString() ?? "0");
-
 
       if (result is QuotationResponseDetailResponse) {
         quotationDetail = result;
@@ -90,12 +78,17 @@ class QuotationDetailsNotifier extends BaseChangeNotifier {
     print("Resending quotation...");
   }
 
-
-
   QuotationResponseDetailResponse get quotationDetail => _quotationDetail;
   set quotationDetail(QuotationResponseDetailResponse value) {
     if (_quotationDetail == value) return;
     _quotationDetail = value;
+    notifyListeners();
+  }
+
+  JobInfoDetailResponse get jobDetail => _jobDetail;
+  set jobDetail(JobInfoDetailResponse value) {
+    if (_jobDetail == value) return;
+    _jobDetail = value;
     notifyListeners();
   }
 }

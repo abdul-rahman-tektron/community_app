@@ -2,6 +2,7 @@ import 'package:community_app/core/model/vendor/jobs/ongoing_jobs_assigned_respo
 import 'package:community_app/modules/vendor/jobs/widgets/ongoing_service/ongoing_service_card.dart';
 import 'package:community_app/modules/vendor/jobs/widgets/ongoing_service/ongoing_service_notifier.dart';
 import 'package:community_app/utils/helpers/common_utils.dart';
+import 'package:community_app/utils/helpers/loader.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +17,7 @@ class OngoingServiceScreen extends StatelessWidget {
       child: Consumer<OngoingServiceNotifier>(
         builder: (context, notifier, _) {
           if (notifier.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: LottieLoader());
           }
           if (notifier.ongoingJobs.isEmpty) {
             return const Center(child: Text("No ongoing jobs."));

@@ -13,7 +13,7 @@ class CommonResponse {
   String? message;
   String? uniqueId;
   DateTime? timestamp;
-  int? data;
+  dynamic data;
 
   CommonResponse({
     this.success,

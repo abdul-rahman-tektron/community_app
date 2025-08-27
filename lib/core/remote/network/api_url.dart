@@ -42,11 +42,13 @@ class ApiUrls {
   static const pathServiceDetail = "/api/Job/ServiceDetail"; // GET
   static const pathCustomerHistoryList = "/api/Job/CustomerHistoryList"; // POST
   static const pathCustomerHistoryDetail = "/api/Job/CustomerHistoryDetail"; // POST
+  static const pathSiteVisitCustomerResponse = "/api/SiteVisit/CustomerResponse"; // POST
 
   ///Vendor
   static const pathVendorRegister = "/api/Vendor/RegisterVendor"; // POST
   static const pathVendorJobs = "/api/Job/GetVendorJobs/"; // GET
   static const pathAddVendorService = "/api/Vendor/AddVendorService"; // POST
+  static const pathUpdateVendorService = "/api/Vendor/updateVendorService"; // POST
   static const pathGetAllVendorServices = "/api/Vendor/GetAllVendorServices/"; // POST
   static const pathVendorQuotationRequestList = "/api/Job/GetAllQuotationsByVendor/"; // GET
   static const pathAssignEmployees = "/api/Job/AssignEmployees"; // POST

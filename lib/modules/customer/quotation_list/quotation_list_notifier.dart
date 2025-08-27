@@ -6,6 +6,7 @@ import 'package:community_app/core/model/vendor/quotation_request/quotation_requ
 import 'package:community_app/core/model/vendor/quotation_request/quotation_response_detail_response.dart';
 import 'package:community_app/core/remote/services/common_repository.dart';
 import 'package:community_app/core/remote/services/customer/customer_dashboard_repository.dart';
+import 'package:community_app/core/remote/services/customer/customer_jobs_repository.dart';
 import 'package:community_app/core/remote/services/vendor/vendor_quotation_repository.dart';
 import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
@@ -115,6 +116,24 @@ class QuotationListNotifier extends BaseChangeNotifier {
     }
   }
 
+  // Future<void> apiSiteVisitCustomerResponse(int? statusId) async {
+  //   if (statusId == null) return;
+  //   try {
+  //     notifyListeners();
+  //
+  //     final parsed = await CommonRepository.instance.apiUpdateJobStatus(
+  //       UpdateJobStatusRequest(jobId: jobId, statusId: statusId),
+  //     );
+  //
+  //   } catch (e, stackTrace) {
+  //     print("❌ Error updating job status: $e");
+  //     print("Stack: $stackTrace");
+  //     ToastHelper.showError('An error occurred. Please try again.');
+  //   } finally {
+  //     notifyListeners();
+  //   }
+  // }
+
   bool isSelected(int index) => _selected.contains(index);
 
   void toggle(int index) {
@@ -126,7 +145,46 @@ class QuotationListNotifier extends BaseChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> acceptSiteVisit(BuildContext context, int siteVisitId) async {
+    try {
+      await getCustomerSiteVisitResponse(context, siteVisitId, true);
+    } catch (e) {
+      ToastHelper.showError('An error occurred. Please try again.');
+    } finally {
+      notifyListeners();
+    }
+  }
 
+  // Reject Site Visit
+  Future<void> rejectSiteVisit(BuildContext context, int siteVisitId) async {
+    try {
+      await getCustomerSiteVisitResponse(context, siteVisitId, false);
+    } catch (e) {
+      ToastHelper.showError('An error occurred. Please try again.');
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  Future<void> getCustomerSiteVisitResponse(BuildContext context, int? siteVisitId, bool? isAccept) async {
+    try {
+      isLoading = true;
+
+      final response = await CustomerJobsRepository.instance
+          .apiSiteVisitCustomerResponse(siteVisitId, isAccept);
+      if (response is CommonResponse && response.success == true) {
+        ToastHelper.showSuccess("Site visit accepted successfully");
+        await apiUpdateJobStatus((isAccept ?? false) ? AppStatus.siteVisitAccepted.id : AppStatus.siteVisitRejected.id);
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      print("Error updating customer response: $e");
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+    notifyListeners();
+  }
 
   List<int> get selectedIndexes => _selected;
 }

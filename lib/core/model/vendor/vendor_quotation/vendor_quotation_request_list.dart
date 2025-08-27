@@ -59,6 +59,7 @@ class VendorQuotationRequestData {
   bool? active;
   bool? siteVisit;
   int? siteVisitId;
+  bool? isAcceptedByCustomer;
   DateTime? createdDate;
   String? createdBy;
   dynamic modifiedDate;
@@ -84,6 +85,7 @@ class VendorQuotationRequestData {
     this.active,
     this.siteVisit,
     this.siteVisitId,
+    this.isAcceptedByCustomer,
     this.createdDate,
     this.createdBy,
     this.modifiedDate,
@@ -110,6 +112,7 @@ class VendorQuotationRequestData {
     active: json["active"],
     siteVisit: json["siteVisit"],
     siteVisitId: json["siteVisitId"],
+    isAcceptedByCustomer: json["isAcceptedByCustomer"],
     createdDate: json["createdDate"] == null ? null : DateTime.parse(json["createdDate"]),
     createdBy: json["createdBy"],
     modifiedDate: json["modifiedDate"],
@@ -135,6 +138,7 @@ class VendorQuotationRequestData {
     "deleted": deleted,
     "active": active,
     "siteVisit": siteVisit,
+    "isAcceptedByCustomer": isAcceptedByCustomer,
     "siteVisitId": siteVisitId,
     "createdDate": createdDate?.toIso8601String(),
     "createdBy": createdBy,

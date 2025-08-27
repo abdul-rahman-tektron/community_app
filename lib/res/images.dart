@@ -17,6 +17,21 @@ class AppImages {
   static const otpVerificationImage = 'assets/images/png/otp_verification.png';
   static const uaePassImage = 'assets/images/png/uae_pass.png';
 
+  //Service Images
+  static const acRepair = 'assets/images/jpg/ac_repair.jpg';
+  static const applianceRepair = 'assets/images/jpg/appliance_repair.jpg';
+  static const carpentry = 'assets/images/jpg/carpentry_service.jpg';
+  static const cleaning = 'assets/images/jpg/cleaning.jpeg';
+  static const electrical = 'assets/images/jpg/electrical-works.jpg';
+  static const handyMan = 'assets/images/jpg/handyman.jpeg';
+  static const laundryService = 'assets/images/jpg/laundry_service.jpg';
+  static const painting = 'assets/images/jpg/painting.jpg';
+  static const pestControl = 'assets/images/jpg/pestcontrol.jpeg';
+  static const petGrooming = 'assets/images/jpg/pet_grooming.jpg';
+  static const plumbing = 'assets/images/jpg/plumbing.jpeg';
+  static const security = 'assets/images/jpg/security.jpg';
+
 
   static const videoPlayer = 'assets/video/sample_video.mp4';
+  static const loaderBlue = 'assets/video/lottie/loader.json';
 }

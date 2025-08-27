@@ -13,6 +13,8 @@ import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/enums.dart';
 import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/helpers/common_utils.dart';
+import 'package:community_app/utils/helpers/loader.dart';
+import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_drawer.dart';
@@ -48,7 +50,9 @@ class AddQuotationScreen extends StatelessWidget {
         ..customerId = customerId,
       child: Consumer<AddQuotationNotifier>(
         builder: (context, addQuotationNotifier, _) {
-          return buildBody(context, addQuotationNotifier);
+          return LoadingOverlay<AddQuotationNotifier>(
+            child: buildBody(context, addQuotationNotifier),
+          );
         },
       ),
     );
@@ -156,12 +160,18 @@ class AddQuotationScreen extends StatelessWidget {
           ),
           10.verticalSpace,
           if (addQuotationNotifier.jobDetail.fileContent != null)
-            Image.memory(
-              addQuotationNotifier.jobDetail.fileBytes ?? Uint8List(0),
-              height: 100,
-              width: 100,
-              fit: BoxFit.cover,
-              gaplessPlayback: true,
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(
+                    context, AppRoutes.imageViewer, arguments: addQuotationNotifier.jobDetail.fileContent);
+              },
+              child: Image.memory(
+                addQuotationNotifier.jobDetail.fileBytes ?? Uint8List(0),
+                height: 100,
+                width: 100,
+                fit: BoxFit.cover,
+                gaplessPlayback: true,
+              ),
             ),
           10.verticalSpace,
           Text.rich(
@@ -249,6 +259,12 @@ class AddQuotationScreen extends StatelessWidget {
                   } else if (response is ErrorResponse) {
                     return response.title ?? "Something went wrong";
                   }
+
+                  addQuotationNotifier.apiUpdateJobStatus(
+                    context,
+                    AppStatus.siteVisitRequestedByVendor.id,
+                  );
+
                   return null;
                 },
               );

@@ -2,6 +2,8 @@ import 'package:community_app/modules/vendor/quotation/widgets/new_request/new_r
 import 'package:community_app/modules/vendor/quotation/widgets/new_request/new_request_notifier.dart';
 import 'package:community_app/modules/vendor/quotation/widgets/new_request/site_visit_card.dart';
 import 'package:community_app/modules/vendor/quotation/widgets/site_visit_detail/site_visit_detail_screen.dart';
+import 'package:community_app/res/colors.dart';
+import 'package:community_app/utils/helpers/loader.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -29,7 +31,7 @@ class NewRequestScreen extends StatelessWidget {
 
     return Scaffold(
       body: notifier.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: LottieLoader())
           : filteredRequests.isEmpty
           ? const Center(child: Text("No new requests."))
           : ListView.builder(

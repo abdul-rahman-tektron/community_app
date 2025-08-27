@@ -243,7 +243,7 @@ class LoginNotifier extends BaseChangeNotifier {
       print("isOnboarded");
       print(isOnboarded);
 
-      if(!(isOnboarded ?? true)) {
+      if(!(result.isOnboarded ?? true)) {
         Navigator.pushReplacementNamed(
           context,
           AppRoutes.vendorOnboarding,
@@ -264,7 +264,6 @@ class LoginNotifier extends BaseChangeNotifier {
       );
     }
   }
-
 
   void disposeControllers() {
     userNameController.dispose();

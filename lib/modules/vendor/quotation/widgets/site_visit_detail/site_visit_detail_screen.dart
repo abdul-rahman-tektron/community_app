@@ -1,9 +1,14 @@
+import 'dart:convert';
+
 import 'package:community_app/modules/vendor/jobs/widgets/ongoing_service/progress_update/assign_bottom_sheet.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/images.dart';
 import 'package:community_app/res/styles.dart';
+import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/helpers/dashed_border_container.dart';
+import 'package:community_app/utils/helpers/loader.dart';
+import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
@@ -21,90 +26,92 @@ class SiteVisitDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => SiteVisitDetailNotifier(jobId, customerId, siteVisitId)..loadDetails(),
+      create: (_) => SiteVisitDetailNotifier(jobId, customerId, siteVisitId),
       child: Consumer<SiteVisitDetailNotifier>(
         builder: (context, notifier, _) {
-          if (notifier.isLoading) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator()));
-          }
-
-          return Scaffold(
-            appBar: CustomAppBar(),
-            body: SingleChildScrollView(
-              padding: const EdgeInsets.all(15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildJobDescription(context, notifier),
-                  10.verticalSpace,
-
-                  /// If employees are assigned → show list
-                  // Step 1: Assign Employee (Multiple)
-                  if (!notifier.isEmployeeAssigned) ...[
-                    _buildAssignEmployeeList(notifier),
-                    10.verticalSpace,
-                    _buildAddEmployeeButton(context, notifier),
-                    20.verticalSpace,
-                    CustomButton(
-                      text: "Submit Employees",
-                      onPressed: notifier.assignedEmployees.isNotEmpty
-                          ? () => notifier.submitAssignedEmployees()
-                          : null,
-                    ),
-                  ],
-
-                  /// If employee assigned but quotation not updated → show "Update Quotation"
-                  if (notifier.isEmployeeAssigned && !notifier.isQuotationUpdated) ...[
-                    Text("Assigned Employees", style: AppFonts.text16.semiBold.style),
-                    5.verticalSpace,
-                    _buildAssignEmployeeList(notifier),
-                    15.verticalSpace,
-                    CustomButton(
-                      text: "Update Quotation",
-                      onPressed: () => notifier.navigateToUpdateQuotation(context),
-                    ),
-                  ],
-
-                  /// If quotation updated → show a read-only confirmation
-                  if (notifier.isQuotationUpdated)
-                    ...[
-                      Container(
-                        width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: AppStyles.commonDecoration,
-                      child: Column(
-                        children: [
-                          Icon(Icons.check_box, size: 50, color: Colors.green),
-                          10.verticalSpace,
-                          Text("Quotation has been submitted.", style: AppFonts.text16.regular.style),
-                        ],
-                      ),
-                    ),
-                      15.verticalSpace,
-                      CustomButton(
-                        text: "Back to Home",
-                        onPressed: () => notifier.navigateToHomeScreen(context),
-                      ),
-                    ]
-
-                ],
-              ),
-            ),
-
-            /// Persistent Decline Button
-            persistentFooterButtons: [
-              SizedBox(
-                width: double.infinity,
-                child: CustomButton(
-                  text: "Decline",
-                  backgroundColor: AppColors.error,
-                  onPressed: () => notifier.declineRequest(),
-                ),
-              ),
-            ],
+          return LoadingOverlay<SiteVisitDetailNotifier>(
+            child: buildBody(context, notifier),
           );
         },
       ),
+    );
+  }
+
+  Widget buildBody(BuildContext context, SiteVisitDetailNotifier notifier) {
+    return Scaffold(
+      appBar: CustomAppBar(),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(12.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            buildCustomerInfo(context, notifier),
+            10.verticalSpace,
+
+            /// If employees are assigned → show list
+            // Step 1: Assign Employee (Multiple)
+            if (!notifier.isEmployeeAssigned) ...[
+              _buildAssignEmployeeList(notifier),
+              10.verticalSpace,
+              _buildAddEmployeeButton(context, notifier),
+              20.verticalSpace,
+              CustomButton(
+                text: "Submit Employees",
+                onPressed: notifier.assignedEmployees.isNotEmpty
+                    ? () => notifier.submitAssignedEmployees()
+                    : null,
+              ),
+            ],
+
+            /// If employee assigned but quotation not updated → show "Update Quotation"
+            if (notifier.isEmployeeAssigned && !notifier.isQuotationUpdated) ...[
+              Text("Assigned Employees", style: AppFonts.text16.semiBold.style),
+              5.verticalSpace,
+              _buildAssignEmployeeList(notifier),
+              15.verticalSpace,
+              CustomButton(
+                text: "Update Quotation",
+                onPressed: () => notifier.navigateToUpdateQuotation(context),
+              ),
+            ],
+
+            /// If quotation updated → show a read-only confirmation
+            if (notifier.isQuotationUpdated)
+              ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: AppStyles.commonDecoration,
+                  child: Column(
+                    children: [
+                      Icon(Icons.check_box, size: 50, color: Colors.green),
+                      10.verticalSpace,
+                      Text("Quotation has been submitted.", style: AppFonts.text16.regular.style),
+                    ],
+                  ),
+                ),
+                15.verticalSpace,
+                CustomButton(
+                  text: "Back to Home",
+                  onPressed: () => notifier.navigateToHomeScreen(context),
+                ),
+              ]
+
+          ],
+        ),
+      ),
+
+      /// Persistent Decline Button
+      persistentFooterButtons: [
+        SizedBox(
+          width: double.infinity,
+          child: CustomButton(
+            text: "Decline",
+            backgroundColor: AppColors.error,
+            onPressed: () => notifier.declineRequest(),
+          ),
+        ),
+      ],
     );
   }
 
@@ -173,7 +180,9 @@ class SiteVisitDetailScreen extends StatelessWidget {
             borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
           ),
           builder: (_) => AssignBottomSheet(
-            onAdd: (name, phone, {emiratesId}) => notifier.addEmployee(name, phone, emiratesId: emiratesId),
+            showEmiratesId: true, // 👈 added true here
+            onAdd: (name, phone, emiratesIdNumber, {emiratesId}) =>
+                notifier.addEmployee(name, phone, emiratesIdNumber: emiratesIdNumber, emiratesId: emiratesId),
           ),
         );
       },
@@ -198,62 +207,66 @@ class SiteVisitDetailScreen extends StatelessWidget {
     );
   }
 
-
   /// Job Description Section
-  Widget _buildJobDescription(BuildContext context, SiteVisitDetailNotifier notifier) {
+  Widget buildCustomerInfo(BuildContext context, SiteVisitDetailNotifier notifier) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 15),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 15.h),
       width: double.infinity,
       decoration: AppStyles.commonDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Ahmed Al Mazroui", style: AppFonts.text16.semiBold.style),
+          Text(notifier.jobDetail.customerName ?? "Customer Name", style: AppFonts.text16.semiBold.style),
           5.verticalSpace,
-          Text("Painting", style: AppFonts.text14.regular.style),
+          Text(notifier.jobDetail.serviceName ?? "Service Name", style: AppFonts.text14.regular.style),
           5.verticalSpace,
           _iconLabelRow(
             icon: LucideIcons.phone,
-            label: "05576263567",
-            bgColor: Color(0xffeff7ef),
+            label: notifier.jobDetail.phoneNumber ?? "---",
+            bgColor: const Color(0xffeff7ef),
             iconColor: Colors.green,
           ),
           5.verticalSpace,
           _iconLabelRow(
             icon: LucideIcons.mapPin,
-            label: "Jumeirah, Villa 23",
-            bgColor: Color(0xffe7f3f9),
+            label: notifier.jobDetail.address ?? "---",
+            bgColor: const Color(0xffe7f3f9),
             iconColor: Colors.blue,
           ),
           5.verticalSpace,
-          Text("Requested Date: 3 July 2025", style: AppFonts.text14.regular.style),
+          Text("Requested Date: ${notifier.jobDetail.expectedDate?.formatFullDateTime() ?? "00/00/0000"}", style: AppFonts.text14.regular.style),
           10.verticalSpace,
           Text.rich(
             TextSpan(
               children: [
-                TextSpan(text: 'Priority: ', style: AppFonts.text14.regular.style),
+                const TextSpan(text: 'Priority: ', style: TextStyle(fontSize: 14)),
                 TextSpan(
-                  text: 'Emergency',
-                  style: AppFonts.text14.regular.red.style, // You can change the style here if needed
+                  text: notifier.jobDetail.priority ?? "None",
+                  style: AppFonts.text14.regular.red.style,
                 ),
               ],
             ),
           ),
           10.verticalSpace,
-          Image.asset(AppImages.loginImage, height: 100, width: 100, fit: BoxFit.cover),
+          if (notifier.jobDetail.fileContent != null)
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(
+                    context, AppRoutes.imageViewer, arguments: notifier.jobDetail.fileContent);
+              },
+              child: Image.memory(
+                base64Decode(notifier.jobDetail.fileContent ?? ""),
+                height: 100,
+                width: 100,
+                fit: BoxFit.cover,
+              ),
+            ),
           10.verticalSpace,
           Text.rich(
             TextSpan(
               children: [
-                TextSpan(
-                  text: "Job Description: ",
-                  style: AppFonts.text14.semiBold.style, // Bold for "Remarks:"
-                ),
-                TextSpan(
-                  text:
-                  "We’re planning to repaint three bedrooms. One of them has old wallpaper that needs to be removed first. The other two just need surface preparation and a fresh coat of paint. We’d like durable, washable paint since we have young kids. Colors will be provided once the quote is finalized.",
-                  style: AppFonts.text14.regular.style, // Regular for content
-                ),
+                const TextSpan(text: "Job Description: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                TextSpan(text: notifier.jobDetail.remarks ?? "Not Added"),
               ],
             ),
           ),
