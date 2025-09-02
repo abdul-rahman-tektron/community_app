@@ -1,13 +1,13 @@
 import 'dart:math';
 
 import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/common/error/common_response.dart';
 import 'package:community_app/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
 import 'package:community_app/core/model/customer/top_vendors/top_vendors_response.dart';
 import 'package:community_app/core/model/vendor/quotation_request/quotation_request_request.dart';
 import 'package:community_app/core/remote/services/common_repository.dart';
 import 'package:community_app/core/remote/services/customer/customer_dashboard_repository.dart';
 import 'package:community_app/core/remote/services/customer/customer_jobs_repository.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:community_app/utils/location_helper.dart';
 import 'package:community_app/utils/router/routes.dart';
@@ -102,13 +102,14 @@ class TopVendorsNotifier extends BaseChangeNotifier {
       notifyListeners();
 
       final parsed = await CommonRepository.instance.apiUpdateJobStatus(
-        UpdateJobStatusRequest(jobId: jobId, statusId: statusId),
+        UpdateJobStatusRequest(jobId: jobId,
+            statusId: statusId,
+            createdBy: userData?.name ?? "",
+            vendorId: userData?.customerId ?? 0),
       );
-
     } catch (e, stackTrace) {
       print("❌ Error updating job status: $e");
       print("Stack: $stackTrace");
-      ToastHelper.showError('An error occurred. Please try again.');
     } finally {
       notifyListeners();
     }
@@ -263,8 +264,7 @@ class TopVendorsNotifier extends BaseChangeNotifier {
   }
 
   Future<void> _handleSubmitRequest(BuildContext context, dynamic result) async {
-    print("Result Data");
-    print(result);
+    await apiUpdateJobStatus(AppStatus.quotationRequested.id);
     Navigator.pushNamed(context, AppRoutes.newServicesConfirmation, arguments: jobId.toString());
     notifyListeners();
   }

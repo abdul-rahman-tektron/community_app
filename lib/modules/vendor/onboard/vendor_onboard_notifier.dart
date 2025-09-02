@@ -127,7 +127,7 @@ class VendorOnboardNotifier extends BaseChangeNotifier {
     }
   }
 
-  Future<void> apiUpdateVendorService(int serviceId) async {
+  Future<void> apiUpdateVendorService(int serviceId, String serviceName) async {
     try {
       final image = await getBase64Image(serviceImagePath);
       final request = AddVendorServiceRequest(
@@ -258,11 +258,12 @@ class VendorOnboardNotifier extends BaseChangeNotifier {
 
     // Prepare serviceId safely
     final serviceId = int.tryParse("${selectedService?.serviceId}") ?? 0;
+    final serviceName = selectedService?.serviceName ?? "";
 
     // Call API first
     if (isEdit ?? false) {
       if (isExistingService) {
-        apiUpdateVendorService(serviceId); // Pass serviceId explicitly
+        apiUpdateVendorService(serviceId, serviceName); // Pass serviceId explicitly
       } else {
         apiAddVendorService(serviceId); // Pass serviceId explicitly
       }

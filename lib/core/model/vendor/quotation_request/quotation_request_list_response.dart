@@ -250,6 +250,7 @@ class JobQuotationResponce {
   int? quotationRequestId;
   int? serviceId;
   int? vendorId;
+  String? vendorName;
   int? siteVisitId;
   bool? isAcceptedByCustomer;
   String? quotationDetails;
@@ -268,6 +269,7 @@ class JobQuotationResponce {
     this.quotationRequestId,
     this.serviceId,
     this.vendorId,
+    this.vendorName,
     this.siteVisitId,
     this.isAcceptedByCustomer,
     this.quotationDetails,
@@ -288,6 +290,7 @@ class JobQuotationResponce {
         quotationRequestId: json["quotationRequestId"],
         serviceId: json["serviceId"],
         vendorId: json["vendorId"],
+        vendorName: json["vendorName"],
         siteVisitId: json["siteVisitId"],
         isAcceptedByCustomer: json["isAcceptedByCustomer"],
         quotationDetails: json["quotationDetails"],
@@ -319,6 +322,7 @@ class JobQuotationResponce {
     "quotationRequestId": quotationRequestId,
     "serviceId": serviceId,
     "vendorId": vendorId,
+    "vendorName": vendorName,
     "siteVisitId": siteVisitId,
     "isAcceptedByCustomer": isAcceptedByCustomer,
     "quotationDetails": quotationDetails,

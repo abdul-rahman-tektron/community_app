@@ -1,12 +1,15 @@
 import 'dart:io';
 import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/core/model/common/error/common_response.dart';
+import 'package:community_app/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
 import 'package:community_app/core/model/vendor/jobs/job_info_detail_response.dart';
 import 'package:community_app/core/model/vendor/quotation_request/site_visit_assign_employee_request.dart';
+import 'package:community_app/core/remote/services/common_repository.dart';
 import 'package:community_app/core/remote/services/vendor/vendor_dashboard_repository.dart';
 import 'package:community_app/core/remote/services/vendor/vendor_jobs_repository.dart';
 import 'package:community_app/core/remote/services/vendor/vendor_quotation_repository.dart';
 import 'package:community_app/utils/extensions.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:flutter/material.dart';
 
@@ -16,13 +19,18 @@ class AssignedEmployee {
   final String? emiratesIdNumber;
   final File? emiratesId;
 
-  AssignedEmployee({required this.name, required this.phone, this.emiratesIdNumber, this.emiratesId});
+  AssignedEmployee({
+    required this.name,
+    required this.phone,
+    this.emiratesIdNumber,
+    this.emiratesId,
+  });
 }
 
 class SiteVisitDetailNotifier extends BaseChangeNotifier {
   final String? jobId;
 
-  SiteVisitDetailNotifier(this.jobId, this.customerId, this.siteVisitId) {
+  SiteVisitDetailNotifier(this.jobId, this.customerId, this.siteVisitId, this.vendorId) {
     runWithLoadingVoid(() => initializeData());
   }
 
@@ -33,17 +41,19 @@ class SiteVisitDetailNotifier extends BaseChangeNotifier {
 
   JobInfoDetailResponse _jobDetail = JobInfoDetailResponse();
 
-  bool isLoading = false;
   bool isEmployeeAssigned = false;
   bool isQuotationUpdated = false;
   int? customerId;
   int? siteVisitId;
+  int? vendorId;
 
   List<AssignedEmployee> assignedEmployees = [];
 
   Future<void> apiJobInfoDetail() async {
     try {
-      final result = await VendorDashboardRepository.instance.apiJobInfoDetail(jobId?.toString() ?? "0");
+      final result = await VendorDashboardRepository.instance.apiJobInfoDetail(
+        jobId?.toString() ?? "0",
+      );
 
       if (result is JobInfoDetailResponse) {
         jobDetail = result;
@@ -56,8 +66,14 @@ class SiteVisitDetailNotifier extends BaseChangeNotifier {
   }
 
   void addEmployee(String name, String phone, {String? emiratesIdNumber, File? emiratesId}) {
-    assignedEmployees.add(AssignedEmployee(
-        name: name, phone: phone, emiratesIdNumber: emiratesIdNumber, emiratesId: emiratesId));
+    assignedEmployees.add(
+      AssignedEmployee(
+        name: name,
+        phone: phone,
+        emiratesIdNumber: emiratesIdNumber,
+        emiratesId: emiratesId,
+      ),
+    );
     notifyListeners();
   }
 
@@ -66,7 +82,7 @@ class SiteVisitDetailNotifier extends BaseChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> submitAssignedEmployees() async {
+  Future<void> submitAssignedEmployees(BuildContext context) async {
     if (assignedEmployees.isEmpty) {
       ToastHelper.showError("Please add at least one employee.");
       return;
@@ -74,7 +90,9 @@ class SiteVisitDetailNotifier extends BaseChangeNotifier {
 
     try {
       final request = SiteVisitAssignEmployeeRequest(
-        siteVisitId: int.parse(jobId ?? "0"),
+        siteVisitId: siteVisitId,
+        customerId: customerId,
+        jobId: int.tryParse(jobId ?? "0"),
         assignEmployeeList: await Future.wait(
           assignedEmployees.map((e) async {
             final base64Id = e.emiratesId != null ? await e.emiratesId!.toBase64() : null;
@@ -92,12 +110,46 @@ class SiteVisitDetailNotifier extends BaseChangeNotifier {
 
       if (response is CommonResponse && response.success == true) {
         isEmployeeAssigned = true;
+        await apiUpdateJobStatus(context, AppStatus.employeeAssigned.id);
         ToastHelper.showSuccess("Employees assigned successfully");
       } else {
-        ToastHelper.showError(response is CommonResponse ? response.message ?? "" : "Failed to assign employees");
+        ToastHelper.showError(
+          response is CommonResponse ? response.message ?? "" : "Failed to assign employees",
+        );
       }
     } catch (e) {
       ToastHelper.showError("Error submitting employees: $e");
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  Future<void> apiUpdateJobStatus(
+    BuildContext context,
+    int? statusId, {
+    bool? isReject = false,
+  }) async {
+    if (statusId == null) return;
+    try {
+      notifyListeners();
+
+      final parsed = await CommonRepository.instance.apiUpdateJobStatus(
+        UpdateJobStatusRequest(
+          jobId: int.parse(jobId ?? "0"),
+          statusId: statusId,
+          vendorId: vendorId,
+          createdBy: userData?.name ?? "",
+        ),
+      );
+
+      if (parsed is CommonResponse && parsed.success == true) {
+        if (isReject ?? false) ToastHelper.showSuccess("Quotation Rejected successfully!");
+        Navigator.pop(context);
+      }
+    } catch (e, stackTrace) {
+      print("❌ Error updating job status: $e");
+      print("Stack: $stackTrace");
+      // ToastHelper.showError('An error occurred. Please try again.');
     } finally {
       notifyListeners();
     }
@@ -114,10 +166,10 @@ class SiteVisitDetailNotifier extends BaseChangeNotifier {
     Navigator.pop(context);
   }
 
-  Future<void> declineRequest() async {
+  Future<void> declineRequest(BuildContext context) async {
     try {
-      // TODO: API call to decline site visit
-      ToastHelper.showSuccess("Request declined successfully");
+      await apiUpdateJobStatus(context, AppStatus.employeeAssigned.id);
+      // ToastHelper.showSuccess("Request declined successfully");
     } catch (e) {
       ToastHelper.showError("Failed to decline request: $e");
     }

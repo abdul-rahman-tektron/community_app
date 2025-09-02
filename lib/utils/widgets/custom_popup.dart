@@ -230,10 +230,13 @@ void showForgotPasswordPopup(BuildContext context) {
   );
 }
 
-void showSiteVisitRequestPopup(BuildContext context, {
-  required Future<String?> Function(DateTime date, String remarks) onSubmit,
-}) {
-  final TextEditingController remarksController = TextEditingController();
+void showSiteVisitRequestPopup(
+    BuildContext context, {
+      required Future<String?> Function(DateTime date, String employeeName, String phone, String emiratesId) onSubmit,
+    }) {
+  final TextEditingController employeeNameController = TextEditingController();
+  final TextEditingController employeePhoneNumberController = TextEditingController();
+  final TextEditingController employeeEmiratesIdNumberController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
   final ValueNotifier<bool> isLoading = ValueNotifier(false);
 
@@ -253,14 +256,10 @@ void showSiteVisitRequestPopup(BuildContext context, {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                /// Header
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "Site Visit Request",
-                      style: AppFonts.text20.semiBold.style,
-                    ),
+                    Text("Site Visit Request", style: AppFonts.text20.semiBold.style),
                     GestureDetector(
                       onTap: () => Navigator.pop(popupContext),
                       child: const Icon(Icons.close),
@@ -269,47 +268,52 @@ void showSiteVisitRequestPopup(BuildContext context, {
                 ),
                 20.verticalSpace,
 
-                /// Message
-                Text(
-                  "Please provide the reason for your site visit request.",
-                  style: AppFonts.text14.regular.style,
-                ),
+                Text("Please provide details for your site visit request.", style: AppFonts.text14.regular.style),
                 15.verticalSpace,
 
-                /// Preferred Date Input
                 CustomTextField(
                   controller: dateController,
-                  fieldName: "Preferred Date for Site Visit",
+                  fieldName: "Preferred Date",
                   keyboardType: TextInputType.datetime,
                   startDate: DateTime.now(),
                   initialDate: DateTime.now(),
                 ),
                 15.verticalSpace,
 
-                /// Remarks Input
+                CustomTextField(controller: employeeNameController, fieldName: "Employee Name"),
+                15.verticalSpace,
+
                 CustomTextField(
-                  controller: remarksController,
-                  fieldName: "Reason",
-                  isMaxLines: true,
+                  controller: employeePhoneNumberController,
+                  fieldName: "Employee Mobile Number",
+                  keyboardType: TextInputType.phone,
+                ),
+                15.verticalSpace,
+
+                CustomTextField(
+                  controller: employeeEmiratesIdNumberController,
+                  fieldName: "Employee Emirates ID Number",
                 ),
                 20.verticalSpace,
 
-                /// Submit Button
                 CustomButton(
                   text: "Submit Request",
                   isLoading: loading,
                   onPressed: () async {
-                    if (remarksController.text.trim().isEmpty) {
-                      ToastHelper.showError("Remarks are required");
-                      return;
-                    }
-
                     isLoading.value = true;
-                    final result = await onSubmit(dateController.text.toDateTimeFromDdMmYyyy(), remarksController.text.trim());
+
+                    final result = await onSubmit(
+                      dateController.text.toDateTimeFromDdMmYyyy(),
+                      employeeNameController.text,
+                      employeePhoneNumberController.text,
+                      employeeEmiratesIdNumberController.text,
+                    );
+
                     isLoading.value = false;
 
                     if (result != null && result.isNotEmpty) {
                       Navigator.pop(popupContext);
+                      // Navigator.pop(context);
                       ToastHelper.showSuccess(result);
                     } else {
                       ToastHelper.showError("Failed to submit request");

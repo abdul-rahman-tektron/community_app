@@ -13,6 +13,7 @@ class VendorCreateJobQuotationRequest {
   int? quotationRequestId;
   int? serviceId;
   int? vendorId;
+  String? vendorName;
   String? quotationDetails;
   int? quotationAmount;
   DateTime? startDate;
@@ -26,6 +27,7 @@ class VendorCreateJobQuotationRequest {
     this.quotationRequestId,
     this.serviceId,
     this.vendorId,
+    this.vendorName = "",
     this.quotationDetails,
     this.quotationAmount,
     this.startDate,
@@ -40,6 +42,7 @@ class VendorCreateJobQuotationRequest {
     quotationRequestId: json["quotationRequestId"],
     serviceId: json["serviceId"],
     vendorId: json["vendorId"],
+    vendorName: json["vendorName"],
     quotationDetails: json["quotationDetails"],
     quotationAmount: json["quotationAmount"],
     startDate: json["startDate"] == null ? null : DateTime.parse(json["startDate"]),
@@ -54,6 +57,7 @@ class VendorCreateJobQuotationRequest {
     "quotationRequestId": quotationRequestId,
     "serviceId": serviceId,
     "vendorId": vendorId,
+    "vendorName": vendorName,
     "quotationDetails": quotationDetails,
     "quotationAmount": quotationAmount,
     "startDate": startDate?.toIso8601String(),

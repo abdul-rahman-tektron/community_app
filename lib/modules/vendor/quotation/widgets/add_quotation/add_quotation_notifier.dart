@@ -2,6 +2,7 @@ import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/core/model/common/error/common_response.dart';
 import 'package:community_app/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
 import 'package:community_app/core/model/vendor/jobs/job_info_detail_response.dart';
+import 'package:community_app/core/model/vendor/quotation_request/site_visit_assign_employee_request.dart';
 import 'package:community_app/core/model/vendor/vendor_quotation/create_job_quotation_request.dart';
 import 'package:community_app/core/remote/services/common_repository.dart';
 import 'package:community_app/core/remote/services/vendor/vendor_dashboard_repository.dart';
@@ -66,7 +67,7 @@ class AddQuotationNotifier extends BaseChangeNotifier {
       notifyListeners();
 
       final parsed = await CommonRepository.instance.apiUpdateJobStatus(
-        UpdateJobStatusRequest(jobId: jobId, statusId: statusId, notes: "Testing"),
+        UpdateJobStatusRequest(jobId: jobId, statusId: statusId, createdBy: userData?.name ?? "", vendorId: userData?.customerId ?? 0),
       );
 
       if (parsed is CommonResponse && parsed.success == true) {
@@ -77,7 +78,7 @@ class AddQuotationNotifier extends BaseChangeNotifier {
     } catch (e, stackTrace) {
       print("❌ Error updating job status: $e");
       print("Stack: $stackTrace");
-      ToastHelper.showError('An error occurred. Please try again.');
+      // ToastHelper.showError('An error occurred. Please try again.');
     } finally {
       notifyListeners();
     }
@@ -119,6 +120,46 @@ class AddQuotationNotifier extends BaseChangeNotifier {
       ToastHelper.showError("Failed to submit quotation. Please try again.");
     }
   }
+
+  Future<void> submitAssignedEmployees(
+      BuildContext context,
+      int siteVisitId, {
+        required String employeeName,
+        required String phone,
+        required String emiratesId,
+      }) async {
+    try {
+      final request = SiteVisitAssignEmployeeRequest(
+        siteVisitId: siteVisitId,
+        customerId: customerId,
+        jobId: jobId ?? 0,
+        assignEmployeeList: [
+          AssignEmployeeList(
+            employeeName: employeeName,
+            employeePhoneNumber: phone,
+            emiratesIdNumber: emiratesId,
+            emiratesIdPhoto: null, // add image upload later if needed
+          ),
+        ],
+      );
+
+      final response = await VendorQuotationRepository.instance.apiSiteVisitAssignEmployee(request);
+
+      if (response is CommonResponse && response.success == true) {
+        await apiUpdateJobStatus(context, AppStatus.employeeAssigned.id);
+        ToastHelper.showSuccess("Employees assigned successfully");
+      } else {
+        ToastHelper.showError(
+          response is CommonResponse ? response.message ?? "" : "Failed to assign employees",
+        );
+      }
+    } catch (e) {
+      ToastHelper.showError("Error submitting employees: $e");
+    } finally {
+      notifyListeners();
+    }
+  }
+
 
   void addItem({QuotationItemType type = QuotationItemType.material}) {
     quotationItems.add(QuotationItem.empty(type));

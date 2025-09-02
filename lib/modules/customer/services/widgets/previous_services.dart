@@ -14,7 +14,7 @@ class PreviousServicesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (historyServices.isEmpty) {
-      return Text("No previous services", style: AppFonts.text14.medium.style);
+      return Center(child: Text("No previous services", style: AppFonts.text14.medium.style));
     }
 
     return SingleChildScrollView(
@@ -26,38 +26,6 @@ class PreviousServicesWidget extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Widget _buildGradientUnderline(String text, TextStyle style) {
-    final textWidth = _getTextWidth(text, style);
-
-    return Container(
-      height: 2,
-      width: textWidth,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.transparent,
-            AppColors.primary.withOpacity(0.5),
-            AppColors.primary,
-            AppColors.primary.withOpacity(0.5),
-            Colors.transparent,
-          ],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-      ),
-    );
-  }
-
-  double _getTextWidth(String text, TextStyle style) {
-    final TextPainter textPainter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      maxLines: 1,
-      textDirection: TextDirection.ltr,
-    )..layout();
-
-    return textPainter.width;
   }
 
   List<Widget> _buildCardListWithSpacing() {

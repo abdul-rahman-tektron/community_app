@@ -5,10 +5,10 @@ import 'package:community_app/core/model/customer/explore/explore_service_respon
 import 'package:community_app/modules/customer/explore/explore_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
-import 'package:community_app/res/images.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/enums.dart';
 import 'package:community_app/utils/helpers/loader.dart';
+import 'package:community_app/utils/helpers/screen_size.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_search_dropdown.dart';
@@ -413,7 +413,7 @@ class ExploreScreen extends StatelessWidget {
         decoration: AppStyles.commonDecoration,
         child: Column(
           children: [
-            /// Image - 45% height
+            /// Image - 53% height
             Expanded(
               flex: 53,
               child: ClipRRect(
@@ -427,7 +427,7 @@ class ExploreScreen extends StatelessWidget {
               ),
             ),
 
-            /// Content - 55% height
+            /// Content - 47% height
             Expanded(
               flex: 47,
               child: Padding(
@@ -437,20 +437,27 @@ class ExploreScreen extends StatelessWidget {
                   children: [
                     Text(
                       service.serviceName ?? "",
-                      style: AppFonts.text14.semiBold.style,
+                      style: AppFonts.text14.semiBold.style.copyWith(
+                        fontSize: ScreenSize.width < 380 ? 11 : 14,
+                      ),
                       maxLines: 1,
                     ),
                     4.verticalSpace,
                     Text(
                       service.vendorName ?? "",
-                      style: AppFonts.text14.medium.style,
+                      style: AppFonts.text14.medium.style.copyWith(
+                        fontSize: ScreenSize.width < 380 ? 11 : 14,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     4.verticalSpace,
                     Row(
                       children: [
-                        RatingsHelper(rating: service.rating?.toDouble() ?? 0.0),
+                        RatingsHelper(
+                          rating: service.rating?.toDouble() ?? 0.0,
+                          size: ScreenSize.width < 380 ? 15 : 20,
+                        ),
                         4.horizontalSpace,
                         Text(
                           "(${service.reviewCount?.toInt() ?? 0})",

@@ -31,6 +31,7 @@ class NewRequestCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildTopRow(context, request.customerName ?? "Customer Name"),
+          2.verticalSpace,
           _buildCategoryRow(request.serviceName ?? "Service Name"),
           if (request.remarks?.isNotEmpty ?? false) ...[
             10.verticalSpace,
@@ -49,15 +50,18 @@ class NewRequestCard extends StatelessWidget {
         Expanded(
           child: Row(
             children: [
-              Text(
-                customerName,
-                style: AppFonts.text16.semiBold.style,
+              Flexible(
+                child: Text(
+                  customerName,
+                  style: AppFonts.text16.semiBold.style,
+                ),
               ),
               10.horizontalSpace,
               _buildPhoneIcon(),
             ],
           ),
         ),
+        10.horizontalSpace,
         Text("#${request.jobId ?? '-'}", style: AppFonts.text14.regular.style),
       ],
     );

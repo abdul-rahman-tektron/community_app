@@ -21,9 +21,12 @@ class JobHistoryScreen extends StatelessWidget {
             return const Center(child: LottieLoader());
           }
 
+          if (notifier.historyServices.isEmpty) {
+            return const Center(child: Text("No job history."));
+          }
+
           return Scaffold(
             body: ListView.builder(
-              // padding: const EdgeInsets.all(15),
               itemCount: notifier.historyServices.length,
               itemBuilder: (context, index) {
                 final job = notifier.historyServices[index];

@@ -45,7 +45,7 @@ class CustomerDashboardNotifier extends BaseChangeNotifier {
     initializeData();
   }
 
-  void initializeData() async {
+  Future<void> initializeData() async {
     await loadUserData();
     await apiServiceDropdown();
     await apiDashboard();
@@ -111,11 +111,13 @@ class CustomerDashboardNotifier extends BaseChangeNotifier {
 
 
   void selectCategory(BuildContext context, ServiceDropdownData category) {
+    print("category.serviceName");
     print(category.serviceName);
+    print(category.serviceId);
     Navigator.pushReplacementNamed(
       context,
       AppRoutes.customerBottomBar,
-      arguments: {'currentIndex': 1, 'category': category},
+      arguments: {'currentIndex': 1, 'category': category.serviceId.toString()},
     );
 
     notifyListeners();

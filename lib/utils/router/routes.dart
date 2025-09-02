@@ -140,11 +140,13 @@ class AppRouter {
         final serviceId = args['serviceId'] as int?;
         final quotationId = args['quotationId'] as int?;
         final customerId = args['customerId'] as int?;
+        final isSiteVisit = args['isSiteVisit'] as bool?;
         screen = AddQuotationScreen(
           jobId: jobId,
           serviceId: serviceId,
           quotationId: quotationId,
           customerId: customerId,
+          isSiteVisit: isSiteVisit,
         );
         break;
 
@@ -152,10 +154,12 @@ class AppRouter {
         final args = settings.arguments as Map<String, dynamic>? ?? {};
         final jobId = args['jobId'] as String?;
         final customerId = args['customerId'] as int?;
+        final vendorId = args['vendorId'] as int?;
         final siteVisitId = args['siteVisitId'] as int?;
         screen = SiteVisitDetailScreen(
           jobId: jobId,
           customerId: customerId,
+          vendorId: vendorId,
           siteVisitId: siteVisitId,
         );
         break;

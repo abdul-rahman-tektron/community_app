@@ -5,6 +5,7 @@ import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/images.dart';
 import 'package:community_app/res/styles.dart';
+import 'package:community_app/utils/helpers/screen_size.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import 'package:provider/provider.dart';
 
 class CustomerDashboardScreen extends StatelessWidget {
   final void Function(ServiceDropdownData category)? onCategoryTap;
+
   const CustomerDashboardScreen({super.key, this.onCategoryTap});
 
   @override
@@ -22,56 +24,63 @@ class CustomerDashboardScreen extends StatelessWidget {
       create: (_) => CustomerDashboardNotifier(),
       child: Consumer<CustomerDashboardNotifier>(
         builder: (context, notifier, _) {
-          return Scaffold(
-            body: SafeArea(
-              child: SingleChildScrollView(
-                child: Stack(
+          return buildBody(context, notifier);
+        },
+      ),
+    );
+  }
+
+  Widget buildBody(BuildContext context, CustomerDashboardNotifier notifier) {
+    return Scaffold(
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await notifier.initializeData();
+        },
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Stack(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    _buildPromotionsCard(context, notifier),
+                    15.verticalSpace,
+                    _buildQuickStatsGrid(notifier),
+                    20.verticalSpace,
+                    Row(
                       children: [
-                        _buildPromotionsCard(context, notifier),
-                        // _buildPromoDots(notifier),
-                        15.verticalSpace,
-                        // _buildServiceCounts(notifier),
-                        _buildQuickStatsGrid(notifier),
-                        20.verticalSpace,
-                        Row(
-                          children: [
-                            Expanded(child: _buildHeader("Categories")),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.pushReplacementNamed(
-                                  context,
-                                  AppRoutes.customerBottomBar,
-                                  arguments: {'currentIndex': 1},
-                                );
-                              },
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 15.0),
-                                child: Row(
-                                  children: [
-                                    Text("view all", style: AppFonts.text14.regular.style),
-                                    3.horizontalSpace,
-                                    Icon(LucideIcons.chevronRight, size: 16.sp),
-                                  ],
-                                ),
-                              ),
-                            )
-                          ],
+                        Expanded(child: _buildHeader("Categories")),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushReplacementNamed(
+                              context,
+                              AppRoutes.customerBottomBar,
+                              arguments: {'currentIndex': 1},
+                            );
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 15.0),
+                            child: Row(
+                              children: [
+                                Text("view all", style: AppFonts.text14.regular.style),
+                                3.horizontalSpace,
+                                Icon(LucideIcons.chevronRight, size: 16.sp),
+                              ],
+                            ),
+                          ),
                         ),
-                        _buildCategoryChips(context, notifier),
-                        20.verticalSpace,
-                        // _buildHeader("Quick Access"),
-                        _buildQuickActions(context, notifier),
                       ],
                     ),
+                    _buildCategoryChips(context, notifier),
+                    20.verticalSpace,
+                    // _buildHeader("Quick Access"),
+                    _buildQuickActions(context, notifier),
                   ],
                 ),
-              ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -84,7 +93,8 @@ class CustomerDashboardScreen extends StatelessWidget {
           itemCount: notifier.promotions.length,
           options: CarouselOptions(
             height: 250,
-            viewportFraction: 1, // Full width
+            viewportFraction: 1,
+            // Full width
             autoPlay: true,
             enlargeCenterPage: false,
             enableInfiniteScroll: true,
@@ -98,10 +108,7 @@ class CustomerDashboardScreen extends StatelessWidget {
                 image: DecorationImage(
                   image: NetworkImage(promo.imageUrl),
                   fit: BoxFit.cover,
-                  colorFilter: ColorFilter.mode(
-                    Colors.black.withOpacity(0.4),
-                    BlendMode.darken,
-                  ),
+                  colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.4), BlendMode.darken),
                 ),
               ),
               child: Stack(
@@ -113,9 +120,7 @@ class CustomerDashboardScreen extends StatelessWidget {
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
-                        shadows: [
-                          Shadow(blurRadius: 6, color: Colors.black45),
-                        ],
+                        shadows: [Shadow(blurRadius: 6, color: Colors.black45)],
                       ),
                     ),
                   ),
@@ -124,9 +129,9 @@ class CustomerDashboardScreen extends StatelessWidget {
                     right: 20,
                     child: CustomButton(
                       onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Booking action triggered")),
-                        );
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(const SnackBar(content: Text("Booking action triggered")));
                       },
                       fullWidth: false,
                       backgroundColor: AppColors.white.withOpacity(0.6),
@@ -168,8 +173,6 @@ class CustomerDashboardScreen extends StatelessWidget {
     );
   }
 
-
-
   Widget _buildCategoryChips(BuildContext context, CustomerDashboardNotifier notifier) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
@@ -178,51 +181,53 @@ class CustomerDashboardScreen extends StatelessWidget {
         child: Wrap(
           spacing: 25,
           runSpacing: 15,
-          alignment: WrapAlignment.center, // Center horizontally
-          runAlignment: WrapAlignment.center, // Center vertically in each row
-            children: List.generate(notifier.categoriesData.length, (index) {
-              final category = notifier.categoriesData[index];
-              final iconColor = notifier.chipIconColors[index % notifier.chipIconColors.length];
+          alignment: WrapAlignment.center,
+          // Center horizontally
+          runAlignment: WrapAlignment.center,
+          // Center vertically in each row
+          children: List.generate(notifier.categoriesData.length, (index) {
+            final category = notifier.categoriesData[index];
+            final iconColor = notifier.chipIconColors[index % notifier.chipIconColors.length];
 
-              return GestureDetector(
-                onTap: () {
-                  if (onCategoryTap != null) {
-                    onCategoryTap!(category);
-                  } else {
-                    notifier.selectCategory(context, category);
-                  }
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      height: 60,
-                      width: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        notifier.getServiceIcon(category.serviceName ?? ""),
-                        color: iconColor,
-                        size: 25,
-                      ),
+            return GestureDetector(
+              onTap: () {
+                if (onCategoryTap != null) {
+                  onCategoryTap!(category);
+                } else {
+                  notifier.selectCategory(context, category);
+                }
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    height: ScreenSize.width < 380 ? 50 : 60,
+                    width: ScreenSize.width < 380 ? 50 : 60,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.1),
+                      shape: BoxShape.circle,
                     ),
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      width: 70,
-                      child: Text(
-                        category.serviceName ?? "",
-                        textAlign: TextAlign.center,
-                        style: AppFonts.text12.regular.style,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                    child: Icon(
+                      notifier.getServiceIcon(category.serviceName ?? ""),
+                      color: iconColor,
+                      size: ScreenSize.width < 380 ? 20 : 25,
                     ),
-                  ],
-                ),
-              );
-            }),
+                  ),
+                  10.verticalSpace,
+                  SizedBox(
+                    width: ScreenSize.width < 380 ? 55 : 70,
+                    child: Text(
+                      category.serviceName ?? "",
+                      textAlign: TextAlign.center,
+                      style: AppFonts.text12.regular.style,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
         ),
       ),
     );
@@ -251,7 +256,10 @@ class CustomerDashboardScreen extends StatelessWidget {
               Container(
                 width: 36.w,
                 height: 36.w,
-                decoration: BoxDecoration(color: stat.iconBgColor, borderRadius: BorderRadius.circular(8.r)),
+                decoration: BoxDecoration(
+                  color: stat.iconBgColor,
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
                 child: Icon(stat.icon, color: stat.iconColor, size: 20.w),
               ),
               15.horizontalSpace,
@@ -260,7 +268,11 @@ class CustomerDashboardScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(stat.count.toString(), style: AppFonts.text18.semiBold.style, overflow: TextOverflow.ellipsis),
+                    Text(
+                      stat.count.toString(),
+                      style: AppFonts.text18.semiBold.style,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     2.verticalSpace,
                     Text(stat.label, style: AppFonts.text14.regular.style),
                   ],
@@ -284,11 +296,10 @@ class CustomerDashboardScreen extends StatelessWidget {
     final iconColors = notifier.chipIconColors;
 
     return Container(
-       width: double.infinity,
+      width: double.infinity,
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: AssetImage(
-              AppImages.backgroundPattern),
+          image: AssetImage(AppImages.backgroundPattern),
           fit: BoxFit.fitWidth,
         ),
       ),
@@ -309,11 +320,11 @@ class CustomerDashboardScreen extends StatelessWidget {
               onTap: () {
                 if (action.label == "New Service") {
                   Navigator.pushNamed(context, AppRoutes.newServices);
-                } else if(action.label == "Pending Quotation") {
+                } else if (action.label == "Pending Quotation") {
                   Navigator.pushNamed(context, AppRoutes.quotationRequestList);
-                } else if(action.label == "Track Request") {
+                } else if (action.label == "Track Request") {
                   Navigator.pushNamed(context, AppRoutes.tracking);
-                } else if(action.label == "Make Payment") {
+                } else if (action.label == "Make Payment") {
                   Navigator.pushNamed(context, AppRoutes.payment);
                 }
               },
@@ -323,9 +334,13 @@ class CustomerDashboardScreen extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(action.icon, size: 30, color: AppColors.secondary),
+                      Icon(
+                        action.icon,
+                        size: ScreenSize.width < 380 ? 25 : 30,
+                        color: AppColors.secondary,
+                      ),
                       10.verticalSpace,
-                      Text(action.label),
+                      Text(action.label, style: AppFonts.text14.regular.style),
                     ],
                   ),
                 ),
@@ -337,7 +352,6 @@ class CustomerDashboardScreen extends StatelessWidget {
     );
   }
 }
-
 
 class BottomCurvePainter extends CustomPainter {
   final Color color;
@@ -351,8 +365,10 @@ class BottomCurvePainter extends CustomPainter {
     final path = Path()
       ..lineTo(0, size.height - 40)
       ..quadraticBezierTo(
-        size.width / 2, size.height + 40, // Control point (dip)
-        size.width, size.height - 40,    // End point
+        size.width / 2,
+        size.height + 40, // Control point (dip)
+        size.width,
+        size.height - 40, // End point
       )
       ..lineTo(size.width, 0)
       ..close();

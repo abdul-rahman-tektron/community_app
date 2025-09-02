@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
 CustomerHistoryDetailResponse customerHistoryDetailResponseFromJson(String str) => CustomerHistoryDetailResponse.fromJson(json.decode(str));
 
 String customerHistoryDetailResponseToJson(CustomerHistoryDetailResponse data) => json.encode(data.toJson());
@@ -64,6 +66,9 @@ class CompletionDetail {
   dynamic notes;
   String? beforePhotoUrl;
   String? afterPhotoUrl;
+   Uint8List? beforePhotoBytes;
+   Uint8List? afterPhotoBytes;
+   bool? isVideo;
   dynamic employeeName;
   dynamic employeePhoneNumber;
 
@@ -73,6 +78,7 @@ class CompletionDetail {
     this.afterPhotoUrl,
     this.employeeName,
     this.employeePhoneNumber,
+    this.beforePhotoBytes, this.afterPhotoBytes, this.isVideo = false
   });
 
   factory CompletionDetail.fromJson(Map<String, dynamic> json) => CompletionDetail(

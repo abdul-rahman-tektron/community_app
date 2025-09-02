@@ -20,13 +20,14 @@ import 'site_visit_detail_notifier.dart';
 class SiteVisitDetailScreen extends StatelessWidget {
   final String? jobId;
   final int? siteVisitId;
+  final int? vendorId;
   final int? customerId;
-  const SiteVisitDetailScreen({super.key, this.jobId, this.customerId, this.siteVisitId});
+  const SiteVisitDetailScreen({super.key, this.jobId, this.customerId, this.siteVisitId, this.vendorId});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => SiteVisitDetailNotifier(jobId, customerId, siteVisitId),
+      create: (_) => SiteVisitDetailNotifier(jobId, customerId, siteVisitId, vendorId),
       child: Consumer<SiteVisitDetailNotifier>(
         builder: (context, notifier, _) {
           return LoadingOverlay<SiteVisitDetailNotifier>(
@@ -58,7 +59,7 @@ class SiteVisitDetailScreen extends StatelessWidget {
               CustomButton(
                 text: "Submit Employees",
                 onPressed: notifier.assignedEmployees.isNotEmpty
-                    ? () => notifier.submitAssignedEmployees()
+                    ? () => notifier.submitAssignedEmployees(context)
                     : null,
               ),
             ],
@@ -108,7 +109,7 @@ class SiteVisitDetailScreen extends StatelessWidget {
           child: CustomButton(
             text: "Decline",
             backgroundColor: AppColors.error,
-            onPressed: () => notifier.declineRequest(),
+            onPressed: () => notifier.declineRequest(context),
           ),
         ),
       ],

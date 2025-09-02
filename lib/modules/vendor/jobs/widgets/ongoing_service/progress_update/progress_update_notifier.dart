@@ -55,6 +55,7 @@ class ProgressUpdateNotifier extends BaseChangeNotifier {
 
   Future<void> initializeData() async {
     await apiJobInfoDetail();
+    await loadUserData();
     updatePhaseFromStatus(AppStatus.fromName(currentStatus ?? ""));
     if(currentPhase == JobPhase.inProgress || currentPhase == JobPhase.completed) await loadJobCompletionDetails();
   }
@@ -100,16 +101,16 @@ class ProgressUpdateNotifier extends BaseChangeNotifier {
     try {
       notifyListeners();
       final parsed = await CommonRepository.instance.apiUpdateJobStatus(
-        UpdateJobStatusRequest(jobId: jobId, statusId: statusId),
+        UpdateJobStatusRequest(jobId: jobId, statusId: statusId, createdBy: userData?.name ?? "", vendorId: userData?.customerId ?? 0),
       );
 
       if (parsed is CommonResponse && parsed.success == true) {
         currentStatus = AppStatus.fromId(statusId)?.name;
         updatePhaseFromStatus(AppStatus.fromId(statusId));
-        ToastHelper.showSuccess("Status updated to: ${AppStatus.fromName(currentStatus ?? "")?.name ?? ""}");
+        // ToastHelper.showSuccess("Status updated to: ${AppStatus.fromName(currentStatus ?? "")?.name ?? ""}");
       }
     } catch (e) {
-      ToastHelper.showError('Error updating status: $e');
+      // ToastHelper.showError('Error updating status: $e');
     } finally {
       notifyListeners();
     }

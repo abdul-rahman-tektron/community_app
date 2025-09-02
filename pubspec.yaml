@@ -69,6 +69,7 @@ dependencies:
   pdf: ^3.11.3
   flutter_pdfview: ^1.4.1+1
   flutter_uae_pass: ^1.0.6
+  flutter_email_sender: ^7.0.0
 
   #Map
   google_maps_flutter: ^2.12.2

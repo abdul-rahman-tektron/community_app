@@ -2,6 +2,8 @@ import 'package:community_app/res/colors.dart';
 import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/helpers/screen_size.dart';
 import 'package:community_app/utils/router/routes.dart';
+import 'package:community_app/utils/widgets/custom_refresh_indicator.dart';
+import 'package:community_app/utils/widgets/ratings_helper.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -21,39 +23,55 @@ class VendorDashboardScreen extends StatelessWidget {
       create: (_) => VendorDashboardNotifier(),
       child: Consumer<VendorDashboardNotifier>(
         builder: (context, notifier, child) {
-          return Scaffold(
-            body: SingleChildScrollView(
-              padding: EdgeInsets.all(16.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          return buildBody(context, notifier);
+        },
+      ),
+    );
+  }
+
+  Widget buildBody(BuildContext context, VendorDashboardNotifier notifier) {
+    return CustomRefreshIndicator(
+      onRefresh: () async {
+        await notifier.initializeData();
+      },
+      child: Scaffold(
+        body: SingleChildScrollView(
+          padding: EdgeInsets.all(16.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildLicenseStatusCard(notifier),
+              25.verticalSpace,
+              Row(
                 children: [
-                  // _buildLicenseAlertCard(notifier),
-                  // 15.verticalSpace,
-                  _buildLicenseStatusCard(notifier),
-                  25.verticalSpace,
-
-                  Text("Quick Stats", style: AppFonts.text16.semiBold.style.copyWith(
-                    fontSize: ScreenSize.width < 380 ? 14 : 16,
-                  ),),
-                  10.verticalSpace,
-                  _buildQuickStatsGrid(notifier),
-                  15.verticalSpace,
-                  _buildServiceStatusPieChart(notifier),
-                  25.verticalSpace,
-                  Text("Quick Actions", style: AppFonts.text16.semiBold.style.copyWith(
-                    fontSize: ScreenSize.width < 380 ? 14 : 16,
-                  ),),
-                  10.verticalSpace,
-                  buildQuickActions(context, notifier),
-                  25.verticalSpace,
-
-                  // Text("Alerts", style: AppFonts.text16.semiBold.style),
-                  // _buildAlertsList(notifier),
+                  Expanded(
+                    child: Text("Quick Stats", style: AppFonts.text16.semiBold.style.copyWith(
+                      fontSize: ScreenSize.width < 380 ? 14 : 16,
+                    ),),
+                  ),
+                  RatingsHelper(rating: notifier.ratings ?? 0, size: ScreenSize.width < 380 ? 15 : 20,),
+                  Text(" (${notifier.ratings ?? 0})", style: AppFonts.text14.regular.style,)
                 ],
               ),
-            ),
-          );
-        },
+              10.verticalSpace,
+              _buildQuickStatsGrid(notifier),
+              15.verticalSpace,
+              _buildServiceStatusPieChart(notifier),
+              // 15.verticalSpace,
+              // ratingWidget(notifier),
+              25.verticalSpace,
+              Text("Quick Actions", style: AppFonts.text16.semiBold.style.copyWith(
+                fontSize: ScreenSize.width < 380 ? 14 : 16,
+              ),),
+              10.verticalSpace,
+              buildQuickActions(context, notifier),
+              25.verticalSpace,
+
+              // Text("Alerts", style: AppFonts.text16.semiBold.style),
+              // _buildAlertsList(notifier),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -144,6 +162,15 @@ class VendorDashboardScreen extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget ratingWidget(VendorDashboardNotifier notifier) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      decoration: AppStyles.commonDecoration,
+      child: RatingsHelper(rating: notifier.ratings ?? 0, size: 40,),
     );
   }
 
@@ -336,11 +363,9 @@ class VendorDashboardScreen extends StatelessWidget {
         value: acceptedValue,
         title: '${acceptedPercent.toStringAsFixed(1)}%',
         radius: touchedIndex == 0 ? 60 : 50,
-        titleStyle: TextStyle(
-          fontSize: touchedIndex == 0 ? 18 : 14,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
+        titleStyle: AppFonts.text12.regular.white.style.copyWith(
+          fontSize: touchedIndex == 0 ? 14 : 12,
+        )
       ),
     );
 
@@ -350,10 +375,8 @@ class VendorDashboardScreen extends StatelessWidget {
         value: rejectedValue,
         title: '${rejectedPercent.toStringAsFixed(1)}%',
         radius: touchedIndex == 1 ? 60 : 50,
-        titleStyle: TextStyle(
-          fontSize: touchedIndex == 1 ? 18 : 14,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
+        titleStyle: AppFonts.text12.regular.white.style.copyWith(
+          fontSize: touchedIndex == 0 ? 14 : 12,
         ),
       ),
     );

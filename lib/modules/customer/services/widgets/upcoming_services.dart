@@ -6,6 +6,7 @@ import 'package:community_app/modules/customer/services/widgets/tracking_service
 import 'package:community_app/utils/enums.dart';
 import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class UpcomingServicesWidget extends StatelessWidget {
   final List<CustomerOngoingJobsData> upcomingJobs;
@@ -14,22 +15,37 @@ class UpcomingServicesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Group by jobStatusCategory enum, mapping 'paymentpending' to completed
-    final Map<JobStatusCategory, List<CustomerOngoingJobsData>> grouped = {
-      for (var status in JobStatusCategory.values)
-        status: upcomingJobs
-            .where((job) {
-          final jobStatus = CommonUtils.jobStatusFromString(job.jobStatusCategory);
-          // Map 'paymentpending' to completed
+    final grouped = {
+      for (final status in JobStatusCategory.values)
+        status: upcomingJobs.where((job) {
+          final jobStatus =
+          CommonUtils.jobStatusFromString(job.jobStatusCategory);
           if (job.jobStatusCategory?.toLowerCase() == "paymentpending") {
             return status == JobStatusCategory.completed;
           }
           return jobStatus == status;
-        })
-            .toList(),
+        }).toList(),
     };
 
+    final hasJobs = grouped.values.any((jobs) => jobs.isNotEmpty);
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        final notifier = context.read<ServicesNotifier>();
+        await notifier.initializeData();
+      },
+      child: buildBody(context, hasJobs, grouped),
+    );
+  }
+
+  Widget buildBody(BuildContext context, bool hasJobs,
+      Map<JobStatusCategory, List<CustomerOngoingJobsData>> grouped) {
+    if (!hasJobs) {
+      return Center(child: Text("No ongoing jobs."));
+    }
+
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

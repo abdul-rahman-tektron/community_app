@@ -12,7 +12,7 @@ class VendorDashboardResponse {
   dynamic serviceMaster;
   List<Document>? documents;
   Stats? stats;
-  List<dynamic>? jobStatusCounts;
+  List<JobStatusCount>? jobStatusCounts;
 
   VendorDashboardResponse({
     this.serviceMaster,
@@ -25,14 +25,14 @@ class VendorDashboardResponse {
     serviceMaster: json["serviceMaster"],
     documents: json["documents"] == null ? [] : List<Document>.from(json["documents"]!.map((x) => Document.fromJson(x))),
     stats: json["stats"] == null ? null : Stats.fromJson(json["stats"]),
-    jobStatusCounts: json["jobStatusCounts"] == null ? [] : List<dynamic>.from(json["jobStatusCounts"]!.map((x) => x)),
+    jobStatusCounts: json["jobStatusCounts"] == null ? [] : List<JobStatusCount>.from(json["jobStatusCounts"]!.map((x) => JobStatusCount.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
     "serviceMaster": serviceMaster,
     "documents": documents == null ? [] : List<dynamic>.from(documents!.map((x) => x.toJson())),
     "stats": stats?.toJson(),
-    "jobStatusCounts": jobStatusCounts == null ? [] : List<dynamic>.from(jobStatusCounts!.map((x) => x)),
+    "jobStatusCounts": jobStatusCounts == null ? [] : List<dynamic>.from(jobStatusCounts!.map((x) => x.toJson())),
   };
 }
 
@@ -41,7 +41,7 @@ class Document {
   int? vendorId;
   int? documentTypeId;
   dynamic documentType;
-  String? documentNumber;
+  dynamic documentNumber;
   DateTime? documentExpiryDate;
   dynamic documentFile;
   bool? active;
@@ -100,6 +100,25 @@ class Document {
   };
 }
 
+class JobStatusCount {
+  int? count;
+  String? category;
+
+  JobStatusCount({
+    this.count,
+    this.category,
+  });
+
+  factory JobStatusCount.fromJson(Map<String, dynamic> json) => JobStatusCount(
+    count: json["count"],
+    category: json["category"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "count": count,
+    "category": category,
+  };
+}
 
 class Stats {
   int? pending;
@@ -109,6 +128,7 @@ class Stats {
   int? awaitingQuotation;
   int? inProgress;
   int? pendingPayment;
+  int? rating;
 
   Stats({
     this.pending,
@@ -118,6 +138,7 @@ class Stats {
     this.awaitingQuotation,
     this.inProgress,
     this.pendingPayment,
+    this.rating,
   });
 
   factory Stats.fromJson(Map<String, dynamic> json) => Stats(
@@ -128,6 +149,7 @@ class Stats {
     awaitingQuotation: json["awaitingQuotation"],
     inProgress: json["inProgress"],
     pendingPayment: json["pendingPayment"],
+    rating: json["rating"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -138,5 +160,6 @@ class Stats {
     "awaitingQuotation": awaitingQuotation,
     "inProgress": inProgress,
     "pendingPayment": pendingPayment,
+    "rating": rating,
   };
 }

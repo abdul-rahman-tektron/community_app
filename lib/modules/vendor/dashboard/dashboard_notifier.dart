@@ -13,6 +13,7 @@ class VendorDashboardNotifier extends BaseChangeNotifier {
   int? _awaitingQuotation = 0;
   int? _inProgress = 0;
   int? _pendingPayment = 0;
+  double? _ratings = 0;
 
   Document? documentData;
 
@@ -44,8 +45,7 @@ class VendorDashboardNotifier extends BaseChangeNotifier {
         acceptedCount = result.stats?.accepted ?? 0;
         rejectedCount = result.stats?.rejected ?? 0;
         documentData = result.documents?.first;
-        print("acceptedCount test");
-        print(acceptedCount);
+        ratings = result.stats?.rating?.toDouble() ?? 0;
         notifyListeners();
       } else {
         debugPrint("Unexpected result type from apiDashboard");
@@ -177,6 +177,14 @@ class VendorDashboardNotifier extends BaseChangeNotifier {
   set pendingPayment(int? value) {
     if (_pendingPayment == value) return;
     _pendingPayment = value;
+    notifyListeners();
+  }
+
+  double? get ratings => _ratings;
+
+  set ratings(double? value) {
+    if (_ratings == value) return;
+    _ratings = value;
     notifyListeners();
   }
 }

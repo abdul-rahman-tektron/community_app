@@ -10,20 +10,28 @@ String siteVisitAssignEmployeeRequestToJson(SiteVisitAssignEmployeeRequest data)
 
 class SiteVisitAssignEmployeeRequest {
   int? siteVisitId;
+  int? customerId;
+  int? jobId;
   List<AssignEmployeeList>? assignEmployeeList;
 
   SiteVisitAssignEmployeeRequest({
     this.siteVisitId,
+    this.customerId,
+    this.jobId,
     this.assignEmployeeList,
   });
 
   factory SiteVisitAssignEmployeeRequest.fromJson(Map<String, dynamic> json) => SiteVisitAssignEmployeeRequest(
     siteVisitId: json["siteVisitId"],
+    customerId: json["customerId"],
+    jobId: json["jobId"],
     assignEmployeeList: json["assignEmployeeList"] == null ? [] : List<AssignEmployeeList>.from(json["assignEmployeeList"]!.map((x) => AssignEmployeeList.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
     "siteVisitId": siteVisitId,
+    "customerId": customerId,
+    "jobId": jobId,
     "assignEmployeeList": assignEmployeeList == null ? [] : List<dynamic>.from(assignEmployeeList!.map((x) => x.toJson())),
   };
 }

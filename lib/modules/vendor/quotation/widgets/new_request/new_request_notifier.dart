@@ -31,8 +31,8 @@ class NewRequestNotifier extends BaseChangeNotifier {
   }
 
   initializeData() async {
-    loadUserData();
-    apiVendorQuotationRequestList();
+    await loadUserData();
+    await apiVendorQuotationRequestList();
   }
 
   Future<void> apiVendorQuotationRequestList() async {

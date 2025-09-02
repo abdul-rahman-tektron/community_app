@@ -65,11 +65,11 @@ class HiveStorageService {
     return _box.get(HiveKeys.userData);
   }
 
-  static Future<void> setNotification(String flow) async {
+  static Future<void> setNotification(bool flow) async {
     await _box.put(HiveKeys.notification, flow);
   }
 
-  static String? getNotification() {
+  static bool? getNotification() {
     return _box.get(HiveKeys.notification);
   }
 

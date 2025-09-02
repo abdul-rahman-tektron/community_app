@@ -108,8 +108,8 @@ class VendorQuotationRepository extends BaseRepository {
     );
 
     if (response?.statusCode == HttpStatus.ok) {
-      final siteVisitAssignEmployeeRequest = siteVisitAssignEmployeeRequestFromJson(jsonEncode(response?.data));
-      return siteVisitAssignEmployeeRequest;
+      final commonResponse = commonResponseFromJson(jsonEncode(response?.data));
+      return commonResponse;
     } else {
       throw ErrorResponse.fromJson(response?.data ?? {});
     }

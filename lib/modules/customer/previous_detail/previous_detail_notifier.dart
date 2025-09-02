@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:community_app/core/base/base_notifier.dart';
@@ -18,6 +19,10 @@ class PreviousDetailNotifier extends BaseChangeNotifier {
 
   CustomerHistoryDetailData? customerHistoryDetailData;
 
+  List<ImagePair> imagePairs = [];
+  List<CompletionDetail> completionDetails = []; // <-- Add this
+  String notes = "";
+
 
   /// Job Info
   String serviceName = "";
@@ -33,8 +38,6 @@ class PreviousDetailNotifier extends BaseChangeNotifier {
   String vendorPhone = "";
 
   /// Work Details
-  List<ImagePair> imagePairs = [];
-  String notes = "";
 
   /// Billing
   double totalAmount = 0.0;
@@ -49,6 +52,8 @@ class PreviousDetailNotifier extends BaseChangeNotifier {
   String serviceReview = "";
 
   PreviousDetailNotifier(this.jobId) {
+    print("called");
+    print("called");
     initializeData();
   }
 
@@ -61,23 +66,34 @@ class PreviousDetailNotifier extends BaseChangeNotifier {
   Future<void> fetchCustomerHistoryDetail() async {
     try {
       isLoading = true;
+      final response = await CustomerJobsRepository.instance.apiCustomerHistoryDetails(
+        CustomerHistoryDetailRequest(customerId: userData?.customerId ?? 0, jobId: jobId ?? 0),
+      );
 
-      final response = await CustomerJobsRepository.instance
-          .apiCustomerHistoryDetails(
-        CustomerHistoryDetailRequest(customerId: userData?.customerId ?? 0, jobId: jobId ?? 0,),);
       if (response is CustomerHistoryDetailResponse && response.success == true) {
         customerHistoryDetailData = response.data;
+
+        // Decode images once here
+        completionDetails = customerHistoryDetailData?.completionDetails?.map((detail) {
+          return CompletionDetail(
+            beforePhotoBytes: detail.beforePhotoUrl != null ? base64Decode(detail.beforePhotoUrl!) : null,
+            afterPhotoBytes: detail.afterPhotoUrl != null ? base64Decode(detail.afterPhotoUrl!) : null,
+            isVideo: detail.isVideo ?? false,
+          );
+        }).toList() ?? [];
+
       } else {
         customerHistoryDetailData = null;
+        completionDetails = [];
       }
     } catch (e) {
       print("Error fetching customer history jobs: $e");
       customerHistoryDetailData = null;
+      completionDetails = [];
     } finally {
       isLoading = false;
       notifyListeners();
     }
-    notifyListeners();
   }
 
   /// Call Vendor
@@ -93,8 +109,7 @@ class PreviousDetailNotifier extends BaseChangeNotifier {
 
   /// Rebook the same service
   void rebookService() {
-    // TODO: Navigate to booking screen with pre-filled service info
-    debugPrint("Rebooking service: $serviceName");
+
   }
 
   /// Raise an issue

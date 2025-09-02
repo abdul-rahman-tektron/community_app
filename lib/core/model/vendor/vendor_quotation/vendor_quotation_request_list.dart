@@ -62,6 +62,8 @@ class VendorQuotationRequestData {
   bool? isAcceptedByCustomer;
   DateTime? createdDate;
   String? createdBy;
+  String? statusCategory;
+  String? status;
   dynamic modifiedDate;
   dynamic modifiedBy;
   num? quotationAmount;
@@ -88,6 +90,8 @@ class VendorQuotationRequestData {
     this.isAcceptedByCustomer,
     this.createdDate,
     this.createdBy,
+    this.statusCategory,
+    this.status,
     this.modifiedDate,
     this.modifiedBy,
     this.quotationAmount,
@@ -115,6 +119,8 @@ class VendorQuotationRequestData {
     isAcceptedByCustomer: json["isAcceptedByCustomer"],
     createdDate: json["createdDate"] == null ? null : DateTime.parse(json["createdDate"]),
     createdBy: json["createdBy"],
+    statusCategory: json["statusCategory"],
+    status: json["status"],
     modifiedDate: json["modifiedDate"],
     modifiedBy: json["modifiedBy"],
     quotationAmount: json["quotationAmount"],
@@ -142,6 +148,8 @@ class VendorQuotationRequestData {
     "siteVisitId": siteVisitId,
     "createdDate": createdDate?.toIso8601String(),
     "createdBy": createdBy,
+    "statusCategory": statusCategory,
+    "status": status,
     "modifiedDate": modifiedDate,
     "modifiedBy": modifiedBy,
     "quotationAmount": quotationAmount,

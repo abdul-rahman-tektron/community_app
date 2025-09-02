@@ -3,6 +3,7 @@ import 'package:community_app/modules/vendor/quotation/widgets/new_request/new_r
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -31,6 +32,7 @@ class SiteVisitCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildTopRow(context, request.customerName ?? "Customer Name"),
+          2.verticalSpace,
           _buildCategoryRow(request.serviceName ?? "Service Name"),
           if (request.remarks?.isNotEmpty ?? false) ...[
             10.verticalSpace,
@@ -49,15 +51,18 @@ class SiteVisitCard extends StatelessWidget {
         Expanded(
           child: Row(
             children: [
-              Text(
-                customerName,
-                style: AppFonts.text16.semiBold.style,
+              Flexible(
+                child: Text(
+                  customerName,
+                  style: AppFonts.text16.semiBold.style,
+                ),
               ),
               10.horizontalSpace,
               _buildPhoneIcon(),
             ],
           ),
         ),
+        10.horizontalSpace,
         Text("#${request.jobId ?? '-'}", style: AppFonts.text14.regular.style),
       ],
     );
@@ -113,7 +118,9 @@ class SiteVisitCard extends StatelessWidget {
                   color: const Color(0xffe7f3f9),
                   borderRadius: BorderRadius.circular(5),
                 ),
-                child: Text("Site Visit ${(request.isAcceptedByCustomer ?? false) ? "Accepted" : "Requested"}", style: AppFonts.text14.regular.style.copyWith(color: Colors.blue)),
+                child: Text("Site Visit ${(request
+                    .isAcceptedByCustomer ?? false) ? "Accepted" : "Requested"}",
+                    style: AppFonts.text14.regular.style.copyWith(color: Colors.blue)),
               ),
               10.verticalSpace,
               Row(
@@ -148,7 +155,7 @@ class SiteVisitCard extends StatelessWidget {
           backgroundColor: AppColors.white,
           borderColor: AppColors.primary,
           textStyle: AppFonts.text14.regular.style,
-          text: 'Assign Employee',
+          text: "Add Quotation",
           onPressed: onQuotationTap ?? () {},
         ),
       ],

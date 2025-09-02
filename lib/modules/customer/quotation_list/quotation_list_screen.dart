@@ -8,6 +8,7 @@ import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_popup.dart';
+import 'package:community_app/utils/widgets/custom_refresh_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -27,52 +28,36 @@ class QuotationListScreen extends StatelessWidget {
           return SafeArea(
             child: Scaffold(
               appBar: CustomAppBar(),
-              body: notifier.isLoading
-                  ? const Center(child: LottieLoader())
-                  : notifier.jobs.isEmpty
-                  ? const Center(child: Text("No Quotations found"))
-                  : Column(
-                    children: [
-                      15.verticalSpace,
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [_buildHeader()],
-                      ),
-                      10.verticalSpace,
-                      ...notifier.jobs.expand(
-                        (job) =>
-                            job.jobQuotationResponce?.map(
-                              (quotation) =>
-                                  _buildQuotationCard(context, notifier, job, quotation),
-                            ) ??
-                            [],
-                      ),
-                    ],
-                  ),
+              body: NonScrollableCustomRefreshIndicator(
+                onRefresh: () async {
+                  await notifier.initializeData();
+                },
+                child: notifier.isLoading
+                    ? const Center(child: LottieLoader())
+                    : notifier.jobs.isEmpty
+                    ? const Center(child: Text("No Quotations found"))
+                    : Column(
+                      children: [
+                        15.verticalSpace,
+                        Row(
+                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [_buildHeader()],
+                        ),
+                        10.verticalSpace,
+                        ...notifier.jobs.expand(
+                          (job) =>
+                              job.jobQuotationResponce?.map(
+                                (quotation) =>
+                                    _buildQuotationCard(context, notifier, job, quotation),
+                              ) ??
+                              [],
+                        ),
+                      ],
+                    ),
+              ),
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildBackButton(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-      child: Align(
-        alignment: Alignment.topRight,
-        child: InkWell(
-          onTap: () => Navigator.pop(context),
-          child: Container(
-            padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.primary, width: 1.5),
-            ),
-            child: Icon(LucideIcons.arrowLeft),
-          ),
-        ),
       ),
     );
   }
@@ -89,101 +74,28 @@ class QuotationListScreen extends StatelessWidget {
     );
   }
 
-  // Widget _buildJobCard(BuildContext context, QuotationListNotifier notifier, int index, QuotationRequestListData job) {
-  //   final quotations = job.jobQuotationRequest ?? [];
-  //
-  //   return Container(
-  //     margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-  //     decoration: AppStyles.commonDecoration,
-  //     padding: const EdgeInsets.all(16),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         Text('Job ID: ${job.jobId}', style: AppFonts.text14.medium.style),
-  //         3.verticalSpace,
-  //         quotations.isEmpty
-  //             ? Padding(
-  //           padding: const EdgeInsets.symmetric(vertical: 10),
-  //           child: Center(
-  //             child: Text(
-  //               "Quotation not provided yet",
-  //               style: AppFonts.text14.semiBold.red.style,
-  //             ),
-  //           ),
-  //         )
-  //             : Column(
-  //           children: quotations.map((model) {
-  //             return Column(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 _buildVendorInfo("Sample Vendor", "VND101", model.quotationId?.toString() ?? "-"),
-  //                 _buildUnderline(),
-  //                 if (model.hasQuotationResponse == true) ...[
-  //                   _buildQuotationItemsStatic(),
-  //                   _buildServiceCharge(50),
-  //                   _buildTotalWithVat(200),
-  //                   _buildSiteVisitRequired(true),
-  //                   _buildCompletionAvailability("2 Days", "12 Jul", "10:00 AM"),
-  //                   _buildFooterActions(context, notifier, index),
-  //                 ] else ...[
-  //                   Padding(
-  //                     padding: const EdgeInsets.symmetric(vertical: 10),
-  //                     child: Center(
-  //                       child: Text(
-  //                         "Quotation not provided yet",
-  //                         style: AppFonts.text14.semiBold.red.style,
-  //                       ),
-  //                     ),
-  //                   ),
-  //                 ],
-  //                 SizedBox(height: 16),
-  //               ],
-  //             );
-  //           }).toList(),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
   // The rest of your widgets remain unchanged (like _buildVendorInfo, _buildQuotationItemsStatic, etc.)
-
-  Widget _buildGradientUnderline(String text, TextStyle style) {
-    final textWidth = _getTextWidth(text, style);
-    return Container(
-      height: 2,
-      width: textWidth,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.transparent,
-            AppColors.primary.withOpacity(0.5),
-            AppColors.primary,
-            AppColors.primary.withOpacity(0.5),
-            Colors.transparent,
-          ],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-      ),
-    );
-  }
-
   Widget _buildQuotationCard(
     BuildContext context,
     QuotationListNotifier notifier,
     QuotationRequestListData job,
     JobQuotationResponce quotation,
   ) {
-    final double itemTotal =
-        quotation.jobQuotationResponseItems?.fold(
-          0.0,
+    final double itemTotal = quotation.jobQuotationResponseItems?.fold(
+      0.0,
           (sum, item) => (sum ?? 0.0) + (item.totalAmount ?? 0.0),
-        ) ??
-        0.0;
+    ) ?? 0.0;
 
     final double serviceCharge = quotation.serviceCharge ?? 0.0;
-    final double totalWithVat = itemTotal + serviceCharge;
+
+    // Subtotal before VAT
+    final double subTotal = itemTotal + serviceCharge;
+
+    // VAT 5%
+    final double vat = subTotal * 0.05;
+
+    // Total including VAT
+    final double totalWithVat = subTotal + vat;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
@@ -195,7 +107,7 @@ class QuotationListScreen extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text('Vendor: ${quotation.vendorId}', style: AppFonts.text16.regular.style),
+                child: Text('${quotation.vendorName}', style: AppFonts.text16.regular.style),
               ),
               Text(
                 'Quotation ID: ${quotation.quotationRequestId}',
@@ -209,10 +121,10 @@ class QuotationListScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildQuotationItemsDynamic(quotation.jobQuotationResponseItems ?? []),
-                    _buildServiceCharge(serviceCharge),
+                    _buildServiceCharge(vat),
                     _buildTotalWithVat(totalWithVat),
                     _buildSiteVisitRequired(job.siteVisitRequired ?? false),
-                    _buildRemarksNotes(job.remarks ?? ""),
+                    _buildRemarksNotes(quotation.quotationDetails ?? ""),
                     // _buildCompletionAvailability("2 Days", "12 Jul", "10:00 AM"),
                     _buildFooterActions(context, notifier, quotation),
                   ],
@@ -316,62 +228,6 @@ class QuotationListScreen extends StatelessWidget {
     );
   }
 
-  double _getTextWidth(String text, TextStyle style) {
-    final TextPainter textPainter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      maxLines: 1,
-      textDirection: TextDirection.ltr,
-    )..layout();
-    return textPainter.width;
-  }
-
-  Widget _buildUnderline() {
-    return Container(
-      height: 1,
-      margin: EdgeInsets.symmetric(vertical: 10),
-      width: double.infinity,
-      decoration: BoxDecoration(color: AppColors.primary),
-    );
-  }
-
-  Widget _buildQuotationItemsStatic() {
-    final items = [
-      {"qty": "2", "name": "AC Filter", "price": 30},
-      {"qty": "1", "name": "Coolant", "price": 40},
-    ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Quotation Items:', style: AppFonts.text12.medium.style),
-        8.verticalSpace,
-        ...items.map(
-          (item) => _quotationItem(
-            item["qty"].toString(),
-            item["name"].toString(),
-            'AED ${(item["price"] as num).toStringAsFixed(2)}',
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildVendorInfo(String vendorName, String vendorId, String quotationId) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Vendor: $vendorName ($vendorId)', style: AppFonts.text14.medium.style),
-        10.verticalSpace,
-        Row(
-          children: [
-            _iconBadge(LucideIcons.receiptText, Colors.blue, const Color(0xffe7f3f9)),
-            6.horizontalSpace,
-            Text(quotationId, style: AppFonts.text12.regular.grey.style),
-          ],
-        ),
-      ],
-    );
-  }
-
   Widget _quotationItem(String qty, String name, String price) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
@@ -399,7 +255,7 @@ class QuotationListScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('Service Charge', style: AppFonts.text12.regular.style),
+          Text('Vat 5%', style: AppFonts.text12.regular.style),
           Text('AED ${amount.toStringAsFixed(2)}', style: AppFonts.text12.semiBold.style),
         ],
       ),
@@ -440,34 +296,6 @@ class QuotationListScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCompletionAvailability(String completion, String date, String time) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: Row(
-              children: [
-                _iconBadge(LucideIcons.clock, Colors.orange, const Color(0xfffdf5e7)),
-                4.horizontalSpace,
-                Text(completion, style: AppFonts.text12.regular.grey.style),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Row(
-              children: [
-                _iconBadge(LucideIcons.calendar, Colors.green, const Color(0xffeff7ef)),
-                4.horizontalSpace,
-                Text('$date, $time', style: AppFonts.text12.regular.grey.style),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildFooterActions(
     BuildContext context,
     QuotationListNotifier notifier,
@@ -489,9 +317,9 @@ class QuotationListScreen extends StatelessWidget {
                     await notifier.apiJobBooking(
                       context,
                       jobId: quotation.jobId ?? 0,
-                      quotationRequestId: quotation?.quotationResponceId ?? 0,
-                      quotationResponseId: quotation?.quotationResponceId ?? 0,
-                      vendorId: quotation?.vendorId ?? 0,
+                      quotationRequestId: quotation.quotationResponceId ?? 0,
+                      quotationResponseId: quotation.quotationResponceId ?? 0,
+                      vendorId: quotation.vendorId ?? 0,
                       remarks: "Accepted by customer",
                     );
                   },
@@ -518,14 +346,6 @@ class QuotationListScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _iconBadge(IconData icon, Color iconColor, Color bgColor) {
-    return Container(
-      padding: const EdgeInsets.all(5),
-      decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(5)),
-      child: Icon(icon, color: iconColor, size: 18),
     );
   }
 

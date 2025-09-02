@@ -7,6 +7,7 @@ import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
 import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/helpers/loader.dart';
+import 'package:community_app/utils/helpers/screen_size.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/ratings_helper.dart';
@@ -185,6 +186,7 @@ class JobHistoryDetailScreen extends StatelessWidget {
 
   Widget _buildBeforeAfterCard(context, CompletionDetail? pair) {
     return Container(
+      constraints: const BoxConstraints(minHeight: 130),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
@@ -192,9 +194,11 @@ class JobHistoryDetailScreen extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2))
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2)
+            ,)
+
         ],
       ),
       child: Row(
@@ -213,6 +217,7 @@ class JobHistoryDetailScreen extends StatelessWidget {
 
   Widget _buildImageWithLabel(BuildContext context, String label, String? url, bool isVideo) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Stack(
@@ -224,7 +229,12 @@ class JobHistoryDetailScreen extends StatelessWidget {
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.memory(base64Decode(url ?? ""), height: 90, width: 90, fit: BoxFit.cover),
+                child: Image.memory(
+                  base64Decode(url ?? ""),
+                  height: ScreenSize.width < 380 ? 75 : 90,
+                  width: ScreenSize.width < 380 ? 75 : 90,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             if (isVideo)
@@ -237,8 +247,12 @@ class JobHistoryDetailScreen extends StatelessWidget {
           ],
         ),
         5.verticalSpace,
-        Text(label,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+        Text(
+          label,
+          style: AppFonts.text14.regular.style,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ],
     );
   }
@@ -258,16 +272,17 @@ class JobHistoryDetailScreen extends StatelessWidget {
         ),
        10.verticalSpace,
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Notes:", style: AppFonts.text14.semiBold.style),
+            Text("Notes: ", style: AppFonts.text14.semiBold.style),
             5.horizontalSpace,
-            Text(notifier.vendorHistoryDetailData?.jobDetail?.remarks ?? "N/A", style: AppFonts.text14.regular.style),
+            Expanded(child: Text(notifier.vendorHistoryDetailData?.jobDetail?.remarks ?? "N/A", style: AppFonts.text14.regular.style)),
           ],
         ),
         10.verticalSpace,
         Row(
           children: [
-            Text("Ratings:", style: AppFonts.text14.semiBold.style),
+            Text("Ratings: ", style: AppFonts.text14.semiBold.style),
             5.horizontalSpace,
            RatingsHelper(rating: notifier.vendorHistoryDetailData?.jobDetail?.rating?.toDouble() ?? 0),
           ],

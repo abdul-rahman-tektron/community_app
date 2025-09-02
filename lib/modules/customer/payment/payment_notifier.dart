@@ -13,7 +13,13 @@ class PaymentNotifier extends BaseChangeNotifier {
 
   int? jobId;
 
-  PaymentNotifier(this.jobId) {}
+  PaymentNotifier(this.jobId) {
+    initializeData();
+  }
+
+  initializeData() async {
+    await loadUserData();
+  }
 
   final promoCodeController = TextEditingController();
   final cardNumberController = TextEditingController();
@@ -43,11 +49,11 @@ class PaymentNotifier extends BaseChangeNotifier {
     try {
       notifyListeners();
       final parsed = await CommonRepository.instance.apiUpdateJobStatus(
-        UpdateJobStatusRequest(jobId: jobId, statusId: statusId),
+        UpdateJobStatusRequest(jobId: jobId, statusId: statusId, createdBy: userData?.name ?? "", vendorId: userData?.customerId ?? 0),
       );
 
       if (parsed is CommonResponse && parsed.success == true) {
-        ToastHelper.showSuccess("Status updated to: ${AppStatus.fromId(statusId ?? 0)?.name ?? ""}");
+        // ToastHelper.showSuccess("Status updated to: ${AppStatus.fromId(statusId ?? 0)?.name ?? ""}");
         Navigator.pushNamed(context, AppRoutes.feedback, arguments: jobId);
       }
     } catch (e) {

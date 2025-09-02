@@ -65,8 +65,7 @@ class ExploreNotifier extends BaseChangeNotifier {
 
   ExploreNotifier({String? initialCategory}) {
     initializeData();
-
-    // Listen to search text with debounce
+    selectedCategoryId = int.tryParse(initialCategory ?? "");
     searchController.addListener(() {
       _onSearchChanged();
     });

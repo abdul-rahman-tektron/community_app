@@ -3,8 +3,10 @@ import 'package:community_app/modules/vendor/quotation/widgets/new_request/new_r
 import 'package:community_app/modules/vendor/quotation/widgets/new_request/site_visit_card.dart';
 import 'package:community_app/modules/vendor/quotation/widgets/site_visit_detail/site_visit_detail_screen.dart';
 import 'package:community_app/res/colors.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/helpers/loader.dart';
 import 'package:community_app/utils/router/routes.dart';
+import 'package:community_app/utils/widgets/custom_refresh_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -30,11 +32,15 @@ class NewRequestScreen extends StatelessWidget {
     }).toList();
 
     return Scaffold(
-      body: notifier.isLoading
-          ? const Center(child: LottieLoader())
-          : filteredRequests.isEmpty
-          ? const Center(child: Text("No new requests."))
-          : ListView.builder(
+      body: CustomRefreshIndicator(
+        onRefresh: () async {
+          await notifier.initializeData();
+        },
+        child: notifier.isLoading
+            ? const Center(child: LottieLoader())
+            : filteredRequests.isEmpty
+            ? const Center(child: Text("No new requests."))
+            : ListView.builder(
               itemCount: filteredRequests.length,
               padding: const EdgeInsets.symmetric(vertical: 10),
               itemBuilder: (context, index) {
@@ -44,17 +50,19 @@ class NewRequestScreen extends StatelessWidget {
                     ? SiteVisitCard(
                         request: request,
                         onQuotationTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            AppRoutes.siteVisitDetail,
-                            arguments: {
-                              'jobId': request.jobId?.toString(),
-                              'customerId': request.fromCustomerId,
-                              'siteVisitId': request.siteVisitId,
-                            },
-                          ).then((value) {
-                            notifier.initializeData();
-                          });
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.addQuotation,
+                              arguments: {
+                                'jobId': request.jobId,
+                                'serviceId': request.serviceId,
+                                'quotationId': request.quotationId,
+                                'customerId': request.fromCustomerId,
+                                'isSiteVisit': request.isAcceptedByCustomer,
+                              },
+                            ).then((value) {
+                              notifier.initializeData();
+                            });
                         },
                         onCallTap: () {
                           notifier.openDialer(request.customerMobile ?? '');
@@ -82,6 +90,7 @@ class NewRequestScreen extends StatelessWidget {
                       );
               },
             ),
+      ),
     );
   }
 }

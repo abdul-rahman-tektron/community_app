@@ -16,14 +16,18 @@ class NotificationService {
   GlobalKey<NavigatorState>? _navigatorKey;
 
   void setNavigatorKey(GlobalKey<NavigatorState> navigatorKey) {
+    debugPrint("[NotificationService] NavigatorKey set");
     _navigatorKey = navigatorKey;
   }
 
   Future<void> init() async {
+    debugPrint("[NotificationService] Initializing...");
+
     await _messaging.requestPermission();
+    debugPrint("[NotificationService] Permission requested");
 
     final token = await _messaging.getToken();
-    debugPrint("FCM Token: $token");
+    debugPrint("[NotificationService] FCM Token: $token");
 
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: androidInit);
@@ -31,35 +35,45 @@ class NotificationService {
     await _localNotifications.initialize(
       initSettings,
       onDidReceiveNotificationResponse: (details) {
-        // Handle tap when app is in foreground (local notification)
+        debugPrint("[NotificationService] Local notification tapped with payload: ${details.payload}");
         final payload = details.payload;
         if (payload != null) {
           _handleNotificationClick(payload);
         }
       },
     );
+    debugPrint("[NotificationService] Local notifications initialized");
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      debugPrint("[NotificationService] onMessage received: ${message.messageId}");
       final notification = message.notification;
       if (notification != null) {
+        debugPrint("[NotificationService] Showing local notification with title: ${notification.title}, body: ${notification.body}");
         _showLocalNotification(notification, message.data);
+      } else {
+        debugPrint("[NotificationService] Message had no notification part");
       }
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      debugPrint("[NotificationService] App opened from notification. Route: ${message.data['route']}, Data: ${message.data}");
       _handleNotificationClick(message.data['route'] ?? '', extraData: message.data);
     });
+
+    debugPrint("[NotificationService] Initialization complete ✅");
   }
 
-
   Future<void> _showLocalNotification(
-      RemoteNotification notification, Map<String, dynamic> data) async {
+      RemoteNotification notification,
+      Map<String, dynamic> data,
+      ) async {
+    final isEnabled = HiveStorageService.getNotification() ?? true;
+    debugPrint("[NotificationService] Notification setting: $isEnabled");
 
-    final isEnabled = HiveStorageService.getNotification() ?? "true";
-    if (isEnabled == "false") {
-      debugPrint("Notifications are muted. Skipping notification.");
+    if (isEnabled == false) {
+      debugPrint("[NotificationService] Notifications muted. Skipping.");
       return;
     }
 
@@ -71,6 +85,7 @@ class NotificationService {
     );
     const platformDetails = NotificationDetails(android: androidDetails);
 
+    debugPrint("[NotificationService] Triggering local notification...");
     await _localNotifications.show(
       0,
       notification.title,
@@ -78,27 +93,32 @@ class NotificationService {
       platformDetails,
       payload: data['route'] ?? '',
     );
+    debugPrint("[NotificationService] Local notification shown ✅");
   }
 
   void _handleNotificationClick(String route, {Map<String, dynamic>? extraData}) {
-    if (_navigatorKey == null) return;
+    debugPrint("[NotificationService] Handling notification click. Route: $route, Data: $extraData");
 
-    // Example: Navigate based on route from notification
+    if (_navigatorKey == null) {
+      debugPrint("[NotificationService] NavigatorKey not set ❌");
+      return;
+    }
+
     if (route == '/bookingDetails') {
       final bookingId = extraData?['bookingId'];
-      print(bookingId);
-      // _navigatorKey!.currentState?.pushNamed('/bookingDetails',
-      //     arguments: bookingId);
+      debugPrint("[NotificationService] Navigating to BookingDetails with bookingId: $bookingId");
+      // _navigatorKey!.currentState?.pushNamed('/bookingDetails', arguments: bookingId);
     } else if (route == '/requestDetails') {
       final requestId = extraData?['requestId'];
-      print(requestId);
+      debugPrint("[NotificationService] Navigating to RequestDetails with requestId: $requestId");
+      // _navigatorKey!.currentState?.pushNamed('/requestDetails', arguments: requestId);
+    } else {
+      debugPrint("[NotificationService] No matching route found for: $route");
     }
-    // Add more cases if needed
   }
 
-  static Future<void> _firebaseMessagingBackgroundHandler(
-      RemoteMessage message) async {
+  static Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     await Firebase.initializeApp();
-    debugPrint("Background message: ${message.messageId}");
+    debugPrint("[NotificationService] Background message received: ${message.messageId}, Data: ${message.data}");
   }
 }

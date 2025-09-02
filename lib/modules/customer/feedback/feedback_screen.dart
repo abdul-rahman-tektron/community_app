@@ -29,43 +29,65 @@ class FeedbackScreen extends StatelessWidget {
     return Scaffold(
       appBar: CustomAppBar(),
       drawer: const CustomDrawer(),
+      persistentFooterButtons: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 2.h),
+          child: CustomButton(text: "Submit", onPressed: () {
+            feedbackNotifier.apiUpdateCustomerJobCompletion(
+              context,
+              feedbackNotifier,
+              jobId ?? 0,
+              feedbackNotifier.userData?.name ?? "",
+            );
+          }),
+        ),
+      ],
       body: SingleChildScrollView(
         child: Column(
           children: [
             buildPaymentSuccessCard(),
+            15.verticalSpace,
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 25.w,),
+              child: Text(
+                "Thank you for using our service!",
+                textAlign: TextAlign.center,
+                style: AppFonts.text16.bold.style,
+              ),
+            ),
+            10.verticalSpace,
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 25.w,),
+              child: Text(
+                "We value your feedback—please share your experience to help us improve in the future.",
+                textAlign: TextAlign.center,
+                style: AppFonts.text14.regular.style,
+              ),
+            ),
 
+            10.verticalSpace,
             // Service Feedback
             buildFeedbackWidget(
-              title: "Service Feedback",
+              title: "Feedback",
               rating: feedbackNotifier.serviceRating,
               controller: feedbackNotifier.serviceCommentController,
               onEmojiTap: (index) {
                 feedbackNotifier.updateServiceRating(index.toDouble());
               },
             ),
-            10.verticalSpace,
+            // 10.verticalSpace,
             // Vendor Feedback
-            buildFeedbackWidget(
-              title: "Vendor Feedback",
-              rating: feedbackNotifier.vendorRating,
-              controller: feedbackNotifier.vendorCommentController,
-              onEmojiTap: (index) {
-                feedbackNotifier.updateVendorRating(index.toDouble());
-              },
-            ),
+            // buildFeedbackWidget(
+            //   title: "Vendor Feedback",
+            //   rating: feedbackNotifier.vendorRating,
+            //   controller: feedbackNotifier.vendorCommentController,
+            //   onEmojiTap: (index) {
+            //     feedbackNotifier.updateVendorRating(index.toDouble());
+            //   },
+            // ),
 
-            20.verticalSpace,
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 25.h),
-              child: CustomButton(text: "Submit", onPressed: () {
-                feedbackNotifier.apiUpdateCustomerJobCompletion(
-                  context,
-                   feedbackNotifier,
-                   jobId ?? 0,
-                   "Admin",
-                );
-              }),
-            ),
+            // 20.verticalSpace,
+
           ],
         ),
       ),
@@ -187,14 +209,14 @@ class FeedbackScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Text(title, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
-          SizedBox(height: 12.h),
+          // Text(title, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
+          // SizedBox(height: 12.h),
           CustomTextField(
             controller: controller,
-            fieldName: "",
+            fieldName: "Feedback",
             titleVisibility: false,
             isMaxLines: true,
-            hintText: "Add comments",
+            hintText: "Add Feedback",
           ),
           20.verticalSpace,
           Center(

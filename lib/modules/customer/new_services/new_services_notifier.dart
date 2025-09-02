@@ -3,10 +3,12 @@ import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/core/model/common/dropdown/priority_dropdown_response.dart';
 import 'package:community_app/core/model/common/dropdown/service_dropdown_response.dart';
 import 'package:community_app/core/model/common/error/common_response.dart';
+import 'package:community_app/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
 import 'package:community_app/core/model/customer/job/new_job_request.dart';
 import 'package:community_app/core/remote/services/common_repository.dart';
 import 'package:community_app/core/remote/services/customer/customer_jobs_repository.dart';
 import 'package:community_app/utils/extensions.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/helpers/file_upload_helper.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:community_app/utils/router/routes.dart';
@@ -197,6 +199,8 @@ class NewServicesNotifier extends BaseChangeNotifier {
 
     CommonResponse resultData = result as CommonResponse;
 
+    await apiUpdateJobStatus(context, AppStatus.jobInitiated.id, resultData.data);
+
     Navigator.pushNamed(
       context,
       AppRoutes.topVendors,
@@ -208,6 +212,35 @@ class NewServicesNotifier extends BaseChangeNotifier {
       },
     );
   }
+
+  Future<void> apiUpdateJobStatus(
+      BuildContext context,
+      int? statusId, int? jobId) async {
+    if (statusId == null) return;
+    try {
+      notifyListeners();
+
+      final parsed = await CommonRepository.instance.apiUpdateJobStatus(
+        UpdateJobStatusRequest(
+          jobId: jobId ?? 0,
+          statusId: statusId,
+          vendorId: vendorId,
+          createdBy: userData?.name ?? "",
+        ),
+      );
+
+      if (parsed is CommonResponse && parsed.success == true) {
+
+      }
+    } catch (e, stackTrace) {
+      print("❌ Error updating job status: $e");
+      print("Stack: $stackTrace");
+      // ToastHelper.showError('An error occurred. Please try again.');
+    } finally {
+      notifyListeners();
+    }
+  }
+
 
   Future<void> pickImageOrVideo() async {
     final file = await FileUploadHelper.pickImageOrVideo();

@@ -4,6 +4,7 @@ import 'package:community_app/res/colors.dart';
 import 'package:community_app/utils/enums.dart';
 import 'package:community_app/utils/helpers/loader.dart';
 import 'package:community_app/utils/router/routes.dart';
+import 'package:community_app/utils/widgets/custom_refresh_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -29,34 +30,39 @@ class SentQuotationScreen extends StatelessWidget {
     }).toList();
 
     return Scaffold(
-      body: notifier.isLoading
-          ? Center(child: LottieLoader())
-          : filteredQuotations.isEmpty
-          ? const Center(child: Text("No quotations sent."))
-          : ListView.builder(
-        itemCount: filteredQuotations.length,
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        itemBuilder: (context, index) {
-          final quotation = filteredQuotations[index];
-          return QuotationCard(
-            quotation: quotation,
-            onViewDetails: () {
-              Navigator.pushNamed(
-                context,
-                AppRoutes.quotationDetails,
-                arguments: {
-                  'jobId': quotation.jobId,
-                  'quotationResponseId': quotation.quotationResponseId,
-                },
-              ).then((value) {
-                notifier.initializeData();
-              });
-            },
-            onResend: (quotation.quotationResponseStatus ?? "").toLowerCase() == "rejected"
-                ? () {}
-                : null,
-          );
+      body: CustomRefreshIndicator(
+        onRefresh: () async {
+          await notifier.initializeData();
         },
+        child: notifier.isLoading
+            ? Center(child: LottieLoader())
+            : filteredQuotations.isEmpty
+            ? const Center(child: Text("No quotations sent."))
+            : ListView.builder(
+          itemCount: filteredQuotations.length,
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          itemBuilder: (context, index) {
+            final quotation = filteredQuotations[index];
+            return QuotationCard(
+              quotation: quotation,
+              onViewDetails: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.quotationDetails,
+                  arguments: {
+                    'jobId': quotation.jobId,
+                    'quotationResponseId': quotation.quotationResponseId,
+                  },
+                ).then((value) {
+                  notifier.initializeData();
+                });
+              },
+              onResend: (quotation.quotationResponseStatus ?? "").toLowerCase() == "rejected"
+                  ? () {}
+                  : null,
+            );
+          },
+        ),
       ),
     );
   }

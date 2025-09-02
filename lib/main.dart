@@ -120,7 +120,9 @@ class AppWrapper extends StatelessWidget {
 
   Widget _getInitialScreen(LoginResponse? user, bool? isOptionSelectionCompleted) {
     if (user != null) {
-      return user.type == "V" ? VendorBottomScreen() : CustomerBottomScreen();
+      return user.type == "V" ?
+      ((user.isOnboarded ?? false) ? VendorBottomScreen() : VendorOnboardScreen()) :
+      CustomerBottomScreen();
     } else {
       return isOptionSelectionCompleted == true
           ? const LoginScreen()

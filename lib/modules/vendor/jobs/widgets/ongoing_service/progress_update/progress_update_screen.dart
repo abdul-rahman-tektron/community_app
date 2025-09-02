@@ -11,6 +11,7 @@ import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/helpers/dashed_border_container.dart';
 import 'package:community_app/utils/helpers/loader.dart';
+import 'package:community_app/utils/helpers/screen_size.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
@@ -172,15 +173,16 @@ class ProgressUpdateScreen extends StatelessWidget {
             Expanded(
               child: CustomButton(
                 text: "Complete",
-                onPressed: notifier.notes.trim().isNotEmpty
+                onPressed: (notifier.notes.trim().isNotEmpty &&
+                    notifier.photoPairs.any((pair) => pair.after != null))
                     ? () async {
-                        await notifier.submitJobCompletion(context);
-                        await notifier
-                            .apiUpdateJobStatus(AppStatus.workCompletedAwaitingConfirmation.id)
-                            .then((value) {
-                              Navigator.pop(context);
-                            });
-                      }
+                  await notifier.submitJobCompletion(context);
+                  await notifier
+                      .apiUpdateJobStatus(AppStatus.workCompletedAwaitingConfirmation.id)
+                      .then((value) {
+                    Navigator.pop(context);
+                  });
+                }
                     : null,
               ),
             ),
@@ -512,11 +514,13 @@ class ProgressUpdateScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           child: GestureDetector(
             onTap: onTap,
-            child: Image.file(image, height: 90, width: 90, fit: BoxFit.cover),
+            child: Image.file(image, height: ScreenSize.width < 380 ? 75 : 90,
+                width: ScreenSize.width < 380 ? 75 : 90,
+                fit: BoxFit.cover),
           ),
         ),
         5.verticalSpace,
-        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+        Text(label, style: AppFonts.text14.regular.style),
       ],
     );
   }

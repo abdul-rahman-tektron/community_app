@@ -1,5 +1,6 @@
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/utils/extensions.dart';
+import 'package:community_app/utils/helpers/screen_size.dart';
 import 'package:flutter/material.dart';
 
 // AppFonts provides font sizes with weights and colors
@@ -73,13 +74,18 @@ class _TextStyleBuilder {
     return _TextStyleBuilder(size: size, weight: weight, color: color);
   }
 
-  TextStyle get style => TextStyle(
-    fontSize: size,
-    fontWeight: weight,
-    color: color,
-    letterSpacing: 0.5,
-    // fontFamily is handled separately by FontResolver if needed
-  );
+  TextStyle get style {
+    final width = ScreenSize.width;
+    final adjustedSize = width < 380 ? size - 3 : size;
+
+    return TextStyle(
+      fontSize: adjustedSize,
+      fontWeight: weight,
+      color: color,
+      letterSpacing: 0.5,
+      // fontFamily is handled separately by FontResolver if needed
+    );
+  }
 }
 
 // FontResolver to switch fonts based on text language

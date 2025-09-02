@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class SettingsNotifier extends BaseChangeNotifier {
-  bool _notificationSwitch = false;
+  bool _notificationSwitch = true;
   void changeLanguage(BuildContext context) {
     final langNotifier = context.read<LanguageNotifier>();
     langNotifier.switchLanguage();
@@ -28,7 +28,7 @@ class SettingsNotifier extends BaseChangeNotifier {
 
   Future<void> toggleNotifications() async {
     notificationSwitch = !notificationSwitch;
-    await HiveStorageService.setNotification(notificationSwitch.toString());
+    await HiveStorageService.setNotification(notificationSwitch);
     debugPrint("Notifications toggled: $notificationSwitch");
   }
 

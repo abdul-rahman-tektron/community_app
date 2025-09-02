@@ -41,8 +41,8 @@ class LoadingOverlay<T extends BaseChangeNotifier> extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             SizedBox(
-                              height: 250,
-                              width: 250,
+                              height: 150,
+                              width: 150,
                               child: Lottie.asset(
                                 AppImages.loaderBlue, // <-- your Lottie JSON file
                                 fit: BoxFit.fill,

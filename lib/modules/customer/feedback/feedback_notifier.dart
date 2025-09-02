@@ -9,13 +9,19 @@ import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 
-class FeedbackNotifier extends ChangeNotifier {
+class FeedbackNotifier extends BaseChangeNotifier {
   double vendorRating = 0;
   double serviceRating = 0;
 
   int? jobId;
 
-  FeedbackNotifier(this.jobId) {}
+  FeedbackNotifier(this.jobId) {
+    initializeData();
+  }
+
+  initializeData() async {
+    await loadUserData();
+  }
 
   final TextEditingController vendorCommentController = TextEditingController();
   final TextEditingController serviceCommentController = TextEditingController();
@@ -49,17 +55,15 @@ class FeedbackNotifier extends ChangeNotifier {
     try {
       final request = UpdateCustomerCompletionRequest(
         jobId: jobId,
-        notes: "${vendorCommentController.text}\n${serviceCommentController.text}",
+        notes: serviceCommentController.text,
         workDonePercentage: 100, // or make it dynamic if needed
-        rating: ((vendorRating + serviceRating) / 2).round(), // average of both ratings
-        feedback: "Vendor: ${vendorCommentController.text}\nService: ${serviceCommentController.text}",
+        rating: serviceRating.toInt(), // average of both ratings
+        feedback: serviceCommentController.text,
         createdBy: createdBy,
       );
 
       final result = await CustomerJobsRepository.instance.apiUpdateCustomerCompletion(request);
 
-      print("result");
-      print(result);
       await _handleCreatedJobSuccess(result is CommonResponse, context, notifier);
     } catch (e) {
       print("result error");
@@ -83,11 +87,14 @@ class FeedbackNotifier extends ChangeNotifier {
     try {
       notifyListeners();
       final parsed = await CommonRepository.instance.apiUpdateJobStatus(
-        UpdateJobStatusRequest(jobId: jobId, statusId: statusId),
+        UpdateJobStatusRequest(jobId: jobId,
+            statusId: statusId,
+            createdBy: userData?.name ?? "",
+            vendorId: userData?.customerId ?? 0),
       );
 
       if (parsed is CommonResponse && parsed.success == true) {
-        ToastHelper.showSuccess("Status updated to: ${AppStatus.fromId(statusId)?.name ?? ""}");
+        // ToastHelper.showSuccess("Status updated to: ${AppStatus.fromId(statusId)?.name ?? ""}");
         Navigator.pushNamed(context, AppRoutes.customerBottomBar);// or navigate to another screen
       }
     } catch (e) {

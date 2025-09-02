@@ -21,7 +21,12 @@ class JobVerificationNotifier extends BaseChangeNotifier {
   List<CompletionPhoto> fileData = [];
 
   JobVerificationNotifier(this.jobId) {
-    fetchJobCompletionDetails(jobId ?? "");
+    initializeData();
+  }
+
+  initializeData() async {
+    await loadUserData();
+    await fetchJobCompletionDetails(jobId ?? "");
   }
 
   Future<void> fetchJobCompletionDetails(String jobId) async {
@@ -52,13 +57,15 @@ class JobVerificationNotifier extends BaseChangeNotifier {
         UpdateJobStatusRequest(
           jobId: int.parse(jobId ?? "0"),
           statusId: statusId,
+            createdBy: userData?.name ?? ""
+            , vendorId: userData?.customerId ?? 0
         ),
       );
 
       if (parsed is CommonResponse && parsed.success == true) {
-        ToastHelper.showSuccess(
-          "Status updated to: ${AppStatus.fromId(statusId)?.name ?? ""}",
-        );
+        // ToastHelper.showSuccess(
+        //   "Status updated to: ${AppStatus.fromId(statusId)?.name ?? ""}",
+        // );
         Navigator.pushNamed(
           context,
           AppRoutes.payment,

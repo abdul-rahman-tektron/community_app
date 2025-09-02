@@ -12,6 +12,7 @@ class UpdateJobStatusRequest {
   int? jobId;
   String? notes;
   int? statusId;
+  int? vendorId;
   String? feedback;
   String? createdBy;
 
@@ -19,6 +20,7 @@ class UpdateJobStatusRequest {
     this.jobId,
     this.notes,
     this.statusId,
+    this.vendorId,
     this.feedback,
     this.createdBy,
   });
@@ -27,6 +29,7 @@ class UpdateJobStatusRequest {
     jobId: json["jobId"],
     notes: json["notes"],
     statusId: json["statusId"],
+    vendorId: json["vendorId"],
     feedback: json["feedback"],
     createdBy: json["createdBy"],
   );
@@ -35,6 +38,7 @@ class UpdateJobStatusRequest {
     "jobId": jobId,
     "notes": notes ?? "",
     "statusId": statusId,
+    "vendorId": vendorId,
     "feedback": feedback ?? "",
     "createdBy": createdBy ?? "Admin",
   };

@@ -16,25 +16,27 @@ class BookingConfirmationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: CustomAppBar(),
-        body: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            // mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildAnimation(),
-              20.verticalSpace,
-              _buildThankYouMessage(),
-              15.verticalSpace,
-              _buildDeliveryMessage(),
-              15.verticalSpace,
-              _buildServiceIdBox(bookingId),
-              15.verticalSpace,
-              _buildInfoText(),
-              50.verticalSpace,
-              _buildViewVendorsButton(context),
-            ],
+        appBar: CustomAppBar(showBackButton: false,),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              // mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildAnimation(),
+                20.verticalSpace,
+                _buildThankYouMessage(),
+                15.verticalSpace,
+                _buildDeliveryMessage(),
+                15.verticalSpace,
+                _buildServiceIdBox(bookingId),
+                15.verticalSpace,
+                _buildInfoText(),
+                50.verticalSpace,
+                _buildViewVendorsButton(context),
+              ],
+            ),
           ),
         ),
       ),

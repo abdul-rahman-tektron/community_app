@@ -54,18 +54,6 @@ class CompletedServiceCard extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressRow() {
-    final progress = service.jobStatusCategory ?? 'N/A';
-
-    return Row(
-      children: [
-        _buildIconBox(),
-        SizedBox(width: 10.w),
-        _buildProgressText(progress),
-      ],
-    );
-  }
-
   Widget _buildIconBox() {
     return Container(
       padding: const EdgeInsets.all(5),

@@ -1,6 +1,7 @@
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/utils/helpers/loader.dart';
+import 'package:community_app/utils/helpers/screen_size.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -90,7 +91,9 @@ class CustomButton extends StatelessWidget {
             FittedBox(
               child: Text(
                 text,
-                style: textStyle ?? AppFonts.text16.semiBold.white.style,
+                style: textStyle ?? AppFonts.text16.semiBold.white.style.copyWith(
+                  fontSize: ScreenSize.width < 380 ? 12 : 16,
+                ),
               ),
             ),
             if (icon != null && !iconOnLeft) ...[

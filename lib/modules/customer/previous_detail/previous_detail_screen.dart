@@ -10,6 +10,7 @@ import 'package:community_app/utils/helpers/loader.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -65,7 +66,10 @@ class PreviousDetailScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(notifier.customerHistoryDetailData?.jobDetail?.vendorName ?? "", style: AppFonts.text20.semiBold.style),
+        Text(
+          notifier.customerHistoryDetailData?.jobDetail?.vendorName ?? "",
+          style: AppFonts.text20.semiBold.style,
+        ),
         5.verticalSpace,
         Text(
           "#${notifier.customerHistoryDetailData?.jobDetail?.jobId ?? ""}",
@@ -155,7 +159,10 @@ class PreviousDetailScreen extends StatelessWidget {
             children: [
               Text("Employee Name:", style: AppFonts.text16.semiBold.style),
               5.verticalSpace,
-              Text(notifier.customerHistoryDetailData?.jobDetail?.employeeName ?? "", style: AppFonts.text14.regular.style),
+              Text(
+                notifier.customerHistoryDetailData?.jobDetail?.employeeName ?? "",
+                style: AppFonts.text14.regular.style,
+              ),
               10.verticalSpace,
             ],
           ),
@@ -174,18 +181,20 @@ class PreviousDetailScreen extends StatelessWidget {
   }
 
   Widget _buildAfterPhotos(PreviousDetailNotifier notifier) {
+    if (notifier.completionDetails.isEmpty) return const SizedBox.shrink();
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: notifier.customerHistoryDetailData?.completionDetails?.length,
+      itemCount: notifier.completionDetails.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 1,
         childAspectRatio: 2.9,
         mainAxisSpacing: 10,
       ),
       itemBuilder: (context, index) {
-        final pair = notifier.customerHistoryDetailData?.completionDetails?[index];
-        return _buildBeforeAfterCard(context, pair ?? CompletionDetail());
+        final pair = notifier.completionDetails[index];
+        return _buildBeforeAfterCard(context, pair);
       },
     );
   }
@@ -196,26 +205,44 @@ class PreviousDetailScreen extends StatelessWidget {
       decoration: AppStyles.commonDecoration,
       child: Row(
         children: [
-          Expanded(child: _buildImageWithLabel(context, "Before", pair.beforePhotoUrl, false)),
+          Expanded(child: _buildImageWithLabel(context, "Before", pair.beforePhotoBytes, false)),
           const Icon(Icons.arrow_forward, color: Colors.grey, size: 28),
-          Expanded(child: _buildImageWithLabel(context, "After", pair.afterPhotoUrl, false)),
+          Expanded(child: _buildImageWithLabel(context, "After", pair.afterPhotoBytes, false)),
         ],
       ),
     );
   }
 
-  Widget _buildImageWithLabel(BuildContext context, String label, String?   url, bool isVideo) {
+  Widget _buildImageWithLabel(
+    BuildContext context,
+    String label,
+    Uint8List? imageBytes,
+    bool isVideo,
+  ) {
     return Column(
       children: [
         Stack(
           children: [
             GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, AppRoutes.imageViewer, arguments: url);
+                if (imageBytes != null) {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.imageViewer,
+                    arguments: base64Encode(imageBytes),
+                  );
+                }
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.memory(base64Decode(url ?? ""), height: 90, width: 90, fit: BoxFit.cover),
+                child: imageBytes != null
+                    ? Image.memory(imageBytes, height: 90, width: 90, fit: BoxFit.cover)
+                    : Container(
+                        height: 90,
+                        width: 90,
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.image, color: Colors.white),
+                      ),
               ),
             ),
             if (isVideo)
