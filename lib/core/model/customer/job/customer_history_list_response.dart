@@ -35,18 +35,19 @@ class CustomerHistoryListResponse {
 class CustomerHistoryListData {
   int? jobId;
   DateTime? requestedDate;
-  dynamic completedDate;
+  DateTime? completedDate;
   String? priority;
   String? vendorName;
   dynamic remarks;
   double? totalAmount;
   dynamic paymentMethod;
-  String? employeeName;
+  String? assignedEmployee;
   dynamic employeePhoneNumber;
-  int? rating;
+  dynamic rating;
   dynamic feedbackComments;
-  dynamic beforePhotoUrl;
-  dynamic afterPhotoUrl;
+  String? serviceName;
+  int? serviceId;
+  int? vendorId;
 
   CustomerHistoryListData({
     this.jobId,
@@ -57,45 +58,48 @@ class CustomerHistoryListData {
     this.remarks,
     this.totalAmount,
     this.paymentMethod,
-    this.employeeName,
+    this.assignedEmployee,
     this.employeePhoneNumber,
     this.rating,
     this.feedbackComments,
-    this.beforePhotoUrl,
-    this.afterPhotoUrl,
+    this.serviceName,
+    this.serviceId,
+    this.vendorId,
   });
 
   factory CustomerHistoryListData.fromJson(Map<String, dynamic> json) => CustomerHistoryListData(
     jobId: json["jobId"],
     requestedDate: json["requestedDate"] == null ? null : DateTime.parse(json["requestedDate"]),
-    completedDate: json["completedDate"],
+    completedDate: json["completedDate"] == null ? null : DateTime.parse(json["completedDate"]),
     priority: json["priority"],
     vendorName: json["vendorName"],
     remarks: json["remarks"],
     totalAmount: json["totalAmount"],
     paymentMethod: json["paymentMethod"],
-    employeeName: json["employeeName"],
+    assignedEmployee: json["assignedEmployee"],
     employeePhoneNumber: json["employeePhoneNumber"],
     rating: json["rating"],
     feedbackComments: json["feedbackComments"],
-    beforePhotoUrl: json["beforePhotoUrl"],
-    afterPhotoUrl: json["afterPhotoUrl"],
+    serviceName: json["serviceName"],
+    serviceId: json["serviceId"],
+    vendorId: json["vendorId"],
   );
 
   Map<String, dynamic> toJson() => {
     "jobId": jobId,
     "requestedDate": requestedDate?.toIso8601String(),
-    "completedDate": completedDate,
+    "completedDate": completedDate?.toIso8601String(),
     "priority": priority,
     "vendorName": vendorName,
     "remarks": remarks,
     "totalAmount": totalAmount,
     "paymentMethod": paymentMethod,
-    "employeeName": employeeName,
+    "assignedEmployee": assignedEmployee,
     "employeePhoneNumber": employeePhoneNumber,
     "rating": rating,
     "feedbackComments": feedbackComments,
-    "beforePhotoUrl": beforePhotoUrl,
-    "afterPhotoUrl": afterPhotoUrl,
+    "serviceName": serviceName,
+    "serviceId": serviceId,
+    "vendorId": vendorId,
   };
 }

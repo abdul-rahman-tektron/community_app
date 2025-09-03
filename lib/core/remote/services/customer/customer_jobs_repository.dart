@@ -15,6 +15,9 @@ import 'package:community_app/core/model/customer/job/job_status_tracking/update
 import 'package:community_app/core/model/customer/job/new_job_request.dart';
 import 'package:community_app/core/model/customer/job/ongoing_jobs_response.dart';
 import 'package:community_app/core/model/customer/job/update_customer_completion_request.dart';
+import 'package:community_app/core/model/customer/quotation/customer_response_reject_response.dart';
+import 'package:community_app/core/model/customer/quotation/customer_response_request.dart';
+import 'package:community_app/core/model/customer/quotation/customer_response_response.dart';
 import 'package:community_app/core/model/customer/top_vendors/top_vendors_response.dart';
 import 'package:community_app/core/remote/network/api_url.dart';
 import 'package:community_app/core/remote/network/base_repository.dart';
@@ -221,30 +224,24 @@ class CustomerJobsRepository extends BaseRepository {
     }
   }
 
-  Future<Object?> apiSiteVisitCustomerResponse(int? siteVisitId, bool? isAccept) async {
+  Future<Object?> apiSiteVisitCustomerResponse(CustomerResponseRequest requestParams) async {
     final token = await SecureStorageService.getToken();
-
-    // Build query string dynamically
-    final queryParams = <String>[];
-
-    if (siteVisitId != null) {
-      queryParams.add("siteVisitId=$siteVisitId");
-    }
-    if (isAccept != null) {
-      queryParams.add("isAccepted=$isAccept");
-    }
-
-    final queryString = queryParams.isNotEmpty ? "?${queryParams.join("&")}" : "";
 
     final response = await networkRepository.call(
       method: Method.post,
-      pathUrl: "${ApiUrls.pathSiteVisitCustomerResponse}$queryString",
+      pathUrl: ApiUrls.pathSiteVisitCustomerResponse,
+      body: jsonEncode(requestParams.toJson()),
       headers: buildHeaders(token: token),
     );
 
     if (response?.statusCode == HttpStatus.ok) {
-      final commonResponse = commonResponseFromJson(jsonEncode(response?.data));
-      return commonResponse;
+      final data = response?.data;
+
+      if (data["emailPreview"] != null) {
+        return customerResponseFromJson(jsonEncode(data));
+      } else {
+        return customerResponseRejectResponseFromJson(jsonEncode(data));
+      }
     } else {
       throw ErrorResponse.fromJson(response?.data ?? {});
     }

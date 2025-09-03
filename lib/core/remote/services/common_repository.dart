@@ -64,7 +64,7 @@ class CommonRepository extends BaseRepository {
   }
 
   /// GET: /Service
-  /// Purpose: Fetches the list of available services (used in dropdowns)
+  /// Purpose: Fetches the list of available jobs (used in dropdowns)
   Future<Object?> apiServiceDropdown() async {
     final token = await SecureStorageService.getToken();
 

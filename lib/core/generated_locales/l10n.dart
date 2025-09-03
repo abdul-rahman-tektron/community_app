@@ -70,20 +70,20 @@ class AppLocalizations {
     );
   }
 
-  /// `Welcome to X10 solutions`
+  /// `Welcome to Xception solutions`
   String get welcomeToCommunityApp {
     return Intl.message(
-      'Welcome to X10 solutions',
+      'Welcome to Xception solutions',
       name: 'welcomeToCommunityApp',
       desc: '',
       args: [],
     );
   }
 
-  /// `Connecting residents, services, and support—seamlessly in one app.`
+  /// `Connecting residents, jobs, and support—seamlessly in one app.`
   String get connectingResidents {
     return Intl.message(
-      'Connecting residents, services, and support—seamlessly in one app.',
+      'Connecting residents, jobs, and support—seamlessly in one app.',
       name: 'connectingResidents',
       desc: '',
       args: [],

@@ -55,7 +55,7 @@ class VendorAuthRepository extends BaseRepository {
   }
 
   /// POST: /Vendor/AddVendorService
-  /// Purpose: Adds services provided by a vendor (used during onboarding or updating services)
+  /// Purpose: Adds jobs provided by a vendor (used during onboarding or updating jobs)
   Future<Object?> apiAddVendorService(AddVendorServiceRequest requestParams) async {
     final token = await SecureStorageService.getToken();
 

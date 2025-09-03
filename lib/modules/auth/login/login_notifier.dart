@@ -22,20 +22,12 @@ class LoginNotifier extends BaseChangeNotifier {
   // Controllers
   final TextEditingController userNameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController captchaController = TextEditingController();
 
   final uaePassService = UAEPassService();
 
-  // Captcha + Remember Me
-  String? captchaImage;
-  String generatedCaptcha = '';
   bool isChecked = false;
   bool? isOnboarded;
-  String captchaError = '';
   String loginError = '';
-
-// Dio instance
-  final Dio _dio = Dio();
 
   // Form
   final formKey = GlobalKey<FormState>();
@@ -48,33 +40,6 @@ class LoginNotifier extends BaseChangeNotifier {
   Future<void> _init() async {
     await rememberMeData();
     await isOnboardedData();
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) {
-          debugPrint('*** Dio Request ***');
-          debugPrint('URI: ${options.uri}');
-          debugPrint('Method: ${options.method}');
-          debugPrint('Headers: ${options.headers}');
-          debugPrint('Data: ${options.data}');
-          handler.next(options);
-        },
-        onResponse: (response, handler) {
-          debugPrint('*** Dio Response ***');
-          debugPrint('Status Code: ${response.statusCode}');
-          debugPrint('Data: ${response.data}');
-          handler.next(response);
-        },
-        onError: (DioError e, handler) {
-          debugPrint('*** Dio Error ***');
-          debugPrint('Message: ${e.message}');
-          if (e.response != null) {
-            debugPrint('Status Code: ${e.response?.statusCode}');
-            debugPrint('Data: ${e.response?.data}');
-          }
-          handler.next(e);
-        },
-      ),
-    );
   }
 
   Future<void> initNotifier() async {
@@ -85,17 +50,6 @@ class LoginNotifier extends BaseChangeNotifier {
   void toggleRememberMe(bool? value) {
     isChecked = value ?? false;
     notifyListeners();
-  }
-
-  void generateNewCaptcha() {
-    generatedCaptcha = _generateRandomDigits(6);
-    captchaController.clear();
-    notifyListeners();
-  }
-
-  String _generateRandomDigits(int length) {
-    final rand = Random();
-    return List.generate(length, (_) => rand.nextInt(10)).join();
   }
 
   bool validateAndSave() {
@@ -165,15 +119,20 @@ class LoginNotifier extends BaseChangeNotifier {
   }
 
   Future<void> apiRegisterToken() async {
-    final fcmToken = await FirebaseMessaging.instance.getToken();
-    print("FCM Token: $fcmToken");
-    if (fcmToken == null) return;
+    String fcmToken = '';
+
     try {
+      // Get FCM token safely
+      fcmToken = await FirebaseMessaging.instance.getToken() ?? '';
+      print("FCM Token: $fcmToken");
 
+      // Call your API with the token (empty string if null)
       final parsed = await CommonRepository.instance.apiRegisterToken(
-        RegisterTokenRequest(userId: userNameController.text, token: fcmToken),
+        RegisterTokenRequest(
+          userId: userNameController.text,
+          token: fcmToken,
+        ),
       );
-
     } catch (e, stackTrace) {
       print("❌ Error updating Token: $e");
       print("Stack: $stackTrace");
@@ -268,6 +227,5 @@ class LoginNotifier extends BaseChangeNotifier {
   void disposeControllers() {
     userNameController.dispose();
     passwordController.dispose();
-    captchaController.dispose();
   }
 }

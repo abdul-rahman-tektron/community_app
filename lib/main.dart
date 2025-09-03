@@ -12,6 +12,7 @@ import 'package:community_app/res/themes.dart';
 import 'package:community_app/utils/crashlytics_service.dart';
 import 'package:community_app/utils/helpers/app_initializer.dart';
 import 'package:community_app/utils/helpers/screen_size.dart';
+import 'package:community_app/utils/notification_service.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -20,16 +21,25 @@ import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 
 Future<void> main() async {
+
   await CrashlyticsService.runWithCrashlytics(() async {
     await AppInitializer.initialize();
 
     final userData = await AppInitializer.loadUserData();
 
-    runApp(MyApp(
+    final app = MyApp(
       token: userData["token"],
       user: userData["user"],
       isOptionSelectionCompleted: userData["optionSelectionCompleted"],
-    ));
+    );
+
+    runApp(app);
+
+    // Set navigatorKey for NotificationService
+    NotificationService().setNavigatorKey(MyApp.navigatorKey);
+
+    // Check if app was launched via notification (terminated state)
+    await NotificationService().checkInitialMessage();
   });
 }
 
@@ -81,7 +91,7 @@ class AppWrapper extends StatelessWidget {
               child: MaterialApp(
                 debugShowCheckedModeBanner: false,
                 navigatorKey: MyApp.navigatorKey,
-                title: 'X10 solutions',
+                title: 'Xception',
                 locale: langNotifier.locale,
                 supportedLocales: const [
                   Locale('en'),

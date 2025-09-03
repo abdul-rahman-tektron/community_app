@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 class SettingsNotifier extends BaseChangeNotifier {
   bool _notificationSwitch = true;
+
   void changeLanguage(BuildContext context) {
     final langNotifier = context.read<LanguageNotifier>();
     langNotifier.switchLanguage();
@@ -21,7 +22,7 @@ class SettingsNotifier extends BaseChangeNotifier {
     await loadUserData();
     final savedValue = HiveStorageService.getNotification();
     if (savedValue != null) {
-      _notificationSwitch = savedValue == "true";
+      _notificationSwitch = savedValue == true;
     }
     notifyListeners();
   }
@@ -35,24 +36,23 @@ class SettingsNotifier extends BaseChangeNotifier {
   void handleNavigation(BuildContext context, String routeKey) {
     switch (routeKey) {
       case 'edit-profile':
-        Navigator.pushNamed(context, '/edit-profile').then((value) {
+        Navigator.pushNamed(context, AppRoutes.editProfile).then((value) {
           initializeData();
-        },);
+        });
         break;
-
-        case 'edit-services':
-        Navigator.pushNamed(context, '/vendor-onboarding', arguments: true).then((value) {
+      case 'edit-jobs':
+        Navigator.pushNamed(context, AppRoutes.vendorOnboarding, arguments: true).then((value) {
           initializeData();
-        },);
+        });
         break;
       case 'change-password':
-        Navigator.pushNamed(context, '/change-password');
+        Navigator.pushNamed(context, AppRoutes.changePassword);
         break;
       case 'delete-account':
-        Navigator.pushNamed(context, '/delete-account');
+        Navigator.pushNamed(context, AppRoutes.deleteAccount);
         break;
       case 'saved-cards':
-        Navigator.pushNamed(context, '/saved-cards');
+        Navigator.pushNamed(context, AppRoutes.savedCards);
         break;
       case 'change-language':
         changeLanguage(context);
@@ -63,6 +63,9 @@ class SettingsNotifier extends BaseChangeNotifier {
       case 'about':
         Navigator.pushNamed(context, '/about');
         break;
+      case 'privacy-policy':
+        Navigator.pushNamed(context, AppRoutes.privacyPolicy);
+        break;
       case 'logout':
         Navigator.pushNamed(context, '/logout');
         break;
@@ -72,14 +75,11 @@ class SettingsNotifier extends BaseChangeNotifier {
   Future<void> logoutFunctionality(BuildContext context) async {
     await SecureStorageService.clearData();
     await HiveStorageService.clearOnLogout();
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      AppRoutes.login,
-          (route) => false,
-    );
+    Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (route) => false);
   }
 
   bool get notificationSwitch => _notificationSwitch;
+
   set notificationSwitch(bool value) {
     if (_notificationSwitch != value) {
       _notificationSwitch = value;

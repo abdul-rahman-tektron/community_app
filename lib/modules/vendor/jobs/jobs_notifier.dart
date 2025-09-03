@@ -4,8 +4,6 @@ class JobsNotifier extends BaseChangeNotifier{
   int _selectedIndex = 0;
 
   JobsNotifier(int? currentIndex) {
-    print("currentIndex in jobs");
-    print(currentIndex);
     _selectedIndex = currentIndex ?? 0;
   }
 

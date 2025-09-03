@@ -20,8 +20,7 @@ class QuotationDetailsNotifier extends BaseChangeNotifier {
   }
 
   Future<void> initializeData() async {
-    await apiJobInfoDetail();
-    await apiQuotationResponseDetail();
+    Future.wait([apiJobInfoDetail(), apiQuotationResponseDetail()]);
   }
 
   Future<void> apiJobInfoDetail() async {

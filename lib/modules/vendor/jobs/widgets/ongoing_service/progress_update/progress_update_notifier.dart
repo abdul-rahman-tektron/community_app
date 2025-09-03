@@ -54,10 +54,13 @@ class ProgressUpdateNotifier extends BaseChangeNotifier {
   }
 
   Future<void> initializeData() async {
-    await apiJobInfoDetail();
     await loadUserData();
+    await apiJobInfoDetail();
     updatePhaseFromStatus(AppStatus.fromName(currentStatus ?? ""));
-    if(currentPhase == JobPhase.inProgress || currentPhase == JobPhase.completed) await loadJobCompletionDetails();
+    if (currentPhase == JobPhase.inProgress ||
+        currentPhase == JobPhase.completed) {
+      await loadJobCompletionDetails();
+    }
   }
 
   TextEditingController notesController = TextEditingController();
@@ -118,7 +121,7 @@ class ProgressUpdateNotifier extends BaseChangeNotifier {
 
   Future<void> assignEmployees(BuildContext context) async {
     if (assignedEmployees.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please add at least one employee")));
+      ToastHelper.showError("Please add at least one employee");
       return;
     }
 

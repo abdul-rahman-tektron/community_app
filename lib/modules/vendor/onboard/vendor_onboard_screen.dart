@@ -67,7 +67,7 @@ class VendorOnboardScreen extends StatelessWidget {
         Text("Welcome Aboard!", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         10.verticalSpace,
         Text(
-          "Let’s help you list your services. Start by selecting a category and then describe the specific services you offer.",
+          "Let’s help you list your jobs. Start by selecting a category and then describe the specific jobs you offer.",
           style: TextStyle(fontSize: 14, color: Colors.black54),
         ),
       ],
@@ -145,7 +145,7 @@ class VendorOnboardScreen extends StatelessWidget {
               backgroundColor: AppColors.white,
               borderColor: AppColors.primary,
               textStyle: AppFonts.text14.regular.style,
-              text: "Done",
+              text: "Submit",
             ),
           ],
         ),
@@ -214,7 +214,7 @@ class VendorOnboardScreen extends StatelessWidget {
           "Upload the Company Logo",
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 8),
+        8.verticalSpace,
         _buildImageUpload(vendorOnboardNotifier, () {
           vendorOnboardNotifier.pickLogo();
         }, vendorOnboardNotifier.logoPath),
@@ -224,6 +224,7 @@ class VendorOnboardScreen extends StatelessWidget {
 
   /// Submit button
   Widget _buildSubmitButton(BuildContext context, VendorOnboardNotifier vendorOnboardNotifier) {
-    return CustomButton(onPressed: () => vendorOnboardNotifier.submit(context), text: "Submit");
+    return CustomButton(onPressed: () => vendorOnboardNotifier.submit(context),
+        text: isEdit ?? false ? "Back" : "Submit");
   }
 }

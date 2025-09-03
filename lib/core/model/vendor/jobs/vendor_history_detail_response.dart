@@ -101,6 +101,7 @@ class JobDetail {
   double? totalAmount;
   String? remarks;
   int? rating;
+  String? feedback;
 
   JobDetail({
     this.jobId,
@@ -111,6 +112,7 @@ class JobDetail {
     this.totalAmount,
     this.remarks,
     this.rating,
+    this.feedback,
   });
 
   factory JobDetail.fromJson(Map<String, dynamic> json) => JobDetail(
@@ -122,6 +124,7 @@ class JobDetail {
     totalAmount: json["totalAmount"],
     remarks: json["remarks"],
     rating: json["rating"],
+    feedback: json["feedback"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -133,5 +136,6 @@ class JobDetail {
     "totalAmount": totalAmount,
     "remarks": remarks,
     "rating": rating,
+    "feedback": feedback,
   };
 }

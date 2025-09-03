@@ -1,10 +1,6 @@
 import 'package:community_app/modules/vendor/jobs/jobs_notifier.dart';
 import 'package:community_app/modules/vendor/jobs/widgets/job_history/job_history_screen.dart';
 import 'package:community_app/modules/vendor/jobs/widgets/ongoing_service/ongoing_service_screen.dart';
-import 'package:community_app/modules/vendor/quotation/quotation_notifier.dart';
-import 'package:community_app/modules/vendor/quotation/widgets/new_request/new_request_screen.dart';
-import 'package:community_app/modules/vendor/quotation/widgets/sent_quotation/sent_quotation_screen.dart';
-import 'package:community_app/modules/vendor/quotation/widgets/updated_quotation/updated_quotation_screen.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:flutter/material.dart';

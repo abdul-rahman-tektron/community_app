@@ -26,13 +26,6 @@ class VendorDashboardNotifier extends BaseChangeNotifier {
     await apiDashboard();
   }
 
-  // License status data
-  final LicenseStatus licenseStatus = LicenseStatus(
-    licenseId: "1234567890",
-    expiryDate: DateTime(2025, 12, 31),
-    status: "Active",
-  );
-
   Future<void> apiDashboard() async {
     try {
       final result = await VendorDashboardRepository.instance.apiVendorDashboard(userData?.customerId.toString() ?? "0");
@@ -113,22 +106,6 @@ class VendorDashboardNotifier extends BaseChangeNotifier {
       iconBgColor: const Color(0xffe7f0ff),
       iconColor: Colors.blue.shade800,
       label: "Service History",
-    ),
-  ];
-
-  // Alerts list
-  final List<AlertItem> alerts = [
-    AlertItem(
-      icon: LucideIcons.messageSquareMore,
-      iconBgColor: const Color(0xfffff6e8),
-      iconColor: Colors.orange.shade900,
-      message: "5 requests have not been responded to for over 24 hours",
-    ),
-    AlertItem(
-      icon: LucideIcons.creditCard,
-      iconBgColor: const Color(0xffffe8e8),
-      iconColor: Colors.red.shade900,
-      message: "3 payments are pending from completed services",
     ),
   ];
 

@@ -76,39 +76,6 @@ class VendorDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLicenseAlertCard(VendorDashboardNotifier notifier) {
-    final license = notifier.licenseStatus;
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        color: Color(0xffffe8e8),
-        borderRadius: BorderRadius.circular(10),
-        border: Border(left: BorderSide(color: Colors.red, width: 5.0)),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 7)],
-      ),
-      child: Row(
-        children: [
-          Icon(LucideIcons.info, color: Colors.red, size: 25.w),
-          15.horizontalSpace,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("License Expiring Soon", style: AppFonts.text14.bold.style),
-                5.verticalSpace,
-                Text(
-                  "Your Trade License is expiring on ${license.expiryDate.toLocal().toString().split(' ')[0]}, Please renew your license",
-                  style: AppFonts.text14.regular.style,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildLicenseStatusCard(VendorDashboardNotifier notifier) {
     return Container(
       width: double.infinity,
@@ -309,34 +276,6 @@ class VendorDashboardScreen extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildAlertsList(VendorDashboardNotifier notifier) {
-    return Column(
-      children: notifier.alerts.map((alert) {
-        return Padding(
-          padding: EdgeInsets.symmetric(vertical: 10.h),
-          child: Container(
-            padding: EdgeInsets.all(12.w),
-            decoration: AppStyles.commonDecoration,
-            child: Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(8.w),
-                  decoration: BoxDecoration(
-                    color: alert.iconBgColor,
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Icon(alert.icon, color: alert.iconColor, size: 20.w),
-                ),
-                15.horizontalSpace,
-                Expanded(child: Text(alert.message, style: AppFonts.text14.regular.style)),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
     );
   }
 

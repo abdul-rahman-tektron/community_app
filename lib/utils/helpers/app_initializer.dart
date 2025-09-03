@@ -9,6 +9,7 @@ import 'package:community_app/utils/permissions_handler.dart';
 import 'package:community_app/utils/storage/hive_storage.dart';
 import 'package:community_app/utils/storage/secure_storage.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -37,8 +38,18 @@ class AppInitializer {
   }
 
   static Future<void> _initializeNotifications() async {
+    // ⚡ Register the background handler first
+    FirebaseMessaging.onBackgroundMessage(
+        NotificationService.firebaseMessagingBackgroundHandler);
+
+    // Then initialize the service (foreground & local notifications)
     await NotificationService().init();
+
+    // Set navigatorKey for on-tap handling
     NotificationService().setNavigatorKey(MyApp.navigatorKey);
+
+    //Handle the case when the app is opened from a terminated state
+    await NotificationService().checkInitialMessage();
   }
 
   static Future<void> _initializeStorage() async {

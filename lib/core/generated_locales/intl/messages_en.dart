@@ -25,7 +25,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "changeLanguageTo":
             MessageLookupByLibrary.simpleMessage("Switch Language -"),
         "connectingResidents": MessageLookupByLibrary.simpleMessage(
-            "Connecting residents, services, and support—seamlessly in one app."),
+            "Connecting residents, jobs, and support—seamlessly in one app."),
         "dontHaveAccount":
             MessageLookupByLibrary.simpleMessage("Don\'t have an account?"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
@@ -62,8 +62,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "tenant": MessageLookupByLibrary.simpleMessage("Tenant"),
         "vendor": MessageLookupByLibrary.simpleMessage("Vendor"),
         "welcome": MessageLookupByLibrary.simpleMessage("Welcome to the App"),
-        "welcomeToCommunityApp":
-            MessageLookupByLibrary.simpleMessage("Welcome to X10 solutions"),
+        "welcomeToCommunityApp": MessageLookupByLibrary.simpleMessage(
+            "Welcome to Xception solutions"),
         "yourRoleHelpsUs": MessageLookupByLibrary.simpleMessage(
             "Your role helps us provide the right experience for you.")
       };

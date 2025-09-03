@@ -24,7 +24,7 @@ class CustomerDashboardNotifier extends BaseChangeNotifier {
     ),
     PromotionItem(
       title: "Buy 1 Cleaning, Get 1 Free",
-      imageUrl: "https://diamondshine.com.ng/storage/2021/04/diamond-shine-cleaning-services-2.jpg",
+      imageUrl: "https://cdn.prod.website-files.com/640051ce8a159067e1042e74/65d5b19950d874f282b5c35f_woman-with-gloves-cleaning-floor_23-2148520978.jpg",
     ),
   ];
 
@@ -47,8 +47,11 @@ class CustomerDashboardNotifier extends BaseChangeNotifier {
 
   Future<void> initializeData() async {
     await loadUserData();
-    await apiServiceDropdown();
-    await apiDashboard();
+
+    final stopwatch = Stopwatch()..start();
+    await Future.wait([apiServiceDropdown(), apiDashboard()]);
+    stopwatch.stop();
+    print("APIs loaded in ${stopwatch.elapsedMilliseconds} ms");
   }
 
   List<QuickStat> get quickStats {
@@ -102,7 +105,7 @@ class CustomerDashboardNotifier extends BaseChangeNotifier {
         return LucideIcons.bug300;
       case "security & cctv":
         return LucideIcons.cctv300;
-      case "handyman services":
+      case "handyman jobs":
         return LucideIcons.drill300;
       default:
         return LucideIcons.circle300; // fallback icon
@@ -111,9 +114,6 @@ class CustomerDashboardNotifier extends BaseChangeNotifier {
 
 
   void selectCategory(BuildContext context, ServiceDropdownData category) {
-    print("category.serviceName");
-    print(category.serviceName);
-    print(category.serviceId);
     Navigator.pushReplacementNamed(
       context,
       AppRoutes.customerBottomBar,
@@ -191,11 +191,3 @@ class PromotionItem {
 
   PromotionItem({required this.title, required this.imageUrl});
 }
-
-
-// class ServiceCategory {
-//   final String name;
-//   final IconData icon;
-//
-//   const ServiceCategory({required this.name, required this.icon});
-// }

@@ -122,6 +122,7 @@ class VendorRegistrationNotifier extends BaseChangeNotifier {
       final result = await VendorAuthRepository.instance.apiVendorRegister(request);
 
       if (result is CustomerRegisterRequest) {
+        if (!context.mounted) return;
         await _handleRegisterSuccess(result, context);
       } else if (result is CommonResponse && result.success == false) {
         ToastHelper.showError(result.message ?? 'Registration failed.');
@@ -131,8 +132,6 @@ class VendorRegistrationNotifier extends BaseChangeNotifier {
       }
     } catch (e, stackTrace) {
       ToastHelper.showError('An error occurred. Please try again.');
-
-      print("ee");
       print(e);
       print(stackTrace);
       notifyListeners();

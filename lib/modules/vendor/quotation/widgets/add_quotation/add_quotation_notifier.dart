@@ -37,10 +37,9 @@ class AddQuotationNotifier extends BaseChangeNotifier {
 
   initializeData() async {
     await loadUserData();
-    // Add default empty items for both types
+    await apiJobInfoDetail();
     quotationItems.add(QuotationItem.empty(QuotationItemType.material));
     quotationItems.add(QuotationItem.empty(QuotationItemType.service));
-    await apiJobInfoDetail();
     notifyListeners();
   }
 

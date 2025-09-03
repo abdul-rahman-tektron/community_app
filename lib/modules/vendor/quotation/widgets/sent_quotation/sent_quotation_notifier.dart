@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 class SentQuotationNotifier extends BaseChangeNotifier {
   List<VendorQuotationRequestData> quotations = [];
-  bool isLoading = false;
 
   SentQuotationNotifier() {
     initializeData();

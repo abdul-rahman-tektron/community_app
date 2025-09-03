@@ -24,22 +24,22 @@ class VendorOnboardNotifier extends BaseChangeNotifier {
 
   List<ServiceDropdownData> serviceData = [];
 
-  // Store completed services with their data
+  // Store completed jobs with their data
   final Map<ServiceDropdownData, Map<String, String?>> completedServices = {};
 
   final Map<String, String> staticDescriptions = {
-    "Handyman Services": "Quick and reliable handyman services for repairs, installations, and general maintenance at your home or office.",
+    "Handyman Services": "Quick and reliable handyman jobs for repairs, installations, and general maintenance at your home or office.",
     "Security & CCTV": "Trusted security and CCTV solutions including installation, monitoring, and system maintenance for safety and peace of mind.",
     "Pest Control": "Safe and effective pest control treatments to eliminate insects, rodents, and termites, keeping your space clean and healthy.",
-    "Appliance Repair": "Professional repair services for home appliances like refrigerators, washing machines, ovens, and more with reliable results.",
-    "Carpentry": "Custom carpentry services for furniture, fittings, and home improvements, crafted with precision and quality workmanship.",
-    "Pet Grooming": "Complete pet grooming services including bathing, trimming, and care to keep your pets clean, healthy, and comfortable.",
-    "Laundry": "Convenient laundry services with washing, ironing, and dry cleaning to keep your clothes fresh, clean, and neatly pressed.",
+    "Appliance Repair": "Professional repair jobs for home appliances like refrigerators, washing machines, ovens, and more with reliable results.",
+    "Carpentry": "Custom carpentry jobs for furniture, fittings, and home improvements, crafted with precision and quality workmanship.",
+    "Pet Grooming": "Complete pet grooming jobs including bathing, trimming, and care to keep your pets clean, healthy, and comfortable.",
+    "Laundry": "Convenient laundry jobs with washing, ironing, and dry cleaning to keep your clothes fresh, clean, and neatly pressed.",
     "Plumbing": "Expert plumbing solutions for leak repairs, pipe installations, bathroom fittings, and water system maintenance with quick service.",
-    "Painting": "High-quality painting services for interiors and exteriors with professional finishing that refreshes and brightens your space.",
-    "Cleaning": "Thorough cleaning services for homes, offices, and commercial spaces, ensuring a spotless, hygienic, and welcoming environment.",
+    "Painting": "High-quality painting jobs for interiors and exteriors with professional finishing that refreshes and brightens your space.",
+    "Cleaning": "Thorough cleaning jobs for homes, offices, and commercial spaces, ensuring a spotless, hygienic, and welcoming environment.",
     "Electric Works": "Certified electrical works for wiring, lighting, installations, and repairs with safe, reliable, and professional service.",
-    "AC Repair": "Specialized AC repair and maintenance services to keep your air conditioning systems efficient, reliable, and cooling properly.",
+    "AC Repair": "Specialized AC repair and maintenance jobs to keep your air conditioning systems efficient, reliable, and cooling properly.",
   };
 
   final Map<String, String> staticServiceImages = {

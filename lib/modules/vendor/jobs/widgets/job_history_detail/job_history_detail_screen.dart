@@ -36,10 +36,6 @@ class JobHistoryDetailScreen extends StatelessWidget {
   }
 
   Widget buildBody(BuildContext context, JobHistoryDetailNotifier notifier) {
-    if (notifier.isLoading) {
-      return const Scaffold(body: Center(child: LottieLoader()));
-    }
-
     return Scaffold(
       appBar: CustomAppBar(),
       body: SafeArea(
@@ -287,7 +283,13 @@ class JobHistoryDetailScreen extends StatelessWidget {
            RatingsHelper(rating: notifier.vendorHistoryDetailData?.jobDetail?.rating?.toDouble() ?? 0),
           ],
         ),
-
+        Row(
+          children: [
+            Text("Feedback: ", style: AppFonts.text14.semiBold.style),
+            5.horizontalSpace,
+            Text(notifier.vendorHistoryDetailData?.jobDetail?.feedback ?? ""),
+          ],
+        ),
       ],
     );
   }

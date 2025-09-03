@@ -90,7 +90,7 @@ class ExploreScreen extends StatelessWidget {
                       // ✅ Empty state text
                       return const Center(
                         child: Text(
-                          "No services found",
+                          "No jobs found",
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                         ),
                       );

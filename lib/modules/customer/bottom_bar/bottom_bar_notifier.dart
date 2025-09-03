@@ -1,7 +1,7 @@
 import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/modules/customer/dashboard/dashboard_screen.dart';
 import 'package:community_app/modules/customer/explore/explore_screen.dart';
-import 'package:community_app/modules/customer/services/services_screen.dart';
+import 'package:community_app/modules/customer/jobs/jobs_screen.dart';
 import 'package:community_app/utils/enums.dart';
 import 'package:flutter/material.dart';
 
@@ -36,7 +36,7 @@ class BottomBarNotifier extends BaseChangeNotifier {
         },
       ),
       ExploreScreen(initialCategory: _selectedCategory), // Pass the selected category here too
-      ServicesScreen(),
+      JobsScreen(),
     ][_currentIndex];
   }
 }

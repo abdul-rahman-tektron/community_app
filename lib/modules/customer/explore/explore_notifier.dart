@@ -72,8 +72,7 @@ class ExploreNotifier extends BaseChangeNotifier {
   }
 
   Future<void> initializeData() async {
-    await apiServiceDropdown();
-    await fetchExploreServices();
+    await Future.wait([apiServiceDropdown(), fetchExploreServices()]);
   }
 
   void _onSearchChanged() {
@@ -113,8 +112,8 @@ class ExploreNotifier extends BaseChangeNotifier {
         exploreServices = [];
       }
     } catch (e, stack) {
-      print("Error fetching explore services: $e");
-      print("Error fetching explore services: $stack");
+      print("Error fetching explore jobs: $e");
+      print("Error fetching explore jobs: $stack");
       exploreServices = [];
     } finally {
       isLoading = false;

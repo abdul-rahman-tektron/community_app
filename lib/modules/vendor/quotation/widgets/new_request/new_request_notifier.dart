@@ -57,12 +57,14 @@ class NewRequestNotifier extends BaseChangeNotifier {
   }
 
   Future<void> openDialer(String phoneNumber) async {
-    final Uri launchUri = Uri(
-      scheme: 'tel',
-      path: phoneNumber,
-    );
-    if (!await launchUrl(launchUri)) {
-      throw 'Could not launch $phoneNumber';
+
+    try {
+      final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
+      if (!await launchUrl(launchUri)) {
+        throw 'Could not launch $phoneNumber';
+      }
+    } catch(e) {
+      print(e);
     }
   }
 }
