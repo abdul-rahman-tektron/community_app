@@ -99,18 +99,18 @@ class ProgressUpdateNotifier extends BaseChangeNotifier {
     }
   }
 
-  Future<void> apiUpdateJobStatus(int? statusId) async {
+  Future<void> apiUpdateJobStatus(int? statusId, {String? notes, bool? showToast}) async {
     if (statusId == null) return;
     try {
       notifyListeners();
       final parsed = await CommonRepository.instance.apiUpdateJobStatus(
-        UpdateJobStatusRequest(jobId: jobId, statusId: statusId, createdBy: userData?.name ?? "", vendorId: userData?.customerId ?? 0),
+        UpdateJobStatusRequest(jobId: jobId, statusId: statusId, notes: notes, createdBy: userData?.name ?? "", vendorId: userData?.customerId ?? 0),
       );
 
       if (parsed is CommonResponse && parsed.success == true) {
         currentStatus = AppStatus.fromId(statusId)?.name;
         updatePhaseFromStatus(AppStatus.fromId(statusId));
-        // ToastHelper.showSuccess("Status updated to: ${AppStatus.fromName(currentStatus ?? "")?.name ?? ""}");
+        if(showToast ?? false) ToastHelper.showSuccess("Status updated to: ${AppStatus.fromName(currentStatus ?? "")?.name ?? ""}");
       }
     } catch (e) {
       // ToastHelper.showError('Error updating status: $e');
@@ -209,13 +209,15 @@ class ProgressUpdateNotifier extends BaseChangeNotifier {
               fileName: "before_$index.jpg",
             );
 
-            // After photo (may be null)
             File? afterFile;
-            if (photo.afterPhotoUrl != null && photo.afterPhotoUrl!.isNotEmpty) {
-              afterFile = await FileUploadHelper.base64ToFile(
-                photo.afterPhotoUrl!,
-                fileName: "after_$index.jpg",
-              );
+            // After photo (may be null)
+            if(currentStatus != AppStatus.rework.name) {
+              if (photo.afterPhotoUrl != null && photo.afterPhotoUrl!.isNotEmpty) {
+                afterFile = await FileUploadHelper.base64ToFile(
+                  photo.afterPhotoUrl!,
+                  fileName: "after_$index.jpg",
+                );
+              }
             }
 
             photoPairs.add(PhotoPair(before: beforeFile, after: afterFile));
@@ -254,7 +256,8 @@ class ProgressUpdateNotifier extends BaseChangeNotifier {
       currentPhase = JobPhase.assign;
     } else if (status.id < 10) {
       currentPhase = JobPhase.initiated;
-    } else if (status.id < 12) {
+    } else if (status.id < 12 || status.name == AppStatus.holdTheJob.name ||
+        status.name == AppStatus.rework.name) {
       currentPhase = JobPhase.inProgress;
     } else if (status.id < 17) {
       currentPhase = JobPhase.completed;

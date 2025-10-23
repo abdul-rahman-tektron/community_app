@@ -85,6 +85,10 @@ class CustomerDashboardNotifier extends BaseChangeNotifier {
     switch (serviceName.toLowerCase()) {
       case "plumbing":
         return LucideIcons.wrench300;
+      case "laptop service":
+        return LucideIcons.laptop300;
+      case "handyman services":
+        return LucideIcons.hardHat300;
       case "painting":
         return LucideIcons.paintRoller300;
       case "cleaning":

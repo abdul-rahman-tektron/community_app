@@ -15,6 +15,10 @@ import 'package:community_app/core/model/customer/job/job_status_tracking/update
 import 'package:community_app/core/model/customer/job/new_job_request.dart';
 import 'package:community_app/core/model/customer/job/ongoing_jobs_response.dart';
 import 'package:community_app/core/model/customer/job/update_customer_completion_request.dart';
+import 'package:community_app/core/model/customer/payment/create_payment/create_payment_request.dart';
+import 'package:community_app/core/model/customer/payment/create_payment/create_payment_response.dart';
+import 'package:community_app/core/model/customer/payment/payment_detail_request.dart';
+import 'package:community_app/core/model/customer/payment/payment_detail_response.dart';
 import 'package:community_app/core/model/customer/quotation/customer_response_reject_response.dart';
 import 'package:community_app/core/model/customer/quotation/customer_response_request.dart';
 import 'package:community_app/core/model/customer/quotation/customer_response_response.dart';
@@ -242,6 +246,42 @@ class CustomerJobsRepository extends BaseRepository {
       } else {
         return customerResponseRejectResponseFromJson(jsonEncode(data));
       }
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+  Future<Object?> apiPaymentDetail(PaymentDetailRequest requestParams) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.post,
+      pathUrl: ApiUrls.pathPaymentDetail,
+      body: jsonEncode(requestParams.toJson()),
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final paymentDetailResponse = paymentDetailResponseFromJson(jsonEncode(response?.data));
+      return paymentDetailResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+  Future<Object?> apiCreatePayment(CreatePaymentRequest requestParams) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.post,
+      pathUrl: ApiUrls.pathCreatePayment,
+      body: jsonEncode(requestParams.toJson()),
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final createPaymentResponse = createPaymentResponseFromJson(jsonEncode(response?.data));
+      return createPaymentResponse;
     } else {
       throw ErrorResponse.fromJson(response?.data ?? {});
     }

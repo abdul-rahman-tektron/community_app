@@ -1,5 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:community_app/core/model/common/login/register_token_request.dart';
+import 'package:community_app/core/remote/services/common_repository.dart';
+import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/storage/hive_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -23,6 +27,9 @@ class NotificationService {
 
   GlobalKey<NavigatorState>? _navigatorKey;
 
+  // ADDED: keep a handle to the token refresh subscription
+  StreamSubscription<String>? _tokenSub;
+
   void setNavigatorKey(GlobalKey<NavigatorState> navigatorKey) {
     _navigatorKey = navigatorKey;
 
@@ -36,6 +43,21 @@ class NotificationService {
 
   Future<void> init() async {
     debugPrint("[NotificationService] Initializing...");
+
+    // Ensure Firebase is ready if you call this from a background isolate
+    // (safe to call even if already initialized)
+    try {
+      Firebase.app();
+    } catch (_) {
+      await Firebase.initializeApp();
+    }
+
+    // iOS foreground presentation options
+    await _messaging.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
     // Request permissions (iOS)
     NotificationSettings settings = await _messaging.requestPermission(
@@ -55,19 +77,19 @@ class NotificationService {
       return;
     }
 
-    // Get FCM/APNs token
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      _messaging.getAPNSToken().then((apnsToken) {
-        debugPrint("[NotificationService] APNs Token: $apnsToken");
-        _messaging.getToken().then((fcmToken) {
-          debugPrint("[NotificationService] FCM Token: $fcmToken");
-        });
-      });
-    } else {
-      _messaging.getToken().then((fcmToken) {
-        debugPrint("[NotificationService] FCM Token: $fcmToken");
-      });
-    }
+    // Enable auto-init (in case it was disabled)
+    await _messaging.setAutoInitEnabled(true);
+
+    // ===== TOKEN: GET CURRENT & SEND TO BACKEND =====
+    await _obtainAndSendCurrentToken();
+
+    // ===== TOKEN: LISTEN FOR REFRESH & RESEND =====
+    _tokenSub?.cancel();
+    _tokenSub = _messaging.onTokenRefresh.listen((newToken) async {
+      debugPrint("[NotificationService] onTokenRefresh -> $newToken");
+      await _persistToken(newToken);
+      await sendTokenToBackend(newToken);
+    });
 
     // Initialize local notifications
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -126,6 +148,94 @@ class NotificationService {
 
     debugPrint("[NotificationService] Initialization complete ✅");
   }
+
+  // ADDED: call when you teardown the app (optional since singleton)
+  Future<void> dispose() async {
+    await _tokenSub?.cancel();
+  }
+
+  // ====== TOKEN HELPERS ======
+
+  Future<void> _obtainAndSendCurrentToken() async {
+    try {
+      String? fcmToken;
+
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        final apns = await _messaging.getAPNSToken();
+        debugPrint("[NotificationService] APNs Token: $apns");
+        fcmToken = await _messaging.getToken();
+      } else {
+        fcmToken = await _messaging.getToken();
+      }
+
+      debugPrint("[NotificationService] FCM Token: $fcmToken");
+
+      if (fcmToken != null && fcmToken.isNotEmpty) {
+        // Avoid redundant sends if already sent/saved
+        final lastSaved = HiveStorageService.getFCMToken();
+        if (lastSaved != fcmToken) {
+          await _persistToken(fcmToken);
+          await sendTokenToBackend(fcmToken);
+        }
+      }
+    } catch (e) {
+      debugPrint("[NotificationService] Error obtaining token: $e");
+    }
+  }
+
+  Future<void> _persistToken(String token) async {
+    try {
+      await HiveStorageService.setFCMToken(token);
+    } catch (e) {
+      debugPrint("[NotificationService] Error saving token locally: $e");
+    }
+  }
+
+  /// ADDED: replace this with your real API integration.
+  /// This mirrors:
+  /// - iOS: Messaging.messaging().token {...}
+  /// - Android: FirebaseMessaging.getInstance().getToken(), onNewToken(...)
+  Future<void> sendTokenToBackend(String token) async {
+    debugPrint("[NotificationService] Sending FCM token to backend...");
+    // TODO: implement your actual API call here.
+    // Example sketch:
+    //
+    // final userId = HiveStorageService.getUserId();
+    // await ApiClient.post(
+    //   "/notifications/register-token",
+    //   body: {"userId": userId, "fcmToken": token, "platform": defaultTargetPlatform.name},
+    // );
+    //
+    // Handle errors & retries as needed.
+    debugPrint("[NotificationService] Token sent ✅");
+  }
+
+  // Future<void> apiRegisterToken(String token) async {
+  //   String fcmToken = '';
+  //
+  //   try {
+  //     // Get FCM token safely
+  //     fcmToken = await FirebaseMessaging.instance.getToken() ?? '';
+  //     print("FCM Token: $fcmToken");
+  //
+  //     // Call your API with the token (empty string if null)
+  //     final parsed = await CommonRepository.instance.apiRegisterToken(
+  //       RegisterTokenRequest(
+  //         userId: userNameController.text,
+  //         token: fcmToken,
+  //       ),
+  //     );
+  //   } catch (e, stackTrace) {
+  //     print("❌ Error updating Token: $e");
+  //     print("Stack: $stackTrace");
+  //     ToastHelper.showError('An error occurred. Please try again.');
+  //   } finally {
+  //     notifyListeners();
+  //   }
+  // }
+
+
+  // ====== NOTIFICATION DISPLAY & NAV ======
 
   Future<void> _showLocalNotification(
       RemoteNotification notification, Map<String, dynamic> data) async {

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/core/model/customer/explore/service_detail_request.dart';
 import 'package:community_app/core/model/customer/explore/service_detail_response.dart';
@@ -41,11 +43,10 @@ class ServiceDetailsNotifier extends BaseChangeNotifier {
 
       if (result is ServiceDetailResponse) {
         serviceDetail = result.data;
+        final hasVendor = (serviceDetail?.vendors?.isNotEmpty ?? false);
+        description = hasVendor ? serviceDetail!.vendors!.first.description ?? "" : "";
         notifyListeners();
       }
-
-      description = serviceDetail?.vendors?[0].description ?? "";
-
     } catch (e) {
       print("result error");
       print(e);
@@ -54,6 +55,11 @@ class ServiceDetailsNotifier extends BaseChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  ImageProvider safeBase64(String? b64, ImageProvider fallback) {
+    if (b64 == null || b64.isEmpty) return fallback;
+    try { return MemoryImage(base64Decode(b64)); } catch (_) { return fallback; }
   }
 
   void toggleDescription() {

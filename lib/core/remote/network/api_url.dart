@@ -43,6 +43,8 @@ class ApiUrls {
   static const pathCustomerHistoryList = "/api/Job/CustomerHistoryList"; // POST
   static const pathCustomerHistoryDetail = "/api/Job/CustomerHistoryDetail"; // POST
   static const pathSiteVisitCustomerResponse = "/api/SiteVisit/CustomerResponse"; // POST
+  static const pathPaymentDetail = "/api/JobPayment/GetPaymentdetails"; // POST
+  static const pathCreatePayment = "/api/JobPayment/CreatePayment"; // POST
 
   ///Vendor
   static const pathVendorRegister = "/api/Vendor/RegisterVendor"; // POST

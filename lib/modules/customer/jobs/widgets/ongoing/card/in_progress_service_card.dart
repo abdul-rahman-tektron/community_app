@@ -24,6 +24,8 @@ class InProgressServiceCard extends StatelessWidget {
           _buildServiceId(),
           10.verticalSpace,
           _buildTechnicianDetails(),
+          if(service.status == AppStatus.holdTheJob.name) 10.verticalSpace,
+          if(service.status == AppStatus.holdTheJob.name) _holdJobNotes(),
           20.verticalSpace,
           _buildProgressBar(),
         ],
@@ -74,6 +76,10 @@ class InProgressServiceCard extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _holdJobNotes() {
+    return Text("Note: the Job is on hold because of some reason");
   }
 
   Widget _iconLabelRow({

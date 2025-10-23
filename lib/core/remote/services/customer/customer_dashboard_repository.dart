@@ -5,6 +5,7 @@ import 'package:community_app/core/model/common/error/common_response.dart';
 import 'package:community_app/core/model/common/error/error_response.dart';
 import 'package:community_app/core/model/customer/dashboard/customer_dashboard_response.dart';
 import 'package:community_app/core/model/customer/job/create_job_booking_request.dart';
+import 'package:community_app/core/model/customer/job/create_job_booking_response.dart';
 import 'package:community_app/core/model/customer/quotation/quotation_request_list_response.dart';
 import 'package:community_app/core/model/vendor/quotation_request/quotation_request_list_response.dart';
 import 'package:community_app/core/model/vendor/quotation_request/quotation_request_request.dart';
@@ -57,21 +58,26 @@ class CustomerDashboardRepository extends BaseRepository {
     }
   }
 
-  /// POST: /Job/CreateJobBooking
-  /// Purpose: Creates a job booking by selecting one vendor from the top vendor list
-  Future<Object?> apiCreateJobBookingRequest(CreateJobBookingRequest requestParams) async {
+// CustomerDashboardRepository.dart (or wherever apiCreateJobBookingRequest lives)
+  Future<Object?> apiCreateJobBookingRequest(CreateJobBookingRequest req) async {
     final token = await SecureStorageService.getToken();
 
     final response = await networkRepository.call(
       method: Method.post,
-      pathUrl: ApiUrls.pathCreateJobBooking,
-      body: jsonEncode(requestParams.toJson()),
+      pathUrl: ApiUrls.pathCreateJobBooking, // your URL
+      body: jsonEncode(req.toJson()),
       headers: buildHeaders(token: token),
     );
 
     if (response?.statusCode == HttpStatus.ok) {
-      final commonResponse = commonResponseFromJson(jsonEncode(response?.data));
-      return commonResponse;
+      final data = response?.data;
+
+      // Booking may return emailPreview just like site-visit
+      if (data["emailPreview"] != null) {
+        return jobBookingResponseFromJson(jsonEncode(data));       // ✅ send email
+      } else {
+        return commonResponseFromJson(jsonEncode(data));           // ✅ generic success
+      }
     } else {
       throw ErrorResponse.fromJson(response?.data ?? {});
     }

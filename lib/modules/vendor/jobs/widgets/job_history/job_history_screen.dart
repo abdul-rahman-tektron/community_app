@@ -25,11 +25,15 @@ class JobHistoryScreen extends StatelessWidget {
             return const Center(child: Text("No job history."));
           }
 
+          // ✅ Sort job history by jobId descending (latest first)
+          final sortedHistory = [...notifier.historyServices]
+            ..sort((a, b) => (b.jobId ?? 0).compareTo(a.jobId ?? 0));
+
           return Scaffold(
             body: ListView.builder(
-              itemCount: notifier.historyServices.length,
+              itemCount: sortedHistory.length,
               itemBuilder: (context, index) {
-                final job = notifier.historyServices[index];
+                final job = sortedHistory[index];
                 return GestureDetector(
                   onTap: () {
                     Navigator.pushNamed(
@@ -50,23 +54,41 @@ class JobHistoryScreen extends StatelessWidget {
                             children: [
                               Row(
                                 children: [
-                                  Expanded(child: Text(job.customerName ?? "", style: AppFonts.text16.semiBold.style)),
-                                  Text("#${job.jobId ?? ""}", style: AppFonts.text16.regular.style),
+                                  Expanded(
+                                    child: Text(
+                                      job.customerName ?? "",
+                                      style: AppFonts.text16.semiBold.style,
+                                    ),
+                                  ),
+                                  Text(
+                                    "#${job.jobId ?? ""}",
+                                    style: AppFonts.text16.regular.style,
+                                  ),
                                 ],
                               ),
                               5.verticalSpace,
                               Row(
                                 children: [
-                                  Expanded(child: Text("${job.serviceName}", style: AppFonts.text14.regular.style,)),
-                                  Text("AED ${job.quotedAmount}", style: AppFonts.text14.regular.style),
+                                  Expanded(
+                                    child: Text(
+                                      job.serviceName ?? "",
+                                      style: AppFonts.text14.regular.style,
+                                    ),
+                                  ),
+                                  Text(
+                                    "AED ${job.quotedAmount ?? 0}",
+                                    style: AppFonts.text14.regular.style,
+                                  ),
                                 ],
                               ),
                               10.verticalSpace,
-                              Text("${job.address}", style: AppFonts.text14.regular.style,)
+                              Text(
+                                job.address ?? "",
+                                style: AppFonts.text14.regular.style,
+                              ),
                             ],
                           ),
                         ),
-
                       ],
                     ),
                   ),

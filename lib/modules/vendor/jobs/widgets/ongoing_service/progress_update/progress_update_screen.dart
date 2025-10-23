@@ -25,8 +25,9 @@ class ProgressUpdateScreen extends StatelessWidget {
   final int? jobId;
   final int? customerId;
   final String? status;
+  final String? reworkNotes;
 
-  const ProgressUpdateScreen({super.key, this.jobId, this.customerId, this.status});
+  const ProgressUpdateScreen({super.key, this.jobId, this.customerId, this.status, this.reworkNotes});
 
   @override
   Widget build(BuildContext context) {
@@ -74,19 +75,24 @@ class ProgressUpdateScreen extends StatelessWidget {
         return _buildBeforePhotos(context, notifier);
 
       case JobPhase.inProgress:
-        return Column(
-          children: [
-            _buildAfterPhotos(context, notifier),
-            15.verticalSpace,
-            CustomTextField(
-              controller: notifier.notesController,
-              fieldName: "Work Notes",
-              hintText: "Add progress notes",
-              isMaxLines: true,
-              onChanged: notifier.updateNotes,
-            ),
-          ],
-        );
+        return notifier.currentStatus == AppStatus.holdTheJob.name
+            ? Column(children: [Text(getVendorStatusMessage(notifier.currentStatus ?? ""))])
+            : Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if(reworkNotes != null) Text("Rework Notes: $reworkNotes"),
+                  if(reworkNotes != null) 15.verticalSpace,
+                  _buildAfterPhotos(context, notifier),
+                  15.verticalSpace,
+                  CustomTextField(
+                    controller: notifier.notesController,
+                    fieldName: "Work Notes",
+                    hintText: "Add progress notes",
+                    isMaxLines: true,
+                    onChanged: notifier.updateNotes,
+                  ),
+                ],
+              );
 
       case JobPhase.completed:
         return Column(children: [Text(getVendorStatusMessage(notifier.currentStatus ?? ""))]);
@@ -102,6 +108,8 @@ class ProgressUpdateScreen extends StatelessWidget {
       return "Payment has been completed. You can now await customer feedback.";
     } else if (currentStatus == AppStatus.jobClosedDone.name) {
       return "This job is closed. All processes are completed.";
+    } else if (currentStatus == AppStatus.holdTheJob.name) {
+      return "This job is on hold. kindly continue once everything is fine.";
     } else {
       return "Status unknown.";
     }
@@ -161,10 +169,22 @@ class ProgressUpdateScreen extends StatelessWidget {
           children: [
             Expanded(
               child: CustomButton(
-                text: "Hold",
-                onPressed: notifier.notes.trim().isNotEmpty
+                text: notifier.currentStatus == AppStatus.holdTheJob.name ? "Continue" : "Hold",
+                onPressed:
+                    notifier.notes.trim().isNotEmpty ||
+                        notifier.currentStatus == AppStatus.holdTheJob.name
                     ? () async {
-                        // await notifier.apiUpdateJobStatus(AppStatus.hold.id);
+                        await notifier
+                            .apiUpdateJobStatus(
+                              notifier.currentStatus == AppStatus.holdTheJob.name
+                                  ? AppStatus.workStartedInProgress.id
+                                  : AppStatus.holdTheJob.id,
+                              notes: notifier.notesController.text,
+                              showToast: true,
+                            )
+                            .then((value) {
+                              Navigator.pop(context);
+                            });
                       }
                     : null,
               ),
@@ -173,16 +193,17 @@ class ProgressUpdateScreen extends StatelessWidget {
             Expanded(
               child: CustomButton(
                 text: "Complete",
-                onPressed: (notifier.notes.trim().isNotEmpty &&
-                    notifier.photoPairs.any((pair) => pair.after != null))
+                onPressed:
+                    (notifier.notes.trim().isNotEmpty &&
+                        notifier.photoPairs.any((pair) => pair.after != null))
                     ? () async {
-                  await notifier.submitJobCompletion(context);
-                  await notifier
-                      .apiUpdateJobStatus(AppStatus.workCompletedAwaitingConfirmation.id)
-                      .then((value) {
-                    Navigator.pop(context);
-                  });
-                }
+                        await notifier.submitJobCompletion(context);
+                        await notifier
+                            .apiUpdateJobStatus(AppStatus.workCompletedAwaitingConfirmation.id)
+                            .then((value) {
+                              Navigator.pop(context);
+                            });
+                      }
                     : null,
               ),
             ),
@@ -514,9 +535,12 @@ class ProgressUpdateScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           child: GestureDetector(
             onTap: onTap,
-            child: Image.file(image, height: ScreenSize.width < 380 ? 75 : 90,
-                width: ScreenSize.width < 380 ? 75 : 90,
-                fit: BoxFit.cover),
+            child: Image.file(
+              image,
+              height: ScreenSize.width < 380 ? 75 : 90,
+              width: ScreenSize.width < 380 ? 75 : 90,
+              fit: BoxFit.cover,
+            ),
           ),
         ),
         5.verticalSpace,

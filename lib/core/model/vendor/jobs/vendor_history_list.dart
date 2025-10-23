@@ -45,7 +45,7 @@ class VendorHistoryListData {
   String? customerName;
   String? serviceName;
   String? address;
-  int? quotedAmount;
+  double? quotedAmount;
   DateTime? date;
 
   VendorHistoryListData({

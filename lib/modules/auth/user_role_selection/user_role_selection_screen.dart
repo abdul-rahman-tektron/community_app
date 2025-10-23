@@ -121,7 +121,7 @@ class UserRoleSelectionScreen extends StatelessWidget {
           //   },
           // ),
           20.verticalSpace,
-          languageWidget(context),
+          // languageWidget(context),
         ],
       ),
     );

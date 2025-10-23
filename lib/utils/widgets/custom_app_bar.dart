@@ -31,12 +31,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       centerTitle: true,
       title: Image.asset(AppImages.logo, height: 60),
-      actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: 14.0),
-          child: Icon(LucideIcons.bell, color: AppColors.white, size: 25.r),
-        ),
-      ],
+      // actions: [
+      //   Padding(
+      //     padding: const EdgeInsets.only(right: 14.0),
+      //     child: Icon(LucideIcons.bell, color: AppColors.white, size: 25.r),
+      //   ),
+      // ],
     );
   }
 

@@ -32,6 +32,8 @@ class AddQuotationScreen extends StatelessWidget {
   final int? quotationId;
   final int? customerId;
   final bool? isSiteVisit;
+  final int? quotationResponseId;
+  final bool? isResend;
 
   const AddQuotationScreen({
     super.key,
@@ -40,6 +42,8 @@ class AddQuotationScreen extends StatelessWidget {
     this.quotationId,
     this.customerId,
     this.isSiteVisit,
+    this.quotationResponseId,
+    this.isResend = false,
   });
 
   @override
@@ -49,7 +53,9 @@ class AddQuotationScreen extends StatelessWidget {
         ..jobId = jobId
         ..serviceId = serviceId
         ..quotationId = quotationId
-        ..customerId = customerId,
+        ..customerId = customerId
+        ..quotationResponseId = quotationResponseId
+        ..isResend = isResend,
       child: Consumer<AddQuotationNotifier>(
         builder: (context, addQuotationNotifier, _) {
           return LoadingOverlay<AddQuotationNotifier>(
@@ -69,8 +75,9 @@ class AddQuotationScreen extends StatelessWidget {
           children: [
             buildTitle(context, addQuotationNotifier),
             buildCustomerInfo(context, addQuotationNotifier),
-            if(!(isSiteVisit ?? false)) Divider(),
-            if(!(isSiteVisit ?? false)) buildSiteVisitRequest(context, addQuotationNotifier),
+            if (!(isSiteVisit ?? false) && !(isResend ?? false)) Divider(),
+            if (!(isSiteVisit ?? false) && !(isResend ?? false))
+              buildSiteVisitRequest(context, addQuotationNotifier),
             Divider(),
             buildQuotationInfo(context, addQuotationNotifier),
             Divider(),
@@ -89,22 +96,26 @@ class AddQuotationScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text("Add Quotation", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          CustomButton(
-            text: "Reject",
-            fullWidth: false,
-            height: 35,
-            borderColor: AppColors.error,
-            backgroundColor: AppColors.background,
-            textStyle: AppFonts.text14.regular.red.style,
-            onPressed: () {
-              addQuotationNotifier.apiUpdateJobStatus(
-                context,
-                AppStatus.vendorQuotationRejected.id,
-                isReject: true,
-              );
-            },
+          Text(
+            "${!(isResend ?? false) ? "Add" : "Update"} Quotation",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
+          if (!(isResend ?? false))
+            CustomButton(
+              text: "Reject",
+              fullWidth: false,
+              height: 35,
+              borderColor: AppColors.error,
+              backgroundColor: AppColors.background,
+              textStyle: AppFonts.text14.regular.red.style,
+              onPressed: () {
+                addQuotationNotifier.apiUpdateJobStatus(
+                  context,
+                  AppStatus.vendorQuotationRejected.id,
+                  isReject: true,
+                );
+              },
+            ),
         ],
       ),
     );
@@ -165,7 +176,10 @@ class AddQuotationScreen extends StatelessWidget {
             GestureDetector(
               onTap: () {
                 Navigator.pushNamed(
-                    context, AppRoutes.imageViewer, arguments: addQuotationNotifier.jobDetail.fileContent);
+                  context,
+                  AppRoutes.imageViewer,
+                  arguments: addQuotationNotifier.jobDetail.fileContent,
+                );
               },
               child: Image.memory(
                 addQuotationNotifier.jobDetail.fileBytes ?? Uint8List(0),
@@ -238,44 +252,46 @@ class AddQuotationScreen extends StatelessWidget {
             borderColor: AppColors.primary,
             height: 35,
             textStyle: AppFonts.text14.regular.style,
-              onPressed: () {
-                showSiteVisitRequestPopup(
-                  context,
-                  onSubmit: (date, employeeName, phone, emiratesId) async {
-                    // 1. Create Site Visit
-                    final response = await VendorQuotationRepository.instance.apiCreateSiteVisit(
-                      CreateSiteVisitRequest(
-                        jobId: jobId,
-                        customerId: customerId,
-                        vendorId: addQuotationNotifier.userData?.customerId ?? 0,
-                        createdBy: addQuotationNotifier.userData?.name ?? "",
-                        requestedBy: addQuotationNotifier.userData?.name ?? "",
-                        requestedTo: addQuotationNotifier.jobDetail.customerName ?? "",
-                        requestedDate: date,
-                      ),
+            onPressed: () {
+              showSiteVisitRequestPopup(
+                context,
+                onSubmit: (date, employeeName, phone, emiratesId) async {
+                  // 1. Create Site Visit
+                  final response = await VendorQuotationRepository.instance.apiCreateSiteVisit(
+                    CreateSiteVisitRequest(
+                      jobId: jobId,
+                      customerId: customerId,
+                      vendorId: addQuotationNotifier.userData?.customerId ?? 0,
+                      createdBy: addQuotationNotifier.userData?.name ?? "",
+                      requestedBy: addQuotationNotifier.userData?.name ?? "",
+                      requestedTo: addQuotationNotifier.jobDetail.customerName ?? "",
+                      requestedDate: date,
+                    ),
+                  );
+
+                  if (response is CreateSiteVisitResponse &&
+                      response.success == true &&
+                      response.data != null) {
+                    final siteVisitId = response.data!;
+
+                    // 2. Assign employee immediately
+                    await addQuotationNotifier.submitAssignedEmployees(
+                      context,
+                      siteVisitId,
+                      employeeName: employeeName,
+                      phone: phone,
+                      emiratesId: emiratesId,
                     );
 
-                    if (response is CreateSiteVisitResponse && response.success == true && response.data != null) {
-                      final siteVisitId = response.data!;
+                    return "Site visit request submitted successfully!";
+                  } else if (response is ErrorResponse) {
+                    return response.title ?? "Something went wrong";
+                  }
 
-                      // 2. Assign employee immediately
-                      await addQuotationNotifier.submitAssignedEmployees(
-                        context,
-                        siteVisitId,
-                        employeeName: employeeName,
-                        phone: phone,
-                        emiratesId: emiratesId,
-                      );
-
-                      return "Site visit request submitted successfully!";
-                    } else if (response is ErrorResponse) {
-                      return response.title ?? "Something went wrong";
-                    }
-
-                    return "Failed to submit request";
-                  },
-                );
-              },
+                  return "Failed to submit request";
+                },
+              );
+            },
           ),
         ],
       ),
@@ -344,18 +360,12 @@ class AddQuotationScreen extends StatelessWidget {
             // Description: largest
             Expanded(
               flex: 4, // bigger space
-              child: Text(
-                "Description",
-                style: AppFonts.text14.semiBold.style,
-              ),
+              child: Text("Description", style: AppFonts.text14.semiBold.style),
             ),
             5.horizontalSpace,
 
             if (type == QuotationItemType.material)
-              Expanded(
-                flex: 2,
-                child: Text("Qty", style: AppFonts.text14.semiBold.style),
-              ),
+              Expanded(flex: 2, child: Text("Qty", style: AppFonts.text14.semiBold.style)),
             if (type == QuotationItemType.material) 5.horizontalSpace,
 
             Expanded(
@@ -369,10 +379,7 @@ class AddQuotationScreen extends StatelessWidget {
 
             Expanded(
               flex: 2, // smaller for total
-              child: Text(
-                "Total",
-                style: AppFonts.text14.semiBold.style,
-              ),
+              child: Text("Total", style: AppFonts.text14.semiBold.style),
             ),
             SizedBox(width: 20),
           ],
@@ -424,10 +431,7 @@ class AddQuotationScreen extends StatelessWidget {
                 ),
                 10.horizontalSpace,
 
-                Expanded(
-                  flex: 2,
-                  child: Text(item.lineTotal.toStringAsFixed(2)),
-                ),
+                Expanded(flex: 2, child: Text(item.lineTotal.toStringAsFixed(2))),
 
                 GestureDetector(
                   onTap: () => notifier.removeItem(index),

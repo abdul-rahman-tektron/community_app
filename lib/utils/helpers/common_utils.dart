@@ -53,8 +53,13 @@ class AppStatus {
   static const quotationSubmitted = AppStatusData(7, 20, "Quotation Submitted");
   static const quotationAccepted = AppStatusData(8, 30, "Quotation Accepted");
   static const employeeAssigned = AppStatusData(9, 35, "Employee Assigned");
+  static const cancelJob = AppStatusData(21, 50, "Cancel Job");
   static const arrivedAtLocation = AppStatusData(10, 55, "Arrived at Location");
+  static const siteVisitInProgress = AppStatusData(17, 60, "Site Visit In Progress");
+  static const siteVisitCompleted = AppStatusData(18, 65, "Site Visit Completed");
   static const workStartedInProgress = AppStatusData(11, 70, "Work Started / Work inProgress");
+  static const holdTheJob = AppStatusData(19, 75, "Hold the Job - By Vendor");
+  static const rework = AppStatusData(20, 80, "Rework");
   static const workCompletedAwaitingConfirmation = AppStatusData(12, 85, "Work Completed - Awaiting Confirmation");
   static const jobVerifiedPaymentPending = AppStatusData(13, 90, "Job Verified & Payment Pending");
   static const paymentCompleted = AppStatusData(14, 95, "Payment Completed");
@@ -72,8 +77,13 @@ class AppStatus {
     quotationSubmitted,
     quotationAccepted,
     employeeAssigned,
+    cancelJob,
     arrivedAtLocation,
+    siteVisitInProgress,
+    siteVisitCompleted,
     workStartedInProgress,
+    holdTheJob,
+    rework,
     workCompletedAwaitingConfirmation,
     jobVerifiedPaymentPending,
     paymentCompleted,

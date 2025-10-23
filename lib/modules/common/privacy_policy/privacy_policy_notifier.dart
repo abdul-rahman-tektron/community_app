@@ -5,7 +5,7 @@ class PrivacyPolicyNotifier extends BaseChangeNotifier {
     {
       "title": "Privacy Policy",
       "content": [
-        "Effective Date: [Insert Date]",
+        "Effective Date: 15 September 2025",
         "Xception (“we,” “our,” or “us”) values your privacy. This Privacy Policy explains how we collect, use, disclose, and protect your personal information when you use our mobile application and related jobs (the “App”). By using our App, you agree to the practices described in this Privacy Policy."
       ],
     },
@@ -65,7 +65,7 @@ class PrivacyPolicyNotifier extends BaseChangeNotifier {
         " • Access, correct, or delete your personal data",
         " • Object to processing or request data portability",
         " • Withdraw consent at any time (if applicable)",
-        "To exercise these rights, contact us at sana.xception@gmail.com."
+        "To exercise these rights, contact us at XXXXXX@XXX.com."
       ],
     },
     {

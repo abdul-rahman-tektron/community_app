@@ -1,6 +1,7 @@
 import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/core/model/common/error/common_response.dart';
 import 'package:community_app/core/model/customer/job/create_job_booking_request.dart';
+import 'package:community_app/core/model/customer/job/create_job_booking_response.dart';
 import 'package:community_app/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
 import 'package:community_app/core/model/customer/quotation/customer_response_reject_response.dart';
 import 'package:community_app/core/model/customer/quotation/customer_response_request.dart';
@@ -63,13 +64,15 @@ class QuotationListNotifier extends BaseChangeNotifier {
     }
   }
 
-  Future<void> apiJobBooking(BuildContext context, {
-    required int jobId,
-    required int quotationRequestId,
-    required int quotationResponseId,
-    required int vendorId,
-    String? remarks,
-  }) async {
+  Future<void> apiJobBooking(
+      BuildContext context, {
+        required int jobId,
+        required int quotationRequestId,
+        required int quotationResponseId,
+        required int vendorId,
+        String? remarks,
+        required String dateOfVisit, // yyyy-MM-dd
+      }) async {
     try {
       final request = CreateJobBookingRequest(
         jobId: jobId,
@@ -77,13 +80,17 @@ class QuotationListNotifier extends BaseChangeNotifier {
         quotationResponseId: quotationResponseId,
         vendorId: vendorId,
         remarks: remarks ?? "Accepted by customer",
-        createdBy: "Customer", // or pass dynamically
+        createdBy: userData?.name ?? "Customer",
+        dateOfVisit: dateOfVisit,
+
+        // ⚠️ If your DB requires VisitorEmail (as the error showed), include it here:
+        // visitorEmail: userData?.email,  // <- add this field in the request model if present
       );
 
       final result = await CustomerDashboardRepository.instance.apiCreateJobBookingRequest(request);
-
       print("result");
       print(result);
+
       await _handleCreatedJobSuccess(result, jobId, context);
     } catch (e) {
       print("result error");
@@ -93,15 +100,52 @@ class QuotationListNotifier extends BaseChangeNotifier {
     }
   }
 
-  Future<void> _handleCreatedJobSuccess(Object? result,int? jobId, BuildContext context) async {
-    if (result is CommonResponse) {
-      // Navigate only after successful booking
+  Future<void> _handleCreatedJobSuccess(Object? result, int? jobId, BuildContext context) async {
+    // Case 1: Booking returned email preview (like site-visit)
+    if (result is JobBookingResponse && result.emailPreview != null) {
+      final emailData = result.emailPreview!;
+      final email = Email(
+        body: emailData.body ?? "",
+        subject: emailData.subject ?? "Job Booking Confirmation",
+        recipients: emailData.to ?? const [],
+        cc: emailData.cc ?? const [],
+        isHTML: true,
+      );
+
+      try {
+        await FlutterEmailSender.send(email);
+        ToastHelper.showSuccess(result.message ?? "Booking created and email prepared.");
+      } catch (e) {
+        print("Error launching email client: $e");
+        ToastHelper.showError("No email client available on this device.");
+      }
+
+      // Update status if you have a status for booking confirmation
       await apiUpdateJobStatus(AppStatus.quotationAccepted.id);
-      Navigator.pushNamed(context, AppRoutes.bookingConfirmation, arguments: jobId.toString());
+
+      // Navigate to success screen
+      Navigator.pushNamed(context, AppRoutes.bookingConfirmation, arguments: jobId?.toString());
+      return;
     }
+
+    // Case 2: Generic common response
+    if (result is CommonResponse) {
+      if (result.success == true) {
+        ToastHelper.showSuccess(result.message ?? "Booking created successfully.");
+        await apiUpdateJobStatus(AppStatus.quotationAccepted.id);
+        Navigator.pushNamed(context, AppRoutes.bookingConfirmation, arguments: jobId?.toString());
+      } else {
+        ToastHelper.showError(result.message ?? "Failed to create booking.");
+      }
+      return;
+    }
+
+    // Fallback
+    ToastHelper.showError("Unexpected response from server.");
   }
 
-  Future<void> apiUpdateJobStatus(int? statusId) async {
+
+  Future<void> apiUpdateJobStatus(int? statusId, {bool? isReject = false}) async {
     if (statusId == null) return;
     try {
       notifyListeners();
@@ -109,6 +153,8 @@ class QuotationListNotifier extends BaseChangeNotifier {
       final parsed = await CommonRepository.instance.apiUpdateJobStatus(
         UpdateJobStatusRequest(jobId: jobId, statusId: statusId, createdBy: userData?.name ?? "", vendorId: userData?.customerId ?? 0),
       );
+
+      if(isReject ?? false) ToastHelper.showSuccess("Quotation Rejected successfully!");
 
     } catch (e, stackTrace) {
       print("❌ Error updating job status: $e");

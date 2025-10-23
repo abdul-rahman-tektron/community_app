@@ -55,14 +55,14 @@ class QuotationDetailScreen extends StatelessWidget {
               buildNotes(notifier),
               10.verticalSpace,
               _buildPrice(context, notifier),
-              if (notifier.isRejected)
-                Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: CustomButton(
-                    text: "Resend Quotation",
-                    onPressed: notifier.resendQuotation,
-                  ),
-                ),
+              // if (notifier.isRejected)
+              //   Padding(
+              //     padding: const EdgeInsets.all(15.0),
+              //     child: CustomButton(
+              //       text: "Resend Quotation",
+              //       onPressed: notifier.resendQuotation,
+              //     ),
+              //   ),
             ],
           ),
         ),

@@ -1,7 +1,9 @@
+import 'package:community_app/core/model/customer/payment/payment_detail_response.dart';
 import 'package:community_app/modules/customer/jobs/widgets/payment/payment_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
+import 'package:community_app/utils/extensions.dart';
 import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
@@ -10,17 +12,20 @@ import 'package:community_app/utils/widgets/custom_drawer.dart';
 import 'package:community_app/utils/widgets/custom_textfields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class PaymentScreen extends StatelessWidget {
   final int? jobId;
-  const PaymentScreen({super.key, this.jobId});
+  final int? vendorId;
+
+  PaymentScreen({super.key, this.jobId, this.vendorId});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => PaymentNotifier(jobId),
+      create: (context) => PaymentNotifier(jobId, vendorId),
       child: Consumer<PaymentNotifier>(
         builder: (context, paymentNotifier, child) {
           return buildBody(context, paymentNotifier);
@@ -46,8 +51,9 @@ class PaymentScreen extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 5.h),
               child: Divider(),
             ),
-            if (paymentNotifier.isCardSelected) buildCardDetails(context, paymentNotifier),
-            if (paymentNotifier.isCardSelected)
+            if (paymentNotifier.selectedPaymentMethod?.isCard ?? false)
+              buildCardDetails(context, paymentNotifier),
+            if (paymentNotifier.selectedPaymentMethod?.isCard ?? false)
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 5.h),
                 child: Divider(),
@@ -69,73 +75,32 @@ class PaymentScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeadingWithGradientUnderline(context),
+          Row(
+            children: [
+              Expanded(child: Text("Service Details", style: AppFonts.text16.semiBold.style)),
+              Text("#${jobId.toString()}", style: AppFonts.text14.regular.style),
+            ],
+          ),
           10.verticalSpace,
-          _infoRow("Service Name", "Laundry Service"),
-          _infoRow("Assigned", "John's Laundry Express"),
+          _infoRow("Service Name", notifier.paymentDetail.job?.serviceName ?? ""),
+          _infoRow("Assigned", notifier.paymentDetail.vendor?.name ?? ""),
           10.verticalSpace,
           _iconLabelRow(
             icon: LucideIcons.calendar,
-            label: "21 July 2025",
+            label: notifier.paymentDetail.job?.requestedDate?.formatDate() ?? "",
             bgColor: Color(0xffe7f3f9),
             iconColor: Colors.blue,
           ),
           5.verticalSpace,
           _iconLabelRow(
             icon: LucideIcons.mapPin,
-            label: "Al Barsha, Deira, Dubai Main Road",
+            label: notifier.paymentDetail.customer?.address ?? "",
             bgColor: Color(0xfffdf5e7),
             iconColor: Colors.orange,
           ),
         ],
       ),
     );
-  }
-
-  Widget _buildHeadingWithGradientUnderline(BuildContext context) {
-    final text = "Service Details";
-    final style = AppFonts.text16.semiBold.style;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(text, style: style),
-        2.verticalSpace,
-        _buildGradientUnderline(text, style),
-      ],
-    );
-  }
-
-  Widget _buildGradientUnderline(String text, TextStyle style) {
-    final textWidth = _getTextWidth(text, style);
-
-    return Container(
-      height: 2,
-      width: textWidth,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.transparent,
-            AppColors.primary.withOpacity(0.5),
-            AppColors.primary,
-            AppColors.primary.withOpacity(0.5),
-            Colors.transparent,
-          ],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-      ),
-    );
-  }
-
-  double _getTextWidth(String text, TextStyle style) {
-    final TextPainter textPainter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      maxLines: 1,
-      textDirection: TextDirection.ltr,
-    )..layout();
-
-    return textPainter.width;
   }
 
   Widget _iconLabelRow({
@@ -167,10 +132,8 @@ class PaymentScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
-              child: Text(label, style: AppFonts.text14.regular.style)),
-          Expanded(
-              child: Text(value, style: AppFonts.text14.bold.style)),
+          Expanded(child: Text(label, style: AppFonts.text14.regular.style)),
+          Expanded(child: Text(value, style: AppFonts.text14.bold.style)),
         ],
       ),
     );
@@ -182,8 +145,7 @@ class PaymentScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
-              child: Text(label, style: AppFonts.text14.regular.style)),
+          Expanded(child: Text(label, style: AppFonts.text14.regular.style)),
           Text(value, style: AppFonts.text14.bold.style),
         ],
       ),
@@ -191,6 +153,13 @@ class PaymentScreen extends StatelessWidget {
   }
 
   Widget buildPriceBreakdown(BuildContext context, PaymentNotifier notifier) {
+    final items  = notifier.paymentDetail.lineItems ?? const <LineItem>[];
+
+    // compute locally (prefer BE totals if you REALLY trust them, but you asked to do it from your end)
+    final subTotal = _subTotalFromItems(items);
+    final vatTotal = _vatFromItems(items);
+    final grand    = subTotal + vatTotal;
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
       child: Column(
@@ -198,15 +167,45 @@ class PaymentScreen extends StatelessWidget {
         children: [
           Text("Price Breakdown", style: AppFonts.text16.semiBold.style),
           10.verticalSpace,
-          _infoPriceRow("Service Charge", "AED 50.00"),
-          _infoPriceRow("Product Price", "AED 15.00"),
-          _infoPriceRow("VAT (5%)", "AED 3.25"),
-          Divider(),
-          _infoPriceRow("TOTAL", "AED 68.25"),
+
+          // Each line shows pre-VAT using qty==0 rule
+          ...items.map((item) {
+            final q = (item.quantity ?? 0);
+            final desc = (q > 0 && (item.rate ?? 0) > 0)
+                ? "${item.description ?? ''} (x${q.toStringAsFixed(0)})"
+                : (item.description ?? '');
+            final preVatLine = _linePreVat(item);
+            return _infoPriceRow(desc, money(preVatLine));
+          }),
+
+          const Divider(),
+
+          _infoPriceRow("Subtotal", money(subTotal)),
+          _infoPriceRow("VAT",      money(vatTotal)),
+
+          const Divider(),
+          _infoPriceRow("TOTAL",    money(grand)),
         ],
       ),
     );
   }
+
+  num _linePreVat(LineItem it) {
+    final q = it.quantity ?? 0;
+    if (q == 0) {
+      // qty==0 → take rate
+      return it.rate ?? 0;
+    }
+    // qty>0 → prefer amount, else rate*qty
+    if (it.amount != null) return it.amount!;
+    return (it.rate ?? 0) * q;
+  }
+
+  num _subTotalFromItems(List<LineItem> items) =>
+      items.fold<num>(0, (s, it) => s + _linePreVat(it));
+
+  num _vatFromItems(List<LineItem> items) =>
+      items.fold<num>(0, (s, it) => s + (it.vat ?? 0));
 
   Widget buildPromoCodeField(BuildContext context, PaymentNotifier notifier) {
     return Padding(
@@ -245,45 +244,40 @@ class PaymentScreen extends StatelessWidget {
         children: [
           Text("Payment Method", style: AppFonts.text16.semiBold.style),
           15.verticalSpace,
-          GestureDetector(
-            onTap: () => notifier.togglePaymentMethod(true),
-            child: Container(
-              padding: EdgeInsets.all(12.w),
-              decoration: notifier.isCardSelected
-                  ? AppStyles.commonDecoration.copyWith(border: Border.all(color: AppColors.primary, width: 1))
-                  : AppStyles.commonDecoration,
-              child: Row(
-                children: [
-                  CustomRoundCheckbox(
-                    value: notifier.isCardSelected,
-                    onChanged: (_) => notifier.togglePaymentMethod(true),
-                  ),
-                  const SizedBox(width: 12),
-                  Text("Credit / Debit Card", style: AppFonts.text14.regular.style),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          GestureDetector(
-            onTap: () => notifier.togglePaymentMethod(false),
-            child: Container(
-              padding: EdgeInsets.all(12.w),
-              decoration: !notifier.isCardSelected
-                  ? AppStyles.commonDecoration.copyWith(border: Border.all(color: AppColors.primary, width: 1))
-                  : AppStyles.commonDecoration,
 
-              child: Row(
-                children: [
-                  CustomRoundCheckbox(
-                    value: !notifier.isCardSelected,
-                    onChanged: (_) => notifier.togglePaymentMethod(false),
+          Column(
+            children: notifier.paymentMethods.map((method) {
+              final isSelected = notifier.isSelected(method);
+
+              return GestureDetector(
+                onTap: () => notifier.selectPaymentMethod(method),
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: EdgeInsets.all(12.w),
+                  decoration: isSelected
+                      ? AppStyles.commonDecoration.copyWith(
+                          border: Border.all(color: AppColors.primary, width: 1),
+                        )
+                      : AppStyles.commonDecoration,
+                  child: Row(
+                    children: [
+                      CustomRoundCheckbox(
+                        value: isSelected,
+                        onChanged: (_) => notifier.selectPaymentMethod(method),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(child: Text(method.name, style: AppFonts.text14.regular.style)),
+                      if (method.iconUrls != null)
+                        Row(
+                          children: method.iconUrls!.map((icon) {
+                            return Image.asset(icon, width: 50, fit: BoxFit.contain);
+                          }).toList(),
+                        ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Text("Tabby", style: AppFonts.text14.regular.style),
-                ],
-              ),
-            ),
+                ),
+              );
+            }).toList(),
           ),
         ],
       ),
@@ -298,7 +292,11 @@ class PaymentScreen extends StatelessWidget {
         children: [
           Text("Card Details", style: AppFonts.text16.semiBold.style),
           15.verticalSpace,
-          CustomTextField(controller: notifier.cardNumberController, fieldName: "Card Number", skipValidation: true),
+          CustomTextField(
+            controller: notifier.cardNumberController,
+            fieldName: "Card Number",
+            skipValidation: true,
+          ),
           10.verticalSpace,
           Row(
             children: [
@@ -311,7 +309,11 @@ class PaymentScreen extends StatelessWidget {
               ),
               10.horizontalSpace,
               Expanded(
-                child: CustomTextField(controller: notifier.cvvController, fieldName: "CVV", skipValidation: true),
+                child: CustomTextField(
+                  controller: notifier.cvvController,
+                  fieldName: "CVV",
+                  skipValidation: true,
+                ),
               ),
             ],
           ),
@@ -357,8 +359,8 @@ class PaymentScreen extends StatelessWidget {
         children: [
           Text("Contact Info", style: AppFonts.text16.semiBold.style),
           10.verticalSpace,
-          _infoRow("Phone Number", "+971 43763483784"),
-          _infoRow("Email Address", "arbkan@mohammed.com"),
+          _infoRow("Phone Number", notifier.paymentDetail.vendor?.phone ?? ""),
+          _infoRow("Email Address", notifier.paymentDetail.vendor?.email ?? ""),
         ],
       ),
     );
@@ -368,13 +370,13 @@ class PaymentScreen extends StatelessWidget {
     final isExpanded = notifier.isTermsExpanded;
 
     final termsList = [
-      "You agree to pay the full amount as displayed.",
-      "No refunds are applicable once the payment is made.",
-      "Your card details will be securely stored (if selected).",
-      "This service is subject to availability.",
-      "We are not liable for delays due to external conditions.",
-      "Your contact info may be used for transactional updates.",
-      "By using this service, you accept all terms listed.",
+      "By proceeding, you authorize us to charge the displayed amount to your selected payment method.",
+      "All payments are final and non-refundable unless required by applicable law.",
+      // "If you choose to save your card, your details will be securely encrypted and stored in compliance with PCI-DSS standards.",
+      "Service fulfillment is subject to availability and scheduling constraints.",
+      "We are not responsible for delays or interruptions caused by factors beyond our control (e.g., technical issues, third-party providers).",
+      "Your contact details may be used solely for transactional communication and service updates.",
+      "By completing this payment, you acknowledge that you have read and agreed to these Terms & Conditions.",
     ];
 
     final visibleItems = isExpanded ? termsList : termsList.take(3);
@@ -411,12 +413,24 @@ class PaymentScreen extends StatelessWidget {
     );
   }
 
+  final _aed = NumberFormat.currency(locale: 'en_AE', name: 'AED ', decimalDigits: 2);
+  String money(num? v) => _aed.format((v ?? 0).toDouble());
+
   Widget buildPayButton(BuildContext context, PaymentNotifier notifier) {
+    final items  = notifier.paymentDetail.lineItems ?? const <LineItem>[];
+    final subTotal = _subTotalFromItems(items);
+    final vatTotal = _vatFromItems(items);
+    final grand    = subTotal + vatTotal;
+
     return Padding(
       padding: EdgeInsets.all(15.w),
-      child: CustomButton(onPressed: () {
-        notifier.apiUpdateJobStatus(context, AppStatus.paymentCompleted.id);
-      }, text: "PAY AED 68.25"),
+      child: CustomButton(
+        isLoading: notifier.isLoading,
+        onPressed: () async {
+          notifier.apiCreatePayment(context, overrideGrandTotal: grand.toDouble());
+        },
+        text: "PAY ${money(grand)}",
+      ),
     );
   }
 }

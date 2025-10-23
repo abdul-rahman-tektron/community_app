@@ -15,6 +15,7 @@ class CreateJobBookingRequest {
   int? vendorId;
   String? remarks;
   String? createdBy;
+  String? dateOfVisit;
 
   CreateJobBookingRequest({
     this.jobId,
@@ -23,6 +24,7 @@ class CreateJobBookingRequest {
     this.vendorId,
     this.remarks,
     this.createdBy,
+    this.dateOfVisit,
   });
 
   factory CreateJobBookingRequest.fromJson(Map<String, dynamic> json) => CreateJobBookingRequest(
@@ -32,6 +34,7 @@ class CreateJobBookingRequest {
     vendorId: json["vendorId"],
     remarks: json["remarks"],
     createdBy: json["createdBy"],
+    dateOfVisit: json["dateofvisit"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -41,5 +44,6 @@ class CreateJobBookingRequest {
     "vendorId": vendorId,
     "remarks": remarks,
     "createdBy": createdBy,
+    "dateofvisit": dateOfVisit,
   };
 }

@@ -2,8 +2,10 @@ import 'package:community_app/modules/customer/jobs/widgets/tracking/tracking_no
 import 'package:community_app/modules/customer/jobs/widgets/tracking/tracking_steps.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_linear_progress_indicator.dart';
+import 'package:community_app/utils/widgets/custom_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -27,9 +29,23 @@ class TrackingScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10.0),
                 child: CustomButton(
-                  text: "Call - Abdul Rahman",
+                  text: (notifier.jobStatusTrackingData?.isNotEmpty ?? false) &&
+                      notifier.jobStatusTrackingData!.last.status == AppStatus.quotationAccepted.name
+                      ? "Cancel Jobs"
+                      : "Call - Abdul Rahman",
                   onPressed: () {
-                    notifier.openDialer(notifier.partyInfo?.employeePhoneNumber ?? "");
+                    if (notifier.jobStatusTrackingData?.last.status ==
+                        AppStatus.quotationAccepted.name) {
+                      showStatusNotesPopup(
+                        context,
+                        onSubmit: (notes) async {
+                          await notifier.apiUpdateJobStatus(
+                              context, AppStatus.cancelJob.id, notes: notes);
+                        },
+                      );
+                    } else {
+                      notifier.openDialer(notifier.partyInfo?.employeePhoneNumber ?? "");
+                    }
                   },
                 ),
               ),
@@ -105,10 +121,10 @@ class TrackingScreen extends StatelessWidget {
             CustomLinearProgressIndicator(percentage: 20),
             15.verticalSpace,
             TrackingStepsWidget(
-              currentStep: notifier.jobStatusTrackingData.isNotEmpty
-                  ? notifier.jobStatusTrackingData.last
+              currentStep: notifier.jobStatusTrackingData?.isNotEmpty ?? false
+                  ? notifier.jobStatusTrackingData?.last
                   : null,
-              jobStatus: notifier.jobStatus,
+              jobStatus: notifier.jobStatus ?? [],
             )
           ],
         ),

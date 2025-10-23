@@ -33,7 +33,7 @@ class HistoryDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => HistoryDetailNotifier(jobId),
+      create: (_) => HistoryDetailNotifier(jobId, vendorId),
       child: Consumer<HistoryDetailNotifier>(
         builder: (context, notifier, _) {
           if (notifier.isLoading) {

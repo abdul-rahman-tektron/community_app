@@ -5,6 +5,7 @@ import 'package:community_app/modules/auth/login/login_screen.dart';
 import 'package:community_app/modules/auth/otp_verification/otp_verification_screen.dart';
 import 'package:community_app/modules/auth/reset_password/reset_password_screen.dart';
 import 'package:community_app/modules/auth/user_role_selection/user_role_selection_screen.dart';
+import 'package:community_app/modules/common/about_us/about_us_screen.dart';
 import 'package:community_app/modules/common/change_password/change_password_screen.dart';
 import 'package:community_app/modules/common/delete_account/delete_account_screen.dart';
 import 'package:community_app/modules/common/edit_profile/edit_profile_screen.dart';
@@ -60,6 +61,7 @@ class AppRoutes {
   static const String resetPassword = '/reset-password';
   static const String savedCards = '/saved-cards';
   static const String privacyPolicy = '/privacy-policy';
+  static const String aboutUs = '/about-us';
   static const String imageViewer = '/image-viewer';
 
   /// 👤 Customer
@@ -143,12 +145,16 @@ class AppRouter {
         final quotationId = args['quotationId'] as int?;
         final customerId = args['customerId'] as int?;
         final isSiteVisit = args['isSiteVisit'] as bool?;
+        final quotationResponseId = args['quotationResponseId'] as int?;
+        final isResend = args['isResend'] as bool?;
         screen = AddQuotationScreen(
           jobId: jobId,
           serviceId: serviceId,
           quotationId: quotationId,
           customerId: customerId,
           isSiteVisit: isSiteVisit,
+          quotationResponseId: quotationResponseId,
+          isResend: isResend,
         );
         break;
 
@@ -180,7 +186,8 @@ class AppRouter {
         final jobId = args['jobId'] as int?;
         final customerId = args['customerId'] as int?;
         final status = args['status'] as String?;
-        screen = ProgressUpdateScreen(jobId: jobId, customerId: customerId, status: status);
+        final reworkNotes = args['reworkNotes'] as String?;
+        screen = ProgressUpdateScreen(jobId: jobId, customerId: customerId, status: status, reworkNotes: reworkNotes,);
         break;
 
       // 👤 Customer
@@ -229,12 +236,16 @@ class AppRouter {
         screen = QuotationRequestListScreen();
         break;
       case AppRoutes.jobVerification:
-        final args = settings.arguments as String?;
-        screen = JobVerificationScreen(jobId: args);
+        final args = settings.arguments as Map<String, dynamic>? ?? {};
+        final jobId = args['jobId'] as int?;
+        final vendorId = args['vendorId'] as int?;
+        screen = JobVerificationScreen(jobId: jobId.toString(), vendorId: vendorId,);
         break;
       case AppRoutes.payment:
-        final jobId = settings.arguments as int?;
-        screen = PaymentScreen(jobId: jobId);
+        final args = settings.arguments as Map<String, dynamic>? ?? {};
+        final jobId = args['jobId'] as int?;
+        final vendorId = args['vendorId'] as int?;
+        screen = PaymentScreen(jobId: jobId, vendorId: vendorId,);
         break;
       case AppRoutes.feedback:
         final jobId = settings.arguments as int?;
@@ -277,6 +288,9 @@ class AppRouter {
         break;
       case AppRoutes.privacyPolicy:
         screen = PrivacyPolicyScreen();
+        break;
+      case AppRoutes.aboutUs:
+        screen = AboutUsScreen();
         break;
       case AppRoutes.imageViewer:
         final args = settings.arguments as String?;

@@ -32,16 +32,26 @@ class OngoingServiceScreen extends StatelessWidget {
     if (notifier.isLoading) {
       return const Center(child: LottieLoader());
     }
+
     if (notifier.ongoingJobs.isEmpty) {
       return const Center(child: Text("No ongoing jobs."));
     }
-    return ListView.builder(
-      itemCount: notifier.ongoingJobs.length,
-      itemBuilder: (context, index) {
-        final reversedJobs = notifier.ongoingJobs.reversed.toList();
-        final job = reversedJobs[index];
 
-        if((AppStatus.fromName(job.status ?? "")?.id ?? 0) > 12) {
+    // ✅ Sort ongoing jobs by jobId descending (latest first)
+    final sortedJobs = [...notifier.ongoingJobs]
+      ..sort((a, b) => (b.jobId ?? 0).compareTo(a.jobId ?? 0));
+
+    return ListView.builder(
+      itemCount: sortedJobs.length,
+      itemBuilder: (context, index) {
+        final job = sortedJobs[index];
+
+        final status = AppStatus.fromName(job.status ?? "");
+
+        // Skip jobs that are beyond status 12, except hold/rework
+        if ((status?.id ?? 0) > 12 &&
+            status?.name != AppStatus.holdTheJob.name &&
+            status?.name != AppStatus.rework.name) {
           return const SizedBox.shrink();
         }
 
@@ -55,6 +65,7 @@ class OngoingServiceScreen extends StatelessWidget {
                 "jobId": job.jobId,
                 "customerId": job.customerId,
                 "status": job.status,
+                "reworkNotes": job.customerRemarks,
               },
             ).then((value) {
               notifier.initializeData();

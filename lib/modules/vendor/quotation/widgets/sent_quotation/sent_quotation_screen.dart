@@ -2,6 +2,7 @@ import 'package:community_app/modules/vendor/quotation/widgets/sent_quotation/qu
 import 'package:community_app/modules/vendor/quotation/widgets/sent_quotation/sent_quotation_notifier.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/utils/enums.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/helpers/loader.dart';
 import 'package:community_app/utils/router/routes.dart';
 import 'package:community_app/utils/widgets/custom_refresh_indicator.dart';
@@ -25,8 +26,11 @@ class SentQuotationScreen extends StatelessWidget {
 
   Widget buildBody(BuildContext context, SentQuotationNotifier notifier) {
     final filteredQuotations = notifier.quotations.where((request) {
+
       final status = request.quotationResponseStatus?.toLowerCase();
-      return status != "accepted" && status != "";
+      return status != "accepted" &&
+          status != "" &&
+          request.status != AppStatus.quotationAccepted.name;
     }).toList();
 
     return Scaffold(
@@ -39,30 +43,46 @@ class SentQuotationScreen extends StatelessWidget {
             : filteredQuotations.isEmpty
             ? const Center(child: Text("No quotations sent."))
             : ListView.builder(
-          itemCount: filteredQuotations.length,
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          itemBuilder: (context, index) {
-            final quotation = filteredQuotations[index];
-            return QuotationCard(
-              quotation: quotation,
-              onViewDetails: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.quotationDetails,
-                  arguments: {
-                    'jobId': quotation.jobId,
-                    'quotationResponseId': quotation.quotationResponseId,
-                  },
-                ).then((value) {
-                  notifier.initializeData();
-                });
-              },
-              onResend: (quotation.quotationResponseStatus ?? "").toLowerCase() == "rejected"
-                  ? () {}
-                  : null,
-            );
-          },
-        ),
+                itemCount: filteredQuotations.length,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                itemBuilder: (context, index) {
+                  final quotation = filteredQuotations[index];
+                  return QuotationCard(
+                    quotation: quotation,
+                    onViewDetails: () {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.quotationDetails,
+                        arguments: {
+                          'jobId': quotation.jobId,
+                          'quotationResponseId': quotation.quotationResponseId,
+                        },
+                      ).then((value) {
+                        notifier.initializeData();
+                      });
+                    },
+                    onResend: (quotation.status ?? "") == AppStatus.vendorQuotationRejected.name
+                        ? () {
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.addQuotation,
+                              arguments: {
+                                'jobId': quotation.jobId,
+                                'serviceId': quotation.serviceId,
+                                'quotationId': quotation.quotationId,
+                                'customerId': quotation.fromCustomerId,
+                                'isSiteVisit': quotation.isAcceptedByCustomer,
+                                'quotationResponseId': quotation.quotationResponseId,
+                                'isResend': true,
+                              },
+                            ).then((value) {
+                              notifier.initializeData();
+                            });
+                          }
+                        : null,
+                  );
+                },
+              ),
       ),
     );
   }

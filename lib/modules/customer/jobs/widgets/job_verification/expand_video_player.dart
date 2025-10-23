@@ -16,7 +16,7 @@ class ExpandedMediaViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => JobVerificationNotifier(""),
+      create: (context) => JobVerificationNotifier("", 2),
       child: Consumer<JobVerificationNotifier>(
         builder: (context, jobVerificationNotifier, child) {
           return buildBody(context, jobVerificationNotifier);

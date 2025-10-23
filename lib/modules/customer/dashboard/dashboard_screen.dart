@@ -124,23 +124,23 @@ class CustomerDashboardScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Positioned(
-                    bottom: 20,
-                    right: 20,
-                    child: CustomButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(const SnackBar(content: Text("Booking action triggered")));
-                      },
-                      fullWidth: false,
-                      backgroundColor: AppColors.white.withOpacity(0.6),
-                      borderColor: AppColors.textPrimary,
-                      textStyle: AppFonts.text14.regular.style,
-                      height: 30,
-                      text: "Book",
-                    ),
-                  ),
+                  // Positioned(
+                  //   bottom: 20,
+                  //   right: 20,
+                  //   child: CustomButton(
+                  //     onPressed: () {
+                  //       ScaffoldMessenger.of(
+                  //         context,
+                  //       ).showSnackBar(const SnackBar(content: Text("Booking action triggered")));
+                  //     },
+                  //     fullWidth: false,
+                  //     backgroundColor: AppColors.white.withOpacity(0.6),
+                  //     borderColor: AppColors.textPrimary,
+                  //     textStyle: AppFonts.text14.regular.style,
+                  //     height: 30,
+                  //     text: "Book",
+                  //   ),
+                  // ),
                 ],
               ),
             );

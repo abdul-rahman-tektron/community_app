@@ -16,6 +16,10 @@ class AppImages {
   static const backgroundPattern = 'assets/images/jpg/background_pattern.jpeg';
   static const otpVerificationImage = 'assets/images/png/otp_verification.png';
   static const uaePassImage = 'assets/images/png/uae_pass.png';
+  static const applePay = 'assets/images/png/apple_pay.png';
+  static const googlePay = 'assets/images/png/google_pay.png';
+  static const tabby = 'assets/images/png/tabby.png';
+  static const tamara = 'assets/images/png/tamara.png';
 
   //Service Images
   static const acRepair = 'assets/images/jpg/ac_repair.jpg';

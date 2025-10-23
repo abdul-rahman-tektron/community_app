@@ -2,6 +2,7 @@ import 'package:community_app/core/base/base_notifier.dart';
 import 'package:community_app/core/model/common/error/common_response.dart';
 import 'package:community_app/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
 import 'package:community_app/core/model/vendor/jobs/job_info_detail_response.dart';
+import 'package:community_app/core/model/vendor/quotation_request/quotation_response_detail_response.dart';
 import 'package:community_app/core/model/vendor/quotation_request/site_visit_assign_employee_request.dart';
 import 'package:community_app/core/model/vendor/vendor_quotation/create_job_quotation_request.dart';
 import 'package:community_app/core/remote/services/common_repository.dart';
@@ -21,6 +22,10 @@ class AddQuotationNotifier extends BaseChangeNotifier {
   int? serviceId;
   int? quotationId;
   int? customerId;
+  int? quotationResponseId;
+  bool? isResend;
+
+  QuotationResponseDetailResponse _quotationDetail = QuotationResponseDetailResponse();
 
   final TextEditingController notesController = TextEditingController();
 
@@ -38,8 +43,44 @@ class AddQuotationNotifier extends BaseChangeNotifier {
   initializeData() async {
     await loadUserData();
     await apiJobInfoDetail();
-    quotationItems.add(QuotationItem.empty(QuotationItemType.material));
-    quotationItems.add(QuotationItem.empty(QuotationItemType.service));
+
+    // If it is resend, fetch quotation details and populate fields
+    if (isResend ?? false) {
+      await apiQuotationResponseDetail();
+
+      if (_quotationDetail.items != null && _quotationDetail.items!.isNotEmpty) {
+        quotationItems.clear(); // Remove default empty items
+
+        // Add items from API
+        for (var item in _quotationDetail.items!) {
+          // If quantity is 0 or null, treat it as service, else material
+          final type = (item.quantity == null || item.quantity == 0)
+              ? QuotationItemType.service
+              : QuotationItemType.material;
+
+          quotationItems.add(
+            QuotationItem(
+              type: type,
+              productController: TextEditingController(text: item.product ?? ''),
+              qtyController: TextEditingController(text: item.quantity?.toString() ?? '0'),
+              unitPriceController: TextEditingController(text: item.price?.toStringAsFixed(2) ?? '0'),
+            ),
+          );
+        }
+      } else {
+        // If no items, add default empty rows
+        quotationItems.add(QuotationItem.empty(QuotationItemType.material));
+        quotationItems.add(QuotationItem.empty(QuotationItemType.service));
+      }
+
+      // Populate notes / description field
+      notesController.text = _quotationDetail.quotationDetails ?? '';
+    } else {
+      // Normal flow: just add empty rows
+      quotationItems.add(QuotationItem.empty(QuotationItemType.material));
+      quotationItems.add(QuotationItem.empty(QuotationItemType.service));
+    }
+
     notifyListeners();
   }
 
@@ -56,6 +97,22 @@ class AddQuotationNotifier extends BaseChangeNotifier {
       }
     } catch (e) {
       debugPrint("Error in apiDashboard: $e");
+    }
+  }
+
+  Future<void> apiQuotationResponseDetail() async {
+    try {
+      final result = await VendorQuotationRepository.instance.apiQuotationDetail(quotationResponseId?.toString() ?? "0");
+
+      if (result is QuotationResponseDetailResponse) {
+        quotationDetail = result;
+
+        notifyListeners();
+      } else {
+        debugPrint("Unexpected result type from apiQuotationResponseDetail");
+      }
+    } catch (e) {
+      debugPrint("Error in apiQuotationResponseDetail: $e");
     }
   }
 
@@ -194,6 +251,14 @@ class AddQuotationNotifier extends BaseChangeNotifier {
     _jobDetail = value;
     notifyListeners();
   }
+
+  QuotationResponseDetailResponse get quotationDetail => _quotationDetail;
+
+  set quotationDetail(QuotationResponseDetailResponse value) {
+    if (_quotationDetail == value) return;
+    _quotationDetail = value;
+    notifyListeners();
+  }
 }
 
 
@@ -223,7 +288,9 @@ class QuotationItem {
   factory QuotationItem.empty(QuotationItemType type) {
     return QuotationItem(
       type: type,
-      productController: TextEditingController(),
+      productController: TextEditingController(
+        text: type == QuotationItemType.service ? 'Labour Charge' : '',
+      ),
       qtyController: TextEditingController(),
       unitPriceController: TextEditingController(),
     );

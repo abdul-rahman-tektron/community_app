@@ -131,17 +131,17 @@ class LoginScreen extends StatelessWidget {
             text: context.locale.login,
             onPressed: () => loginNotifier.performLogin(context),
           ),
-          20.verticalSpace,
-          CustomButton(
-            backgroundColor: AppColors.background,
-            borderColor: AppColors.secondary,
-            textStyle: AppFonts.text14.regular.style,
-            image: AppImages.uaePassImage,
-            imageSize: 30,
-            imageOnLeft: true,
-            text: "Sign in with UAE PASS",
-            onPressed: () => loginNotifier.performUaePass(context),
-          ),
+          // 20.verticalSpace,
+          // CustomButton(
+          //   backgroundColor: AppColors.background,
+          //   borderColor: AppColors.secondary,
+          //   textStyle: AppFonts.text14.regular.style,
+          //   image: AppImages.uaePassImage,
+          //   imageSize: 30,
+          //   imageOnLeft: true,
+          //   text: "Sign in with UAE PASS",
+          //   onPressed: () => loginNotifier.performUaePass(context),
+          // ),
           20.verticalSpace,
           Text.rich(
             TextSpan(
@@ -164,24 +164,24 @@ class LoginScreen extends StatelessWidget {
             ),
           ),
           10.verticalSpace,
-          Text.rich(
-            textAlign: TextAlign.center,
-            TextSpan(
-              text: context.locale.changeLanguageTo,
-              style: AppFonts.text16.regular.style,
-              children: [
-                TextSpan(
-                  text: " ${context.locale.switchLng}",
-                  style: AppFonts.text16.regular.red.style,
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      final langNotifier = context.read<LanguageNotifier>();
-                      langNotifier.switchLanguage();
-                    },
-                ),
-              ],
-            ),
-          ),
+          // Text.rich(
+          //   textAlign: TextAlign.center,
+          //   TextSpan(
+          //     text: context.locale.changeLanguageTo,
+          //     style: AppFonts.text16.regular.style,
+          //     children: [
+          //       TextSpan(
+          //         text: " ${context.locale.switchLng}",
+          //         style: AppFonts.text16.regular.red.style,
+          //         recognizer: TapGestureRecognizer()
+          //           ..onTap = () {
+          //             final langNotifier = context.read<LanguageNotifier>();
+          //             langNotifier.switchLanguage();
+          //           },
+          //       ),
+          //     ],
+          //   ),
+          // ),
         ],
       ),
     );

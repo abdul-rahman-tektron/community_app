@@ -5,6 +5,7 @@ class HiveKeys {
   static const optionSelectionCompleted = 'option_selection_completed';
   static const userCategory = 'user_category';
   static const rememberMe = 'remember_me';
+  static const fcmToken = 'fcm_token';
   static const userData = 'user_data';
   static const notification = 'notification';
 }

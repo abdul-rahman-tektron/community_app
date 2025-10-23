@@ -61,10 +61,16 @@ class ServiceDetailsScreen extends StatelessWidget {
   }
 
   Widget headerSection(BuildContext context, ServiceDetailsNotifier notifier) {
-    final String status = RatingStarHelper.getStatus(
-      notifier.serviceDetail?.vendors?[0].totalRating ?? 0,
-    );
+    final vendor = (notifier.serviceDetail?.vendors?.isNotEmpty ?? false)
+        ? notifier.serviceDetail!.vendors!.first
+        : null;
+
+    final double ratingVal = vendor?.totalRating ?? 0;
+    final String status = RatingStarHelper.getStatus(ratingVal);
     final Color statusColor = RatingStarHelper.getStatusColor(notifier.rating);
+
+    final heroImage = notifier.safeBase64(notifier.serviceDetail?.serviceImage, const AssetImage(AppImages.acRepair));
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -74,17 +80,14 @@ class ServiceDetailsScreen extends StatelessWidget {
               height: 180.h,
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: (notifier.serviceDetail?.serviceImage?.isNotEmpty ?? false)
-                    ? MemoryImage(base64Decode(notifier.serviceDetail!.serviceImage!))
-                    : const AssetImage(AppImages.acRepair) as ImageProvider,
+                  image: heroImage,
                   fit: BoxFit.cover,
                   colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.4), BlendMode.darken),
                 ),
               ),
             ),
             Positioned(
-              top: 0,
-              left: 15,
+              top: 0, left: 15,
               child: Image.asset(AppImages.logo, height: 70.h, width: 70.w),
             ),
           ],
@@ -95,38 +98,22 @@ class ServiceDetailsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        notifier.serviceDetail?.vendors?[0].vendorName ?? "",
-                        style: AppFonts.text14.regular.style,
-                      ),
-                      Text(
-                        notifier.serviceDetail?.serviceName ?? "",
-                        style: AppFonts.text20.semiBold.style,
-                      ),
-                    ],
-                  ),
-                ],
+              if (vendor != null) ...[
+                Text(vendor.vendorName ?? "", style: AppFonts.text14.regular.style),
+              ],
+              Text(
+                vendor?.serviceName ?? notifier.serviceDetail?.serviceName ?? "",
+                style: AppFonts.text20.semiBold.style,
               ),
               8.verticalSpace,
               Row(
                 children: [
-                  RatingStarHelper.buildRatingStars(rating: notifier.serviceDetail?.vendors?[0].totalRating ?? 0),
+                  RatingStarHelper.buildRatingStars(rating: ratingVal),
                   3.horizontalSpace,
+                  Text(ratingVal.toStringAsFixed(1), style: AppFonts.text14.regular.style),
+                  Text(" · $status", style: AppFonts.text14.regular.style.copyWith(color: statusColor)),
                   Text(
-                    notifier.serviceDetail?.vendors?[0].totalRating?.toStringAsFixed(1) ?? "",
-                    style: AppFonts.text14.regular.style,
-                  ),
-                  Text(
-                    " · $status",
-                    style: AppFonts.text14.regular.style.copyWith(color: statusColor),
-                  ),
-                  Text(
-                    " · ${notifier.serviceDetail?.vendors?[0].reviewCount ?? ""} reviews",
+                    " · ${(vendor?.reviewCount ?? 0)} reviews",
                     style: AppFonts.text14.regular.style,
                   ),
                 ],
@@ -139,6 +126,15 @@ class ServiceDetailsScreen extends StatelessWidget {
   }
 
   Widget serviceVendorInfoSection(BuildContext context, ServiceDetailsNotifier notifier) {
+    final vendor = (notifier.serviceDetail?.vendors?.isNotEmpty ?? false)
+        ? notifier.serviceDetail!.vendors!.first
+        : null;
+
+    if (vendor == null) {
+      // Nothing to show if no vendor came from API
+      return const SizedBox.shrink();
+    }
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 15.w),
       child: Column(
@@ -146,15 +142,15 @@ class ServiceDetailsScreen extends StatelessWidget {
         children: [
           _iconLabelRow(
             icon: LucideIcons.mapPin,
-            label: notifier.serviceDetail?.vendors?[0].address ?? "",
-            bgColor: Color(0xffe7f3f9),
+            label: vendor.address ?? "",
+            bgColor: const Color(0xffe7f3f9),
             iconColor: Colors.blue,
           ),
           10.verticalSpace,
           _iconLabelRow(
             icon: LucideIcons.mail,
-            label: notifier.serviceDetail?.vendors?[0].vendorEmail ?? "",
-            bgColor: Color(0xfffdf5e7),
+            label: vendor.vendorEmail ?? "",
+            bgColor: const Color(0xfffdf5e7),
             iconColor: Colors.orange,
           ),
         ],
@@ -397,21 +393,33 @@ class ServiceDetailsScreen extends StatelessWidget {
   }
 
   Widget submitButton(BuildContext context, ServiceDetailsNotifier notifier) {
+    final vendor = (notifier.serviceDetail?.vendors?.isNotEmpty ?? false)
+        ? notifier.serviceDetail!.vendors!.first
+        : null;
+
+    final bool canEnquire = vendor != null;
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.h, vertical: 3.h),
-      child: CustomButton(
-        onPressed: () {
-          Navigator.pushNamed(
-            context,
-            AppRoutes.newServices,
-            arguments: {
-              "vendorId": notifier.serviceDetail?.vendors?[0].vendorId ?? "",
-              "vendorName": notifier.serviceDetail?.vendors?[0].vendorName ?? "",
-              "serviceName": notifier.serviceDetail?.serviceName ?? "",
+      child: Opacity(
+        opacity: canEnquire ? 1.0 : 0.5,
+        child: IgnorePointer(
+          ignoring: !canEnquire,
+          child: CustomButton(
+            onPressed: () {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.newServices,
+                arguments: {
+                  "vendorId": vendor?.vendorId ?? "",
+                  "vendorName": vendor?.vendorName ?? "",
+                  "serviceName": vendor?.serviceName ?? notifier.serviceDetail?.serviceName ?? "",
+                },
+              );
             },
-          );
-        },
-        text: "Enquire Now",
+            text: "Enquire Now",
+          ),
+        ),
       ),
     );
   }

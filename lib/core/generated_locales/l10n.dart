@@ -80,10 +80,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Connecting residents, jobs, and support—seamlessly in one app.`
+  /// `Connecting residents, services, and support—seamlessly in one app.`
   String get connectingResidents {
     return Intl.message(
-      'Connecting residents, jobs, and support—seamlessly in one app.',
+      'Connecting residents, services, and support—seamlessly in one app.',
       name: 'connectingResidents',
       desc: '',
       args: [],

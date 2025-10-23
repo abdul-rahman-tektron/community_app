@@ -80,12 +80,18 @@ class CompletedServiceCard extends StatelessWidget {
 
         if (service.status == AppStatus.jobVerifiedPaymentPending.name) {
           route = AppRoutes.payment;
+          argument = {"jobId": service.jobId, "vendorId" : service.customerId};
         } else if (service.status == AppStatus.paymentCompleted.name) {
           route = AppRoutes.feedback;
         } else {
+          print("Entered sana");
           route = AppRoutes.jobVerification;
-          argument = service.jobId.toString(); // only case where you need String
+          argument = {"jobId": service.jobId, "vendorId" : service.customerId};
         }
+
+        print("argument");
+        print(argument);
+        print(service.status);
 
         Navigator.pushNamed(context, route, arguments: argument).then((_) {
           notifier.initializeData();

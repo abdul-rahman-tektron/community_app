@@ -115,12 +115,15 @@ class SiteVisitCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xffe7f3f9),
+                  color: Color(request.status ==
+                      AppStatus.siteVisitRejected.name ? 0xffffebee : 0xffe7f3f9),
                   borderRadius: BorderRadius.circular(5),
                 ),
-                child: Text("Site Visit ${(request
-                    .isAcceptedByCustomer ?? false) ? "Accepted" : "Requested"}",
-                    style: AppFonts.text14.regular.style.copyWith(color: Colors.blue)),
+                child: Text("Site Visit ${request.status ==
+                    AppStatus.siteVisitRejected.name ? "Rejected" : (request
+                    .isAcceptedByCustomer ?? false) ?  "Accepted" : "Requested"}",
+                    style: AppFonts.text14.regular.style.copyWith(color: request.status ==
+                        AppStatus.siteVisitRejected.name ? Colors.red : Colors.blue)),
               ),
               10.verticalSpace,
               Row(
@@ -149,7 +152,8 @@ class SiteVisitCard extends StatelessWidget {
             ],
           ),
         ),
-        if(request.isAcceptedByCustomer ?? false) CustomButton(
+        if((request.isAcceptedByCustomer ?? false) ||
+            request.status == AppStatus.siteVisitRejected.name) CustomButton(
           height: 30.h,
           fullWidth: false,
           backgroundColor: AppColors.white,

@@ -260,6 +260,7 @@ class JobQuotationResponce {
   DateTime? endDate;
   String? createdBy;
   DateTime? createdDate;
+  DateTime? requestedDate;
   String? status;
   int? quotationResponceId;
   List<JobQuotationResponseItem>? jobQuotationResponseItems;
@@ -281,6 +282,7 @@ class JobQuotationResponce {
     this.createdDate,
     this.status,
     this.quotationResponceId,
+    this.requestedDate,
     this.jobQuotationResponseItems,
   });
 
@@ -306,6 +308,9 @@ class JobQuotationResponce {
         createdDate: json["createdDate"] == null
             ? null
             : DateTime.parse(json["createdDate"]),
+        requestedDate: json["requestedDate"] == null
+            ? null
+            : DateTime.parse(json["requestedDate"]),
         status: json["status"],
         quotationResponceId: json["quotationResponceId"],
         jobQuotationResponseItems: json["jobQuotationResponseItems"] == null
@@ -334,6 +339,7 @@ class JobQuotationResponce {
     "createdDate": createdDate?.toIso8601String(),
     "status": status,
     "quotationResponceId": quotationResponceId,
+    "requestedDate": requestedDate,
     "jobQuotationResponseItems": jobQuotationResponseItems == null
         ? []
         : List<dynamic>.from(jobQuotationResponseItems!.map((x) => x.toJson())),

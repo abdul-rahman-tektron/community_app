@@ -15,62 +15,60 @@ class OngoingServicesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final grouped = {
-      for (final status in JobStatusCategory.values)
-        status: upcomingJobs.where((job) {
-          final jobStatus =
-          CommonUtils.jobStatusFromString(job.jobStatusCategory);
-          if (job.jobStatusCategory?.toLowerCase() == "paymentpending") {
-            return status == JobStatusCategory.completed;
-          }
-          return jobStatus == status;
-        }).toList(),
-    };
+    // 1) Sort ALL jobs globally by jobId DESC
+    final sortedJobs = [...upcomingJobs]
+      ..sort((a, b) => (b.jobId ?? 0).compareTo(a.jobId ?? 0));
 
-    final hasJobs = grouped.values.any((jobs) => jobs.isNotEmpty);
+    // 2) Filter out cancelled jobs (we won't render them)
+    final visibleJobs = sortedJobs
+        .where((job) => job.status != AppStatus.cancelJob.name)
+        .toList();
+
+    final hasJobs = visibleJobs.isNotEmpty;
 
     return RefreshIndicator(
       onRefresh: () async {
         final notifier = context.read<JobsNotifier>();
         await notifier.initializeData();
       },
-      child: buildBody(context, hasJobs, grouped),
-    );
-  }
+      // 3) Mixed list (no grouping). Each row decides its card by status.
+      child: hasJobs
+          ? ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.zero,
+        itemCount: visibleJobs.length,
+        itemBuilder: (context, index) {
+          final job = visibleJobs[index];
 
-  Widget buildBody(BuildContext context, bool hasJobs,
-      Map<JobStatusCategory, List<CustomerOngoingJobsData>> grouped) {
-    if (!hasJobs) {
-      return Center(child: Text("No ongoing jobs."));
-    }
+          // Map raw category to enum (with special "paymentpending" handling)
+          final rawCat = (job.jobStatusCategory ?? '').toLowerCase();
+          final effectiveStatus = rawCat == 'paymentpending'
+              ? JobStatusCategory.completed
+              : CommonUtils.jobStatusFromString(job.jobStatusCategory);
 
-    return SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+          switch (effectiveStatus) {
+            case JobStatusCategory.tracking:
+              return TrackingServiceCard(key: ValueKey(job.jobId), job: job);
+
+            case JobStatusCategory.inProgress:
+              return InProgressServiceCard(key: ValueKey(job.jobId), service: job);
+
+            case JobStatusCategory.completed:
+              return CompletedServiceCard(key: ValueKey(job.jobId), service: job);
+
+            case JobStatusCategory.unknown:
+              return const SizedBox.shrink();
+          }
+        },
+      )
+          : ListView(
+        // Keep pull-to-refresh working even when empty
+        physics: const AlwaysScrollableScrollPhysics(),
         children: [
-          ...JobStatusCategory.values.map((status) {
-            final jobs = grouped[status]!;
-            if (jobs.isEmpty) return const SizedBox.shrink();
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ...jobs.map((job) {
-                  switch (status) {
-                    case JobStatusCategory.tracking:
-                      return TrackingServiceCard(job: job);
-                    case JobStatusCategory.inProgress:
-                      return InProgressServiceCard(service: job);
-                    case JobStatusCategory.completed:
-                      return CompletedServiceCard(service: job);
-                    case JobStatusCategory.unknown:
-                      return const SizedBox.shrink();
-                  }
-                }),
-              ],
-            );
-          }),
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.6,
+            child: const Center(child: Text("No ongoing jobs.")),
+          ),
         ],
       ),
     );

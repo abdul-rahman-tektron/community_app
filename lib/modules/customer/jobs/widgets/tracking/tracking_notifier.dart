@@ -1,9 +1,12 @@
 import 'dart:math';
 
 import 'package:community_app/core/base/base_notifier.dart';
+import 'package:community_app/core/model/common/error/common_response.dart';
 import 'package:community_app/core/model/customer/job/job_status_tracking/job_status_tracking_request.dart';
 import 'package:community_app/core/model/customer/job/job_status_tracking/job_status_tracking_response.dart';
 import 'package:community_app/core/model/customer/job/job_status_tracking/jobs_status_response.dart';
+import 'package:community_app/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
+import 'package:community_app/core/remote/services/common_repository.dart';
 import 'package:community_app/core/remote/services/customer/customer_jobs_repository.dart';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/utils/helpers/toast_helper.dart';
@@ -19,8 +22,8 @@ class TrackingNotifier extends BaseChangeNotifier {
   LatLng? _employeePosition;
   LatLng _customerPosition = const LatLng(25.268938, 55.305338);
 
-  List<JobStatusTrackingData> jobStatusTrackingData = [];
-  List<JobStatusResponse> jobStatus = [];
+  List<JobStatusTrackingData>? jobStatusTrackingData = [];
+  List<JobStatusResponse>? jobStatus = [];
   PartyInfo? partyInfo;
 
   TrackingNotifier(this.jobId) {
@@ -122,6 +125,31 @@ class TrackingNotifier extends BaseChangeNotifier {
       ToastHelper.showError('An error occurred. Please try again.');
     } finally {
       isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> apiUpdateJobStatus(BuildContext context, int? statusId, {String? notes}) async {
+    if (statusId == null) return;
+    try {
+      notifyListeners();
+      final parsed = await CommonRepository.instance.apiUpdateJobStatus(
+        UpdateJobStatusRequest(
+            jobId: jobId ?? 0,
+            statusId: statusId,
+            notes: notes ?? "",
+            createdBy: userData?.name ?? "",
+            vendorId: userData?.customerId ?? 0
+        ),
+      );
+
+      if (parsed is CommonResponse && parsed.success == true) {
+        ToastHelper.showSuccess('Job Cancelled successfully');
+          Navigator.pop(context);
+      }
+    } catch (e) {
+      ToastHelper.showError('Error updating status: $e');
+    } finally {
       notifyListeners();
     }
   }

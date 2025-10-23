@@ -64,8 +64,8 @@ class ExploreNotifier extends BaseChangeNotifier {
   Timer? _debounce; // 👈 debounce timer
 
   ExploreNotifier({String? initialCategory}) {
-    initializeData();
     selectedCategoryId = int.tryParse(initialCategory ?? "");
+    initializeData();
     searchController.addListener(() {
       _onSearchChanged();
     });

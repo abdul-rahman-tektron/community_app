@@ -16,11 +16,12 @@ class JobVerificationNotifier extends BaseChangeNotifier {
   bool isFullscreen = false;
 
   String? jobId;
+  int? vendorId;
   String? notes;
 
   List<CompletionPhoto> fileData = [];
 
-  JobVerificationNotifier(this.jobId) {
+  JobVerificationNotifier(this.jobId, this.vendorId) {
     initializeData();
   }
 
@@ -49,7 +50,7 @@ class JobVerificationNotifier extends BaseChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> apiUpdateJobStatus(BuildContext context, int? statusId) async {
+  Future<void> apiUpdateJobStatus(BuildContext context, int? statusId, {String? notes}) async {
     if (statusId == null) return;
     try {
       notifyListeners();
@@ -57,20 +58,25 @@ class JobVerificationNotifier extends BaseChangeNotifier {
         UpdateJobStatusRequest(
           jobId: int.parse(jobId ?? "0"),
           statusId: statusId,
-            createdBy: userData?.name ?? ""
-            , vendorId: userData?.customerId ?? 0
+            notes: notes ?? "",
+            createdBy: userData?.name ?? "",
+            vendorId: vendorId ?? 0
         ),
       );
 
       if (parsed is CommonResponse && parsed.success == true) {
-        // ToastHelper.showSuccess(
-        //   "Status updated to: ${AppStatus.fromId(statusId)?.name ?? ""}",
-        // );
-        Navigator.pushNamed(
-          context,
-          AppRoutes.payment,
-          arguments: int.parse(jobId ?? "0"),
-        );
+        if(statusId == AppStatus.rework.id) {
+          ToastHelper.showSuccess(
+            "Status updated to: ${AppStatus.fromId(statusId)?.name ?? ""}",
+          );
+          Navigator.pop(context);
+        } else {
+          Navigator.pushNamed(
+            context,
+            AppRoutes.payment,
+            arguments: {"jobId": int.parse(jobId ?? "0"), "vendorId" : vendorId},
+          );
+        }
       }
     } catch (e) {
       ToastHelper.showError('Error updating status: $e');

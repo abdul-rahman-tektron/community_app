@@ -11,6 +11,7 @@ import 'package:community_app/utils/helpers/loader.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_drawer.dart';
+import 'package:community_app/utils/widgets/custom_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -20,12 +21,13 @@ import 'package:video_player/video_player.dart';
 
 class JobVerificationScreen extends StatelessWidget {
   final String? jobId;
-  const JobVerificationScreen({super.key, this.jobId});
+  final int? vendorId;
+  const JobVerificationScreen({super.key, this.jobId, this.vendorId});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => JobVerificationNotifier(jobId),
+      create: (_) => JobVerificationNotifier(jobId, vendorId),
       child: Consumer<JobVerificationNotifier>(
         builder: (context, notifier, child) {
           return buildBody(context, notifier);
@@ -41,11 +43,32 @@ class JobVerificationScreen extends StatelessWidget {
       persistentFooterButtons: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0),
-          child: CustomButton(
-            onPressed: () {
-              notifier.apiUpdateJobStatus(context, AppStatus.jobVerifiedPaymentPending.id);
-            },
-            text: "Proceed Payment",
+          child: Row(
+            children: [
+              Expanded(
+                child: CustomButton(
+                  onPressed: () {
+                    showStatusNotesPopup(
+                      context,
+                      onSubmit: (notes) async {
+                        await notifier.apiUpdateJobStatus(
+                            context, AppStatus.rework.id, notes: notes);
+                      },
+                    );
+                  },
+                  text: "Rework",
+                ),
+              ),
+              10.horizontalSpace,
+              Expanded(
+                child: CustomButton(
+                  onPressed: () {
+                    notifier.apiUpdateJobStatus(context, AppStatus.jobVerifiedPaymentPending.id);
+                  },
+                  text: "Proceed",
+                ),
+              ),
+            ],
           ),
         ),
       ],

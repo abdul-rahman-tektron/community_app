@@ -50,6 +50,7 @@ class OngoingJobsAssignedData {
   String? jobStatusCategory;
   String? status;
   dynamic address;
+  String? customerRemarks;
   List<AssignedEmployee>? assignedEmployees;
 
   OngoingJobsAssignedData({
@@ -62,6 +63,7 @@ class OngoingJobsAssignedData {
     this.jobStatusCategory,
     this.status,
     this.address,
+    this.customerRemarks,
     this.assignedEmployees,
   });
 
@@ -75,6 +77,7 @@ class OngoingJobsAssignedData {
     jobStatusCategory: json["jobStatusCategory"],
     status: json["status"],
     address: json["address"],
+    customerRemarks: json["customerRemarks"],
     assignedEmployees: json["assignedEmployees"] == null ? [] : List<AssignedEmployee>.from(json["assignedEmployees"]!.map((x) => AssignedEmployee.fromJson(x))),
   );
 
@@ -88,6 +91,7 @@ class OngoingJobsAssignedData {
     "jobStatusCategory": jobStatusCategory,
     "status": status,
     "address": address,
+    "customerRemarks": customerRemarks,
     "assignedEmployees": assignedEmployees == null ? [] : List<dynamic>.from(assignedEmployees!.map((x) => x.toJson())),
   };
 }

@@ -56,6 +56,15 @@ class HiveStorageService {
     return _box.get(HiveKeys.rememberMe);
   }
 
+  //Set FCM Token
+  static Future<void> setFCMToken(String flow) async {
+    await _box.put(HiveKeys.fcmToken, flow);
+  }
+
+  static String? getFCMToken() {
+    return _box.get(HiveKeys.fcmToken);
+  }
+
   //
   static Future<void> setUserData(String flow) async {
     await _box.put(HiveKeys.userData, flow);

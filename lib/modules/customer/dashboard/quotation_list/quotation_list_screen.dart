@@ -3,6 +3,8 @@ import 'package:community_app/modules/customer/dashboard/quotation_list/quotatio
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/res/styles.dart';
+import 'package:community_app/utils/extensions.dart';
+import 'package:community_app/utils/helpers/common_utils.dart';
 import 'package:community_app/utils/helpers/loader.dart';
 import 'package:community_app/utils/widgets/custom_app_bar.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
@@ -43,23 +45,22 @@ class QuotationListScreen extends StatelessWidget {
               : notifier.jobs.isEmpty
               ? const Center(child: Text("No Quotations found"))
               : Column(
-            children: [
-              15.verticalSpace,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [_buildHeader()],
-              ),
-              10.verticalSpace,
-              ...notifier.jobs.expand(
-                    (job) =>
-                job.jobQuotationResponce?.map(
-                      (quotation) =>
-                      _buildQuotationCard(context, notifier, job, quotation),
-                ) ??
-                    [],
-              ),
-            ],
-          ),
+                  children: [
+                    15.verticalSpace,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [_buildHeader()],
+                    ),
+                    10.verticalSpace,
+                    ...notifier.jobs.expand(
+                      (job) =>
+                          job.jobQuotationResponce?.map(
+                            (quotation) => _buildQuotationCard(context, notifier, job, quotation),
+                          ) ??
+                          [],
+                    ),
+                  ],
+                ),
         ),
       ),
     );
@@ -84,10 +85,12 @@ class QuotationListScreen extends StatelessWidget {
     QuotationRequestListData job,
     JobQuotationResponce quotation,
   ) {
-    final double itemTotal = quotation.jobQuotationResponseItems?.fold(
-      0.0,
+    final double itemTotal =
+        quotation.jobQuotationResponseItems?.fold(
+          0.0,
           (sum, item) => (sum ?? 0.0) + (item.totalAmount ?? 0.0),
-    ) ?? 0.0;
+        ) ??
+        0.0;
 
     final double serviceCharge = quotation.serviceCharge ?? 0.0;
 
@@ -126,17 +129,34 @@ class QuotationListScreen extends StatelessWidget {
                     _buildQuotationItemsDynamic(quotation.jobQuotationResponseItems ?? []),
                     _buildServiceCharge(vat),
                     _buildTotalWithVat(totalWithVat),
-                    _buildSiteVisitRequired(job.siteVisitRequired ?? false),
+                    // _buildSiteVisitRequired(job.siteVisitRequired ?? false),
                     _buildRemarksNotes(quotation.quotationDetails ?? ""),
                     // _buildCompletionAvailability("2 Days", "12 Jul", "10:00 AM"),
-                    _buildFooterActions(context, notifier, quotation),
+                    quotation.status == AppStatus.vendorQuotationRejected.name
+                        ? Center(
+                            child: Text(
+                              "Quotation Declined",
+                              style: AppFonts.text16.semiBold.red.style,
+                            ),
+                          )
+                        : _buildFooterActions(context, notifier, quotation),
                   ],
                 )
               : quotation.siteVisitId != null
-              ? _buildSiteVisitSection(context, quotation, notifier)
+              ? quotation.status == AppStatus.siteVisitRejected.name
+                    ? Center(
+                        child: Text(
+                          "Waiting for vendor response. you have rejected the site visit request",
+                          style: AppFonts.text14.semiBold.red.style,
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                    : _buildSiteVisitSection(context, quotation, notifier)
               : Center(
                   child: Text(
-                    "Quotation not provided yet",
+                    quotation.status == AppStatus.vendorQuotationRejected.name
+                        ? "Vendor Rejected your request"
+                        : "Quotation not provided yet",
                     style: AppFonts.text14.semiBold.red.style,
                   ),
                 ),
@@ -176,58 +196,62 @@ class QuotationListScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade300),
       ),
-      child: quotation.isAcceptedByCustomer ?? false ? Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Site Visit Status", style: AppFonts.text16.semiBold.style),
-          12.verticalSpace,
-          Text(
-            "The employee verification process is in progress. Once verification is complete, the employee will visit your site to carry out the inspection and provide you with the accurate quotation.",
-            style: AppFonts.text14.regular.primary.style,
-          ),
-        ],
-      ) : Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Site Visit Requested By Vendor", style: AppFonts.text16.semiBold.style),
-          15.verticalSpace,
-          Text(
-            "The vendor cannot evaluate the issue remotely. "
-            "For an accurate quotation, a site visit and inspection are required.",
-            style: AppFonts.text14.regular.style,
-          ),
-          12.verticalSpace,
-          Row(
-            children: [
-              Expanded(
-                child: CustomButton(
-                  height: 35,
-                  onPressed: () async {
-                    await notifier.acceptSiteVisit(context, quotation.siteVisitId ?? 0);
-                  },
-                  backgroundColor: AppColors.white,
-                  borderColor: AppColors.primary,
-                  textStyle: AppFonts.text14.regular.primary.style,
-                  text: 'Accept',
+      child: quotation.isAcceptedByCustomer ?? false
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Site Visit Status", style: AppFonts.text16.semiBold.style),
+                12.verticalSpace,
+                Text(
+                  "The employee verification process is in progress. Once verification is complete, the employee will visit your site to carry out the inspection and provide you with the accurate quotation.",
+                  style: AppFonts.text14.regular.primary.style,
                 ),
-              ),
-              10.horizontalSpace,
-              Expanded(
-                child: CustomButton(
-                  height: 35,
-                  onPressed: () async {
-                    await notifier.rejectSiteVisit(context, quotation.siteVisitId ?? 0);
-                  },
-                  backgroundColor: AppColors.white,
-                  borderColor: AppColors.error,
-                  textStyle: AppFonts.text14.regular.red.style,
-                  text: 'Reject',
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Site Visit Requested By Vendor", style: AppFonts.text16.semiBold.style),
+                15.verticalSpace,
+                Text("Requested Date: ${quotation.requestedDate?.formatDate()}", style: AppFonts.text14.regular.style),
+                15.verticalSpace,
+                Text(
+                  "The vendor cannot evaluate the issue remotely. "
+                  "For an accurate quotation, a site visit and inspection are required.",
+                  style: AppFonts.text14.regular.style,
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
+                12.verticalSpace,
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomButton(
+                        height: 35,
+                        onPressed: () async {
+                          await notifier.acceptSiteVisit(context, quotation.siteVisitId ?? 0);
+                        },
+                        backgroundColor: AppColors.white,
+                        borderColor: AppColors.primary,
+                        textStyle: AppFonts.text14.regular.primary.style,
+                        text: 'Accept',
+                      ),
+                    ),
+                    10.horizontalSpace,
+                    Expanded(
+                      child: CustomButton(
+                        height: 35,
+                        onPressed: () async {
+                          await notifier.rejectSiteVisit(context, quotation.siteVisitId ?? 0);
+                        },
+                        backgroundColor: AppColors.white,
+                        borderColor: AppColors.error,
+                        textStyle: AppFonts.text14.regular.red.style,
+                        text: 'Reject',
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
     );
   }
 
@@ -316,14 +340,15 @@ class QuotationListScreen extends StatelessWidget {
               onPressed: () {
                 bookingConfirmationPopup(
                   context,
-                  onConfirm: () async {
+                  onConfirm: (String isoDate, String? note) async {
                     await notifier.apiJobBooking(
                       context,
                       jobId: quotation.jobId ?? 0,
                       quotationRequestId: quotation.quotationResponceId ?? 0,
                       quotationResponseId: quotation.quotationResponceId ?? 0,
                       vendorId: quotation.vendorId ?? 0,
-                      remarks: "Accepted by customer",
+                      remarks: (note != null && note.isNotEmpty) ? note : "Accepted by customer",
+                      dateOfVisit: isoDate, // yyyy-MM-dd
                     );
                   },
                 );
@@ -338,8 +363,11 @@ class QuotationListScreen extends StatelessWidget {
           Expanded(
             child: CustomButton(
               height: 40,
-              onPressed: () {
-                // Decline logic
+              onPressed: () async {
+                await notifier.apiUpdateJobStatus(
+                  AppStatus.vendorQuotationRejected.id,
+                  isReject: true,
+                );
               },
               backgroundColor: AppColors.white,
               borderColor: AppColors.error,

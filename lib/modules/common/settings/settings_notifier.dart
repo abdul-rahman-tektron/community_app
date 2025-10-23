@@ -60,8 +60,8 @@ class SettingsNotifier extends BaseChangeNotifier {
       case 'notifications':
         toggleNotifications();
         break;
-      case 'about':
-        Navigator.pushNamed(context, '/about');
+      case 'about-us':
+        Navigator.pushNamed(context, AppRoutes.aboutUs);
         break;
       case 'privacy-policy':
         Navigator.pushNamed(context, AppRoutes.privacyPolicy);

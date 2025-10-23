@@ -44,7 +44,7 @@ class SettingsScreen extends StatelessWidget {
                   //
                   _buildSettingsGroup(
                     [
-                      _tileData(LucideIcons.languages, "Change Language", 'change-language'),
+                      // _tileData(LucideIcons.languages, "Change Language", 'change-language'),
                       _tileData(LucideIcons.bell, "Notifications", 'notifications'),
                     ],
                     context,
@@ -52,7 +52,7 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   _buildSettingsGroup(
                     [
-                      _tileData(LucideIcons.info, "About", 'about'),
+                      _tileData(LucideIcons.info, "About", 'about-us'),
                       _tileData(LucideIcons.globeLock, "Privacy Policy", 'privacy-policy'),
                     ],
                     context,

@@ -25,7 +25,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "changeLanguageTo":
             MessageLookupByLibrary.simpleMessage("Switch Language -"),
         "connectingResidents": MessageLookupByLibrary.simpleMessage(
-            "Connecting residents, jobs, and support—seamlessly in one app."),
+            "Connecting residents, services, and support—seamlessly in one app."),
         "dontHaveAccount":
             MessageLookupByLibrary.simpleMessage("Don\'t have an account?"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),

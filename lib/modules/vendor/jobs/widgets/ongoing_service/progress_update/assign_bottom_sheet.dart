@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:community_app/res/colors.dart';
 import 'package:community_app/res/fonts.dart';
 import 'package:community_app/utils/helpers/dashed_border_container.dart';
+import 'package:community_app/utils/helpers/toast_helper.dart';
 import 'package:community_app/utils/widgets/custom_buttons.dart';
 import 'package:community_app/utils/widgets/custom_popup.dart';
 import 'package:community_app/utils/widgets/custom_textfields.dart';
@@ -71,9 +72,7 @@ class _AssignBottomSheetState extends State<AssignBottomSheet> {
                   );
                   Navigator.pop(context);
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Please enter name & phone")),
-                  );
+                  ToastHelper.showError("Please enter name & phone");
                 }
               },
             ),
