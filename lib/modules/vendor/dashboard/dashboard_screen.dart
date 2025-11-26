@@ -1,18 +1,18 @@
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/utils/extensions.dart';
-import 'package:community_app/utils/helpers/screen_size.dart';
-import 'package:community_app/utils/router/routes.dart';
-import 'package:community_app/utils/widgets/custom_refresh_indicator.dart';
-import 'package:community_app/utils/widgets/ratings_helper.dart';
+import 'package:Xception/res/colors.dart';
+import 'package:Xception/utils/extensions.dart';
+import 'package:Xception/utils/helpers/screen_size.dart';
+import 'package:Xception/utils/router/routes.dart';
+import 'package:Xception/utils/widgets/custom_refresh_indicator.dart';
+import 'package:Xception/utils/widgets/ratings_helper.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
-import 'package:community_app/modules/vendor/dashboard/dashboard_notifier.dart';
-import 'package:community_app/res/fonts.dart';
-import 'package:community_app/res/styles.dart';
+import 'package:Xception/modules/vendor/dashboard/dashboard_notifier.dart';
+import 'package:Xception/res/fonts.dart';
+import 'package:Xception/res/styles.dart';
 
 class VendorDashboardScreen extends StatelessWidget {
   const VendorDashboardScreen({super.key});

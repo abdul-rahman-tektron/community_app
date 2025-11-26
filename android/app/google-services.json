@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "953987534728",
-    "project_id": "xception-39c70",
-    "storage_bucket": "xception-39c70.firebasestorage.app"
+    "project_number": "1024569195684",
+    "project_id": "xceptionsolutions-a1e94",
+    "storage_bucket": "xceptionsolutions-a1e94.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:953987534728:android:0c466895377002db86343d",
+        "mobilesdk_app_id": "1:1024569195684:android:0e283bff095156b55fba31",
         "android_client_info": {
-          "package_name": "com.example.community_app"
+          "package_name": "com.tektronix.xception"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBHKCJ5ssRBRJRNTuqsnsXcIChrGc4AtPE"
+          "current_key": "AIzaSyAGtk7I_kUsmUBGZxxtdDCciuOdVAlPxmE"
         }
       ],
       "services": {

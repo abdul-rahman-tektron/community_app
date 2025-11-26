@@ -1,15 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/customer/job/customer_history_detail_request.dart';
-import 'package:community_app/core/model/customer/job/customer_history_detail_response.dart';
-import 'package:community_app/core/model/customer/payment/payment_detail_request.dart';
-import 'package:community_app/core/model/customer/payment/payment_detail_response.dart';
-import 'package:community_app/core/remote/services/customer/customer_jobs_repository.dart';
-import 'package:community_app/res/images.dart';
-import 'package:community_app/utils/helpers/pdf_viewer.dart';
-import 'package:community_app/utils/helpers/toast_helper.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/core/model/customer/job/customer_history_detail_request.dart';
+import 'package:Xception/core/model/customer/job/customer_history_detail_response.dart';
+import 'package:Xception/core/model/customer/payment/payment_detail_request.dart';
+import 'package:Xception/core/model/customer/payment/payment_detail_response.dart';
+import 'package:Xception/core/remote/services/customer/customer_jobs_repository.dart';
+import 'package:Xception/res/images.dart';
+import 'package:Xception/utils/helpers/pdf_viewer.dart';
+import 'package:Xception/utils/helpers/toast_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';

@@ -1,6 +1,6 @@
 // job_booking_response.dart
 import 'dart:convert';
-import 'package:community_app/core/model/customer/quotation/customer_response_response.dart' show EmailPreview;
+import 'package:Xception/core/model/customer/quotation/customer_response_response.dart' show EmailPreview;
 // ^ reuse the same EmailPreview class you already have
 
 JobBookingResponse jobBookingResponseFromJson(String str) => JobBookingResponse.fromJson(json.decode(str));

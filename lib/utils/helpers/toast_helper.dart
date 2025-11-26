@@ -1,4 +1,4 @@
-import 'package:community_app/res/colors.dart';
+import 'package:Xception/res/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:toastification/toastification.dart';

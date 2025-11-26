@@ -1,8 +1,8 @@
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/notifier/language_notifier.dart';
-import 'package:community_app/utils/router/routes.dart';
-import 'package:community_app/utils/storage/hive_storage.dart';
-import 'package:community_app/utils/storage/secure_storage.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/core/notifier/language_notifier.dart';
+import 'package:Xception/utils/router/routes.dart';
+import 'package:Xception/utils/storage/hive_storage.dart';
+import 'package:Xception/utils/storage/secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

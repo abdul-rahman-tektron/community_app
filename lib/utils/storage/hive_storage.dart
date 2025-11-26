@@ -1,4 +1,4 @@
-import 'package:community_app/res/hive_keys.dart';
+import 'package:Xception/res/hive_keys.dart';
 import 'package:hive/hive.dart';
 
 class HiveStorageService {

@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/customer/explore/service_detail_request.dart';
-import 'package:community_app/core/model/customer/explore/service_detail_response.dart';
-import 'package:community_app/core/remote/services/customer/customer_explore_repository.dart';
-import 'package:community_app/utils/helpers/toast_helper.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/core/model/customer/explore/service_detail_request.dart';
+import 'package:Xception/core/model/customer/explore/service_detail_response.dart';
+import 'package:Xception/core/remote/services/customer/customer_explore_repository.dart';
+import 'package:Xception/utils/helpers/toast_helper.dart';
 import 'package:flutter/material.dart';
 
 class ServiceDetailsNotifier extends BaseChangeNotifier {

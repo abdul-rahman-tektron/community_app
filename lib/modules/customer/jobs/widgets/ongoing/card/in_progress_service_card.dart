@@ -1,8 +1,8 @@
-import 'package:community_app/core/model/customer/job/ongoing_jobs_response.dart';
-import 'package:community_app/res/fonts.dart';
-import 'package:community_app/res/styles.dart';
-import 'package:community_app/utils/helpers/common_utils.dart';
-import 'package:community_app/utils/widgets/custom_linear_progress_indicator.dart';
+import 'package:Xception/core/model/customer/job/ongoing_jobs_response.dart';
+import 'package:Xception/res/fonts.dart';
+import 'package:Xception/res/styles.dart';
+import 'package:Xception/utils/helpers/common_utils.dart';
+import 'package:Xception/utils/widgets/custom_linear_progress_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';

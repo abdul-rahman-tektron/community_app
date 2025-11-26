@@ -1,6 +1,6 @@
-import 'package:community_app/modules/common/privacy_policy/privacy_policy_notifier.dart';
-import 'package:community_app/res/fonts.dart';
-import 'package:community_app/utils/widgets/custom_app_bar.dart';
+import 'package:Xception/modules/common/privacy_policy/privacy_policy_notifier.dart';
+import 'package:Xception/res/fonts.dart';
+import 'package:Xception/utils/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';

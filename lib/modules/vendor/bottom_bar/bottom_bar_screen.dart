@@ -1,10 +1,10 @@
-import 'package:community_app/modules/customer/bottom_bar/bottom_bar_notifier.dart';
-import 'package:community_app/modules/vendor/bottom_bar/bottom_bar_notifier.dart';
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/utils/extensions.dart';
-import 'package:community_app/utils/widgets/custom_app_bar.dart';
-import 'package:community_app/utils/widgets/custom_bottom_bar.dart';
-import 'package:community_app/utils/widgets/custom_drawer.dart';
+import 'package:Xception/modules/customer/bottom_bar/bottom_bar_notifier.dart';
+import 'package:Xception/modules/vendor/bottom_bar/bottom_bar_notifier.dart';
+import 'package:Xception/res/colors.dart';
+import 'package:Xception/utils/extensions.dart';
+import 'package:Xception/utils/widgets/custom_app_bar.dart';
+import 'package:Xception/utils/widgets/custom_bottom_bar.dart';
+import 'package:Xception/utils/widgets/custom_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';

@@ -1,10 +1,10 @@
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/common/password/reset_password_request.dart';
-import 'package:community_app/core/remote/services/common_repository.dart';
-import 'package:community_app/utils/helpers/toast_helper.dart';
-import 'package:community_app/utils/router/routes.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/core/model/common/password/reset_password_request.dart';
+import 'package:Xception/core/remote/services/common_repository.dart';
+import 'package:Xception/utils/helpers/toast_helper.dart';
+import 'package:Xception/utils/router/routes.dart';
 import 'package:flutter/material.dart';
-import 'package:community_app/utils/enums.dart';
+import 'package:Xception/utils/enums.dart';
 
 class ResetPasswordNotifier extends BaseChangeNotifier {
   String? email;

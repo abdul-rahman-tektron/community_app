@@ -1,5 +1,5 @@
-import 'package:community_app/res/fonts.dart';
-import 'package:community_app/utils/enums.dart';
+import 'package:Xception/res/fonts.dart';
+import 'package:Xception/utils/enums.dart';
 import 'package:flutter/material.dart';
 
 class StatusIndicator extends StatelessWidget {

@@ -1,8 +1,8 @@
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/modules/customer/dashboard/dashboard_screen.dart';
-import 'package:community_app/modules/customer/explore/explore_screen.dart';
-import 'package:community_app/modules/customer/jobs/jobs_screen.dart';
-import 'package:community_app/utils/enums.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/modules/customer/dashboard/dashboard_screen.dart';
+import 'package:Xception/modules/customer/explore/explore_screen.dart';
+import 'package:Xception/modules/customer/jobs/jobs_screen.dart';
+import 'package:Xception/utils/enums.dart';
 import 'package:flutter/material.dart';
 
 class BottomBarNotifier extends BaseChangeNotifier {

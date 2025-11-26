@@ -1,16 +1,16 @@
 import 'dart:math';
 
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/common/error/common_response.dart';
-import 'package:community_app/core/model/customer/job/job_status_tracking/job_status_tracking_request.dart';
-import 'package:community_app/core/model/customer/job/job_status_tracking/job_status_tracking_response.dart';
-import 'package:community_app/core/model/customer/job/job_status_tracking/jobs_status_response.dart';
-import 'package:community_app/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
-import 'package:community_app/core/remote/services/common_repository.dart';
-import 'package:community_app/core/remote/services/customer/customer_jobs_repository.dart';
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/utils/helpers/toast_helper.dart';
-import 'package:community_app/utils/map_icon_paint.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/core/model/common/error/common_response.dart';
+import 'package:Xception/core/model/customer/job/job_status_tracking/job_status_tracking_request.dart';
+import 'package:Xception/core/model/customer/job/job_status_tracking/job_status_tracking_response.dart';
+import 'package:Xception/core/model/customer/job/job_status_tracking/jobs_status_response.dart';
+import 'package:Xception/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
+import 'package:Xception/core/remote/services/common_repository.dart';
+import 'package:Xception/core/remote/services/customer/customer_jobs_repository.dart';
+import 'package:Xception/res/colors.dart';
+import 'package:Xception/utils/helpers/toast_helper.dart';
+import 'package:Xception/utils/map_icon_paint.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -38,13 +38,15 @@ class TrackingNotifier extends BaseChangeNotifier {
   BitmapDescriptor? _employeeIcon;
   BitmapDescriptor? _customerIcon;
 
-  String? _estimatedDuration;  // e.g. "15 mins"
-  String? _estimatedDistance;  // e.g. "10 km"
+  String? _estimatedDuration; // e.g. "15 mins"
+  String? _estimatedDistance; // e.g. "10 km"
 
   LatLng? get employeePosition => _employeePosition;
+
   LatLng get customerPosition => _customerPosition;
 
   String? get estimatedDuration => _estimatedDuration;
+
   String? get estimatedDistance => _estimatedDistance;
 
   GoogleMapController? _mapController;
@@ -107,14 +109,25 @@ class TrackingNotifier extends BaseChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      final parsed = await CustomerJobsRepository.instance
-          .apiJobStatusTracking(JobStatusTrackingRequest(jobId: jobId)) as JobStatusTrackingResponse;
+      final parsed =
+          await CustomerJobsRepository.instance.apiJobStatusTracking(
+                JobStatusTrackingRequest(jobId: jobId),
+              )
+              as JobStatusTrackingResponse;
 
       if (parsed.success == true && parsed.data != null) {
         jobStatusTrackingData = parsed.data?.statusTracking ?? [];
-        partyInfo = parsed.data?.partyInfo?[0] ?? PartyInfo() ;
+        partyInfo = parsed.data?.partyInfo?[0] ?? PartyInfo();
 
-        updateEmployeePosition(LatLng(partyInfo?.vendorLatitude ?? 0, partyInfo?.vendorLongitude ?? 0));
+        print("Data updated");
+        print(partyInfo?.customerName);
+        print(partyInfo?.employeeName);
+        print(LatLng(partyInfo?.vendorLatitude ?? 0, partyInfo?.vendorLongitude ?? 0));
+        print(LatLng(partyInfo?.latitude ?? 0, partyInfo?.longitude ?? 0));
+
+        updateEmployeePosition(
+          LatLng(partyInfo?.vendorLatitude ?? 0, partyInfo?.vendorLongitude ?? 0),
+        );
         updateCustomerPosition(LatLng(partyInfo?.latitude ?? 0, partyInfo?.longitude ?? 0));
         print("jobStatusTrackingData");
         print(jobStatusTrackingData);
@@ -135,17 +148,17 @@ class TrackingNotifier extends BaseChangeNotifier {
       notifyListeners();
       final parsed = await CommonRepository.instance.apiUpdateJobStatus(
         UpdateJobStatusRequest(
-            jobId: jobId ?? 0,
-            statusId: statusId,
-            notes: notes ?? "",
-            createdBy: userData?.name ?? "",
-            vendorId: userData?.customerId ?? 0
+          jobId: jobId ?? 0,
+          statusId: statusId,
+          notes: notes ?? "",
+          createdBy: userData?.name ?? "",
+          vendorId: userData?.customerId ?? 0,
         ),
       );
 
       if (parsed is CommonResponse && parsed.success == true) {
         ToastHelper.showSuccess('Job Cancelled successfully');
-          Navigator.pop(context);
+        Navigator.pop(context);
       }
     } catch (e) {
       ToastHelper.showError('Error updating status: $e');
@@ -155,10 +168,7 @@ class TrackingNotifier extends BaseChangeNotifier {
   }
 
   Future<void> openDialer(String phoneNumber) async {
-    final Uri launchUri = Uri(
-      scheme: 'tel',
-      path: phoneNumber,
-    );
+    final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
     if (!await launchUrl(launchUri)) {
       throw 'Could not launch $phoneNumber';
     }
@@ -169,8 +179,7 @@ class TrackingNotifier extends BaseChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      final parsed = await CustomerJobsRepository.instance
-          .apiJobStatus();
+      final parsed = await CustomerJobsRepository.instance.apiJobStatus();
 
       if (parsed is List<JobStatusResponse> && parsed.isNotEmpty) {
         jobStatus = parsed;
@@ -279,7 +288,8 @@ class TrackingNotifier extends BaseChangeNotifier {
 
       for (var step in steps) {
         final stepPointsEncoded = step['polyline']['points'];
-        final stepPoints = PolylinePoints().decodePolyline(stepPointsEncoded)
+        final stepPoints = PolylinePoints()
+            .decodePolyline(stepPointsEncoded)
             .map((e) => LatLng(e.latitude, e.longitude))
             .toList();
 
@@ -290,11 +300,13 @@ class TrackingNotifier extends BaseChangeNotifier {
 
         final polylineColor = _getTrafficColor(speed);
 
-        segments.add(ColoredPolylineSegment(
-          id: 'segment_$segmentIndex',
-          points: stepPoints,
-          color: polylineColor,
-        ));
+        segments.add(
+          ColoredPolylineSegment(
+            id: 'segment_$segmentIndex',
+            points: stepPoints,
+            color: polylineColor,
+          ),
+        );
         segmentIndex++;
       }
     }
@@ -336,15 +348,10 @@ class TrackingNotifier extends BaseChangeNotifier {
   }
 }
 
-
 class ColoredPolylineSegment {
   final String id;
   final List<LatLng> points;
   final Color color;
 
-  ColoredPolylineSegment({
-    required this.id,
-    required this.points,
-    required this.color,
-  });
+  ColoredPolylineSegment({required this.id, required this.points, required this.color});
 }

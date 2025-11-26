@@ -1,7 +1,7 @@
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/common/user/customer_id_request.dart';
-import 'package:community_app/core/model/vendor/jobs/vendor_history_list.dart';
-import 'package:community_app/core/remote/services/vendor/vendor_jobs_repository.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/core/model/common/user/customer_id_request.dart';
+import 'package:Xception/core/model/vendor/jobs/vendor_history_list.dart';
+import 'package:Xception/core/remote/services/vendor/vendor_jobs_repository.dart';
 
 class JobHistoryNotifier extends BaseChangeNotifier {
   List<Map<String, dynamic>> jobHistory = [];

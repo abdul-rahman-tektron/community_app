@@ -1,10 +1,10 @@
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/vendor/quotation_request/site_visit_assign_employee_request.dart';
-import 'package:community_app/core/model/vendor/quotation_request/site_visit_assign_employee_response.dart';
-import 'package:community_app/core/model/vendor/vendor_quotation/vendor_quotation_request_list.dart';
-import 'package:community_app/core/remote/services/vendor/vendor_quotation_repository.dart';
-import 'package:community_app/utils/helpers/toast_helper.dart';
-import 'package:community_app/utils/router/routes.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/core/model/vendor/quotation_request/site_visit_assign_employee_request.dart';
+import 'package:Xception/core/model/vendor/quotation_request/site_visit_assign_employee_response.dart';
+import 'package:Xception/core/model/vendor/vendor_quotation/vendor_quotation_request_list.dart';
+import 'package:Xception/core/remote/services/vendor/vendor_quotation_repository.dart';
+import 'package:Xception/utils/helpers/toast_helper.dart';
+import 'package:Xception/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 

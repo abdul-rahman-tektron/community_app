@@ -1,4 +1,4 @@
-import 'package:community_app/core/base/base_notifier.dart';
+import 'package:Xception/core/base/base_notifier.dart';
 import 'package:flutter/material.dart';
 
 class SavedCardsNotifier extends BaseChangeNotifier {

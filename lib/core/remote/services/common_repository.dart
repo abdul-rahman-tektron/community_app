@@ -1,24 +1,24 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:community_app/core/model/common/dropdown/community_dropdown_response.dart';
-import 'package:community_app/core/model/common/error/common_basic_response.dart';
-import 'package:community_app/core/model/common/error/common_response.dart';
-import 'package:community_app/core/model/common/error/error_response.dart';
-import 'package:community_app/core/model/common/login/login_request.dart';
-import 'package:community_app/core/model/common/login/login_response.dart';
-import 'package:community_app/core/model/common/login/register_token_request.dart';
-import 'package:community_app/core/model/common/password/change_password_request.dart';
-import 'package:community_app/core/model/common/password/reset_password_request.dart';
-import 'package:community_app/core/model/common/password/send_otp_request.dart';
-import 'package:community_app/core/model/common/password/verify_otp_request.dart';
-import 'package:community_app/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
-import 'package:community_app/core/remote/network/api_url.dart';
-import 'package:community_app/core/remote/network/base_repository.dart';
-import 'package:community_app/utils/crashlytics_service.dart';
-import 'package:community_app/utils/enums.dart';
-import 'package:community_app/utils/storage/hive_storage.dart';
-import 'package:community_app/utils/storage/secure_storage.dart';
+import 'package:Xception/core/model/common/dropdown/community_dropdown_response.dart';
+import 'package:Xception/core/model/common/error/common_basic_response.dart';
+import 'package:Xception/core/model/common/error/common_response.dart';
+import 'package:Xception/core/model/common/error/error_response.dart';
+import 'package:Xception/core/model/common/login/login_request.dart';
+import 'package:Xception/core/model/common/login/login_response.dart';
+import 'package:Xception/core/model/common/login/register_token_request.dart';
+import 'package:Xception/core/model/common/password/change_password_request.dart';
+import 'package:Xception/core/model/common/password/reset_password_request.dart';
+import 'package:Xception/core/model/common/password/send_otp_request.dart';
+import 'package:Xception/core/model/common/password/verify_otp_request.dart';
+import 'package:Xception/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
+import 'package:Xception/core/remote/network/api_url.dart';
+import 'package:Xception/core/remote/network/base_repository.dart';
+import 'package:Xception/utils/crashlytics_service.dart';
+import 'package:Xception/utils/enums.dart';
+import 'package:Xception/utils/storage/hive_storage.dart';
+import 'package:Xception/utils/storage/secure_storage.dart';
 
 import '../../model/common/dropdown/service_dropdown_response.dart' show serviceDropdownResponseFromJson;
 

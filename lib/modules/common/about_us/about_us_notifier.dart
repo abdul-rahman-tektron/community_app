@@ -1,4 +1,4 @@
-import 'package:community_app/core/base/base_notifier.dart';
+import 'package:Xception/core/base/base_notifier.dart';
 
 class AboutUsNotifier extends BaseChangeNotifier {
   final List<Map<String, dynamic>> privacyPolicy = [

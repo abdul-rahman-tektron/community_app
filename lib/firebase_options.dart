@@ -50,20 +50,19 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBHKCJ5ssRBRJRNTuqsnsXcIChrGc4AtPE',
-    appId: '1:953987534728:android:0c466895377002db86343d',
-    messagingSenderId: '953987534728',
-    projectId: 'xception-39c70',
-    storageBucket: 'xception-39c70.firebasestorage.app',
+    apiKey: 'AIzaSyAGtk7I_kUsmUBGZxxtdDCciuOdVAlPxmE',
+    appId: '1:1024569195684:android:0e283bff095156b55fba31',
+    messagingSenderId: '1024569195684',
+    projectId: 'xceptionsolutions-a1e94',
+    storageBucket: 'xceptionsolutions-a1e94.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCyKPwIlPJwSWDqRz6U1VVEQXOMT-JUu6M',
-    appId: '1:953987534728:ios:d7fdb9fd8ddfad2b86343d',
-    messagingSenderId: '953987534728',
-    projectId: 'xception-39c70',
-    storageBucket: 'xception-39c70.firebasestorage.app',
-    iosBundleId: 'com.example.communityApp',
+    apiKey: 'AIzaSyAm8QZbg0TUO3TO5X0D8Ayen37FWhXVRPQ',
+    appId: '1:1024569195684:ios:9febea42f5ba5d325fba31',
+    messagingSenderId: '1024569195684',
+    projectId: 'xceptionsolutions-a1e94',
+    storageBucket: 'xceptionsolutions-a1e94.firebasestorage.app',
+    iosBundleId: 'com.tektronix.xceptionapp',
   );
-
 }

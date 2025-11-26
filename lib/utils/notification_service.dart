@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:community_app/core/model/common/login/register_token_request.dart';
-import 'package:community_app/core/remote/services/common_repository.dart';
-import 'package:community_app/utils/helpers/toast_helper.dart';
-import 'package:community_app/utils/router/routes.dart';
-import 'package:community_app/utils/storage/hive_storage.dart';
+import 'package:Xception/core/model/common/login/register_token_request.dart';
+import 'package:Xception/core/remote/services/common_repository.dart';
+import 'package:Xception/firebase_options.dart';
+import 'package:Xception/utils/helpers/toast_helper.dart';
+import 'package:Xception/utils/router/routes.dart';
+import 'package:Xception/utils/storage/hive_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -112,9 +113,6 @@ class NotificationService {
         }
       },
     );
-
-    // Background messages
-    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
     // Foreground messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -310,9 +308,17 @@ class NotificationService {
     }
   }
 
+
   @pragma('vm:entry-point')
   static Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-    await Firebase.initializeApp();
+    try {
+      Firebase.app();
+    } catch (_) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
+
     debugPrint("[NotificationService] Background message received: ${message.messageId}, Data: ${message.data}");
   }
 }

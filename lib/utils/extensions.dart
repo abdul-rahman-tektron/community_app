@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:community_app/core/generated_locales/l10n.dart';
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/utils/enums.dart';
+import 'package:Xception/core/generated_locales/l10n.dart';
+import 'package:Xception/res/colors.dart';
+import 'package:Xception/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';

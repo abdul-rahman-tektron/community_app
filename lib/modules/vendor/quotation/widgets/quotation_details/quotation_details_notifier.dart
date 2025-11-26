@@ -1,8 +1,8 @@
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/vendor/jobs/job_info_detail_response.dart';
-import 'package:community_app/core/model/vendor/quotation_request/quotation_response_detail_response.dart';
-import 'package:community_app/core/remote/services/vendor/vendor_dashboard_repository.dart';
-import 'package:community_app/core/remote/services/vendor/vendor_quotation_repository.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/core/model/vendor/jobs/job_info_detail_response.dart';
+import 'package:Xception/core/model/vendor/quotation_request/quotation_response_detail_response.dart';
+import 'package:Xception/core/remote/services/vendor/vendor_dashboard_repository.dart';
+import 'package:Xception/core/remote/services/vendor/vendor_quotation_repository.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../utils/enums.dart' show QuotationStatus;

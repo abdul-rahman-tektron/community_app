@@ -12,8 +12,8 @@ class UAEPassService {
       await _uaePass.setUpEnvironment(
         clientId: "sandbox_stage",
         clientSecret: "sandbox_stage",
-        urlScheme: "com.example.community_app",
-        redirectUri: "com.example.community_app://success",
+        urlScheme: "com.example.Xception",
+        redirectUri: "com.example.Xception://success",
         isProduction: true,
         language: "en",
       );

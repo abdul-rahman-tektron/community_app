@@ -1,5 +1,5 @@
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/res/images.dart';
+import 'package:Xception/res/colors.dart';
+import 'package:Xception/res/images.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

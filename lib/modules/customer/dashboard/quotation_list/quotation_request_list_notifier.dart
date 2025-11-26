@@ -1,9 +1,9 @@
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/common/dropdown/service_dropdown_response.dart';
-import 'package:community_app/core/model/customer/quotation/quotation_request_list_response.dart';
-import 'package:community_app/core/remote/services/common_repository.dart';
-import 'package:community_app/core/remote/services/customer/customer_dashboard_repository.dart';
-import 'package:community_app/utils/helpers/toast_helper.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/core/model/common/dropdown/service_dropdown_response.dart';
+import 'package:Xception/core/model/customer/quotation/quotation_request_list_response.dart';
+import 'package:Xception/core/remote/services/common_repository.dart';
+import 'package:Xception/core/remote/services/customer/customer_dashboard_repository.dart';
+import 'package:Xception/utils/helpers/toast_helper.dart';
 import 'package:flutter/material.dart';
 
 class QuotationRequestListNotifier extends BaseChangeNotifier {

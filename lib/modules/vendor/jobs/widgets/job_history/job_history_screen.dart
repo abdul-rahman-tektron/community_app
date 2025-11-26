@@ -1,9 +1,9 @@
-import 'package:community_app/modules/vendor/jobs/widgets/job_history/job_history_notifier.dart';
-import 'package:community_app/res/fonts.dart';
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/res/styles.dart';
-import 'package:community_app/utils/helpers/loader.dart';
-import 'package:community_app/utils/router/routes.dart';
+import 'package:Xception/modules/vendor/jobs/widgets/job_history/job_history_notifier.dart';
+import 'package:Xception/res/fonts.dart';
+import 'package:Xception/res/colors.dart';
+import 'package:Xception/res/styles.dart';
+import 'package:Xception/utils/helpers/loader.dart';
+import 'package:Xception/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';

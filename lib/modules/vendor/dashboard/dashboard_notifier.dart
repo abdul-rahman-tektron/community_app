@@ -1,7 +1,7 @@
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/vendor/dashboard/vendor_dashboard_response.dart';
-import 'package:community_app/core/remote/services/vendor/vendor_dashboard_repository.dart';
-import 'package:community_app/utils/router/routes.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/core/model/vendor/dashboard/vendor_dashboard_response.dart';
+import 'package:Xception/core/remote/services/vendor/vendor_dashboard_repository.dart';
+import 'package:Xception/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 

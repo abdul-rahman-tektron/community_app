@@ -1,4 +1,4 @@
-import 'package:community_app/res/strings.dart';
+import 'package:Xception/res/strings.dart';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 

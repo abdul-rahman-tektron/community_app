@@ -1,4 +1,4 @@
-import 'package:community_app/utils/enums.dart';
+import 'package:Xception/utils/enums.dart';
 
 mixin CommonUtils {
 

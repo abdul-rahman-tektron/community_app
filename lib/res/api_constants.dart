@@ -8,7 +8,7 @@ class ApiConstants {
 
   static const String clientId = "sandbox_stage";
   static const String clientSecret = "sandbox_stage";
-  static const String redirectUri = "com.example.community_app://uaepass-callback";
+  static const String redirectUri = "com.tektronix.xception://uaepass-callback";
   static const String authUrl = "https://stg-id.uaepass.ae/idshub/authorize";
   static const String tokenUrl = "https://stg-id.uaepass.ae/idshub/token";
   static const String userInfoUrl = "https://stg-id.uaepass.ae/idshub/userinfo";

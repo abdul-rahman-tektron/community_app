@@ -1,11 +1,11 @@
-import 'package:community_app/modules/vendor/quotation/widgets/sent_quotation/quotation_card.dart';
-import 'package:community_app/modules/vendor/quotation/widgets/sent_quotation/sent_quotation_notifier.dart';
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/utils/enums.dart';
-import 'package:community_app/utils/helpers/common_utils.dart';
-import 'package:community_app/utils/helpers/loader.dart';
-import 'package:community_app/utils/router/routes.dart';
-import 'package:community_app/utils/widgets/custom_refresh_indicator.dart';
+import 'package:Xception/modules/vendor/quotation/widgets/sent_quotation/quotation_card.dart';
+import 'package:Xception/modules/vendor/quotation/widgets/sent_quotation/sent_quotation_notifier.dart';
+import 'package:Xception/res/colors.dart';
+import 'package:Xception/utils/enums.dart';
+import 'package:Xception/utils/helpers/common_utils.dart';
+import 'package:Xception/utils/helpers/loader.dart';
+import 'package:Xception/utils/router/routes.dart';
+import 'package:Xception/utils/widgets/custom_refresh_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

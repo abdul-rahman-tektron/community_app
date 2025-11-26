@@ -1,9 +1,9 @@
 import 'dart:ui';
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/res/fonts.dart';
-import 'package:community_app/res/styles.dart';
-import 'package:community_app/utils/extensions.dart';
-import 'package:community_app/utils/helpers/validations.dart';
+import 'package:Xception/res/colors.dart';
+import 'package:Xception/res/fonts.dart';
+import 'package:Xception/res/styles.dart';
+import 'package:Xception/utils/extensions.dart';
+import 'package:Xception/utils/helpers/validations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -41,6 +41,11 @@ class CustomTextField extends StatefulWidget {
   final Icon? prefix;
   final List<TextInputFormatter>? inputFormatters;
 
+  // 👇 NEW
+  final bool readOnly;                 // Force read-only (e.g., Address opens map)
+  final VoidCallback? onTap;           // Handle tap (e.g., push map)
+  final bool? showCursor;
+
   const CustomTextField({
     super.key,
     required this.controller,
@@ -71,6 +76,11 @@ class CustomTextField extends StatefulWidget {
     this.showAsterisk = true,
     this.prefix,
     this.inputFormatters,
+
+    // 👇 NEW defaults
+    this.readOnly = false,
+    this.onTap,
+    this.showCursor,
   });
 
   @override
@@ -83,6 +93,11 @@ class _CustomTextFieldState extends State<CustomTextField> {
   final FocusNode _focusNode = FocusNode();
   OverlayEntry? _overlayEntry;
   final LayerLink _layerLink = LayerLink();
+
+  bool get _effectiveReadOnly =>
+      widget.readOnly ||
+          !widget.isEditable ||
+          widget.keyboardType == TextInputType.datetime;
 
   @override
   void initState() {
@@ -248,11 +263,27 @@ class _CustomTextFieldState extends State<CustomTextField> {
       obscuringCharacter: '*',
       textInputAction: widget.textInputAction,
       keyboardType: widget.keyboardType,
-      readOnly: !widget.isEditable || widget.keyboardType == TextInputType.datetime,
+      // 👇 Respect readOnly override + existing conditions
+      readOnly: _effectiveReadOnly,
       enabled: widget.isEnable,
+
+      // 👇 Route taps: custom onTap > datetime picker > default
+      onTap: () async {
+        // Always hide the keyboard if we're treating this like a picker
+        if (_effectiveReadOnly || widget.onTap != null) {
+          FocusScope.of(context).unfocus();
+        }
+        if (widget.onTap != null) {
+          widget.onTap!.call();
+        } else if (widget.keyboardType == TextInputType.datetime) {
+          await _selectDate(context);
+        }
+      },
+
+      // 👇 Hide caret if read-only unless explicitly forced true
+      showCursor: widget.showCursor ?? !_effectiveReadOnly,
       onChanged: widget.onChanged,
       maxLines: widget.isMaxLines == true ? 3 : 1,
-      onTap: widget.keyboardType == TextInputType.datetime ? () => _selectDate(context) : null,
       style: textColor,
       autovalidateMode: widget.isAutoValidate ? AutovalidateMode.onUserInteraction : null,
       inputFormatters: widget.inputFormatters,

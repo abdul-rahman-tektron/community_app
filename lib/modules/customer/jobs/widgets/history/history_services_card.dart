@@ -1,13 +1,13 @@
-import 'package:community_app/core/model/customer/job/customer_history_list_response.dart';
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/res/fonts.dart';
-import 'package:community_app/res/styles.dart';
-import 'package:community_app/utils/router/routes.dart';
-import 'package:community_app/utils/widgets/custom_buttons.dart';
+import 'package:Xception/core/model/customer/job/customer_history_list_response.dart';
+import 'package:Xception/res/colors.dart';
+import 'package:Xception/res/fonts.dart';
+import 'package:Xception/res/styles.dart';
+import 'package:Xception/utils/router/routes.dart';
+import 'package:Xception/utils/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:community_app/utils/extensions.dart';
+import 'package:Xception/utils/extensions.dart';
 
 class HistoryServiceCard extends StatelessWidget {
   final CustomerHistoryListData service;

@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:community_app/core/remote/network/api_url.dart';
-import 'package:community_app/main.dart';
-import 'package:community_app/utils/enums.dart';
-import 'package:community_app/utils/router/routes.dart';
+import 'package:Xception/core/remote/network/api_url.dart';
+import 'package:Xception/main.dart';
+import 'package:Xception/utils/enums.dart';
+import 'package:Xception/utils/router/routes.dart';
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 

@@ -1,17 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/common/login/login_response.dart';
-import 'package:community_app/core/model/common/user/update_user_request.dart';
-import 'package:community_app/core/model/common/user/update_user_response.dart';
-import 'package:community_app/core/remote/services/common_repository.dart';
-import 'package:community_app/core/remote/services/customer/customer_auth_repository.dart';
-import 'package:community_app/utils/crashlytics_service.dart';
-import 'package:community_app/utils/extensions.dart';
-import 'package:community_app/utils/helpers/toast_helper.dart';
-import 'package:community_app/utils/router/routes.dart';
-import 'package:community_app/utils/storage/hive_storage.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/core/model/common/login/login_response.dart';
+import 'package:Xception/core/model/common/user/update_user_request.dart';
+import 'package:Xception/core/model/common/user/update_user_response.dart';
+import 'package:Xception/core/remote/services/common_repository.dart';
+import 'package:Xception/core/remote/services/customer/customer_auth_repository.dart';
+import 'package:Xception/utils/crashlytics_service.dart';
+import 'package:Xception/utils/extensions.dart';
+import 'package:Xception/utils/helpers/toast_helper.dart';
+import 'package:Xception/utils/router/routes.dart';
+import 'package:Xception/utils/storage/hive_storage.dart';
 import 'package:flutter/material.dart';
 
 class EditProfileNotifier extends BaseChangeNotifier {

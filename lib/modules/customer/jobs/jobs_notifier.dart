@@ -1,11 +1,11 @@
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/common/user/customer_id_request.dart';
-import 'package:community_app/core/model/customer/job/customer_history_list_response.dart';
-import 'package:community_app/core/model/customer/job/ongoing_jobs_response.dart';
-import 'package:community_app/core/remote/services/customer/customer_jobs_repository.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/core/model/common/user/customer_id_request.dart';
+import 'package:Xception/core/model/customer/job/customer_history_list_response.dart';
+import 'package:Xception/core/model/customer/job/ongoing_jobs_response.dart';
+import 'package:Xception/core/remote/services/customer/customer_jobs_repository.dart';
 
-import 'package:community_app/utils/enums.dart';
-import 'package:community_app/utils/helpers/toast_helper.dart';
+import 'package:Xception/utils/enums.dart';
+import 'package:Xception/utils/helpers/toast_helper.dart';
 
 class JobsNotifier extends BaseChangeNotifier {
   int _selectedIndex = 0;

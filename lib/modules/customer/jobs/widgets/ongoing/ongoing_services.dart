@@ -1,10 +1,10 @@
-import 'package:community_app/core/model/customer/job/ongoing_jobs_response.dart';
-import 'package:community_app/modules/customer/jobs/jobs_notifier.dart';
-import 'package:community_app/modules/customer/jobs/widgets/ongoing/card/completed_service_card.dart';
-import 'package:community_app/modules/customer/jobs/widgets/ongoing/card/in_progress_service_card.dart';
-import 'package:community_app/modules/customer/jobs/widgets/ongoing/card/tracking_service_card.dart';
-import 'package:community_app/utils/enums.dart';
-import 'package:community_app/utils/helpers/common_utils.dart';
+import 'package:Xception/core/model/customer/job/ongoing_jobs_response.dart';
+import 'package:Xception/modules/customer/jobs/jobs_notifier.dart';
+import 'package:Xception/modules/customer/jobs/widgets/ongoing/card/completed_service_card.dart';
+import 'package:Xception/modules/customer/jobs/widgets/ongoing/card/in_progress_service_card.dart';
+import 'package:Xception/modules/customer/jobs/widgets/ongoing/card/tracking_service_card.dart';
+import 'package:Xception/utils/enums.dart';
+import 'package:Xception/utils/helpers/common_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

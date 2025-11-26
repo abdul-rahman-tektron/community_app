@@ -1,6 +1,6 @@
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/utils/extensions.dart';
-import 'package:community_app/utils/helpers/screen_size.dart';
+import 'package:Xception/res/colors.dart';
+import 'package:Xception/utils/extensions.dart';
+import 'package:Xception/utils/helpers/screen_size.dart';
 import 'package:flutter/material.dart';
 
 // AppFonts provides font sizes with weights and colors

@@ -1,16 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:community_app/core/model/common/delete_account/delete_Account_request.dart';
-import 'package:community_app/core/model/common/error/common_response.dart';
-import 'package:community_app/core/model/common/error/error_response.dart';
-import 'package:community_app/core/model/common/register/customer_register_request.dart';
-import 'package:community_app/core/model/common/user/update_user_request.dart';
-import 'package:community_app/core/model/common/user/update_user_response.dart';
-import 'package:community_app/core/remote/network/api_url.dart';
-import 'package:community_app/core/remote/network/base_repository.dart';
-import 'package:community_app/utils/enums.dart';
-import 'package:community_app/utils/storage/secure_storage.dart';
+import 'package:Xception/core/model/common/delete_account/delete_Account_request.dart';
+import 'package:Xception/core/model/common/error/common_response.dart';
+import 'package:Xception/core/model/common/error/error_response.dart';
+import 'package:Xception/core/model/common/register/customer_register_request.dart';
+import 'package:Xception/core/model/common/user/update_user_request.dart';
+import 'package:Xception/core/model/common/user/update_user_response.dart';
+import 'package:Xception/core/remote/network/api_url.dart';
+import 'package:Xception/core/remote/network/base_repository.dart';
+import 'package:Xception/utils/enums.dart';
+import 'package:Xception/utils/storage/secure_storage.dart';
 
 class CustomerAuthRepository extends BaseRepository {
   CustomerAuthRepository._internal();

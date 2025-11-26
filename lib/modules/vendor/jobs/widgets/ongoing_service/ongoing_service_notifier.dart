@@ -1,7 +1,7 @@
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/vendor/jobs/ongoing_jobs_assigned_response.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/core/model/vendor/jobs/ongoing_jobs_assigned_response.dart';
 
-import 'package:community_app/core/remote/services/vendor/vendor_jobs_repository.dart';
+import 'package:Xception/core/remote/services/vendor/vendor_jobs_repository.dart';
 
 class OngoingServiceNotifier extends BaseChangeNotifier {
   List<OngoingJobsAssignedData> _ongoingJobs = [];

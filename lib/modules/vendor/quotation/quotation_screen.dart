@@ -1,8 +1,8 @@
-import 'package:community_app/modules/vendor/quotation/quotation_notifier.dart';
-import 'package:community_app/modules/vendor/quotation/widgets/new_request/new_request_screen.dart';
-import 'package:community_app/modules/vendor/quotation/widgets/sent_quotation/sent_quotation_screen.dart';
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/res/fonts.dart';
+import 'package:Xception/modules/vendor/quotation/quotation_notifier.dart';
+import 'package:Xception/modules/vendor/quotation/widgets/new_request/new_request_screen.dart';
+import 'package:Xception/modules/vendor/quotation/widgets/sent_quotation/sent_quotation_screen.dart';
+import 'package:Xception/res/colors.dart';
+import 'package:Xception/res/fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';

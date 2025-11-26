@@ -1,8 +1,8 @@
 import 'dart:ui';
 
-import 'package:community_app/modules/customer/registration/registration_address.dart';
-import 'package:community_app/modules/customer/registration/registration_personal.dart';
-import 'package:community_app/res/colors.dart';
+import 'package:Xception/modules/customer/registration/registration_address.dart';
+import 'package:Xception/modules/customer/registration/registration_personal.dart';
+import 'package:Xception/res/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:horizontal_stepper_flutter/horizontal_stepper_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';

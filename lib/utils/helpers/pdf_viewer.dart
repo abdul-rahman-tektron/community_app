@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/utils/widgets/custom_app_bar.dart';
+import 'package:Xception/res/colors.dart';
+import 'package:Xception/utils/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:intl/intl.dart';

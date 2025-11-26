@@ -1,8 +1,8 @@
-import 'package:community_app/modules/vendor/jobs/jobs_notifier.dart';
-import 'package:community_app/modules/vendor/jobs/widgets/job_history/job_history_screen.dart';
-import 'package:community_app/modules/vendor/jobs/widgets/ongoing_service/ongoing_service_screen.dart';
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/res/fonts.dart';
+import 'package:Xception/modules/vendor/jobs/jobs_notifier.dart';
+import 'package:Xception/modules/vendor/jobs/widgets/job_history/job_history_screen.dart';
+import 'package:Xception/modules/vendor/jobs/widgets/ongoing_service/ongoing_service_screen.dart';
+import 'package:Xception/res/colors.dart';
+import 'package:Xception/res/fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';

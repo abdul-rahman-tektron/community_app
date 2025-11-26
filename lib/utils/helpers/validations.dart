@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:community_app/utils/regex.dart';
-import 'package:community_app/utils/extensions.dart'; // Assuming you have a context.locale extension or similar
+import 'package:Xception/utils/regex.dart';
+import 'package:Xception/utils/extensions.dart'; // Assuming you have a context.locale extension or similar
 
 class Validations {
   Validations._();

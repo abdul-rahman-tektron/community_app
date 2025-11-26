@@ -1,9 +1,9 @@
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/common/error/common_response.dart';
-import 'package:community_app/core/model/common/error/error_response.dart';
-import 'package:community_app/core/model/common/password/change_password_request.dart';
-import 'package:community_app/core/remote/services/common_repository.dart';
-import 'package:community_app/utils/helpers/toast_helper.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/core/model/common/error/common_response.dart';
+import 'package:Xception/core/model/common/error/error_response.dart';
+import 'package:Xception/core/model/common/password/change_password_request.dart';
+import 'package:Xception/core/remote/services/common_repository.dart';
+import 'package:Xception/utils/helpers/toast_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

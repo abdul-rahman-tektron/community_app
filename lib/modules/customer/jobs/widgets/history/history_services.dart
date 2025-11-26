@@ -1,6 +1,6 @@
-import 'package:community_app/core/model/customer/job/customer_history_list_response.dart';
-import 'package:community_app/modules/customer/jobs/widgets/history/history_services_card.dart';
-import 'package:community_app/res/fonts.dart';
+import 'package:Xception/core/model/customer/job/customer_history_list_response.dart';
+import 'package:Xception/modules/customer/jobs/widgets/history/history_services_card.dart';
+import 'package:Xception/res/fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 

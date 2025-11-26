@@ -1,18 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:community_app/core/model/common/error/common_response.dart';
-import 'package:community_app/core/model/common/error/error_response.dart';
-import 'package:community_app/core/model/customer/dashboard/customer_dashboard_response.dart';
-import 'package:community_app/core/model/customer/job/create_job_booking_request.dart';
-import 'package:community_app/core/model/customer/job/create_job_booking_response.dart';
-import 'package:community_app/core/model/customer/quotation/quotation_request_list_response.dart';
-import 'package:community_app/core/model/vendor/quotation_request/quotation_request_list_response.dart';
-import 'package:community_app/core/model/vendor/quotation_request/quotation_request_request.dart';
-import 'package:community_app/core/remote/network/api_url.dart';
-import 'package:community_app/core/remote/network/base_repository.dart';
-import 'package:community_app/utils/enums.dart';
-import 'package:community_app/utils/storage/secure_storage.dart';
+import 'package:Xception/core/model/common/error/common_response.dart';
+import 'package:Xception/core/model/common/error/error_response.dart';
+import 'package:Xception/core/model/customer/dashboard/customer_dashboard_response.dart';
+import 'package:Xception/core/model/customer/job/create_job_booking_request.dart';
+import 'package:Xception/core/model/customer/job/create_job_booking_response.dart';
+import 'package:Xception/core/model/customer/quotation/quotation_request_list_response.dart';
+import 'package:Xception/core/model/vendor/quotation_request/quotation_request_list_response.dart';
+import 'package:Xception/core/model/vendor/quotation_request/quotation_request_request.dart';
+import 'package:Xception/core/remote/network/api_url.dart';
+import 'package:Xception/core/remote/network/base_repository.dart';
+import 'package:Xception/utils/enums.dart';
+import 'package:Xception/utils/storage/secure_storage.dart';
 
 class CustomerDashboardRepository extends BaseRepository {
   CustomerDashboardRepository._internal();

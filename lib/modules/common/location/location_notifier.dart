@@ -1,15 +1,17 @@
-import 'package:community_app/core/base/base_notifier.dart';
+import 'package:Xception/core/base/base_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart' hide Location;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 
+/// Notifier controlling the map, pin, and reverse-geocoded labels.
 class LocationPickerNotifier extends BaseChangeNotifier {
+  GoogleMapController? _mapController;
+
   LatLng? _selectedPosition;
   String? _selectedPlaceName;
 
   final locationController = TextEditingController();
-  GoogleMapController? _mapController;
 
   String? building;
   String? block;
@@ -22,78 +24,79 @@ class LocationPickerNotifier extends BaseChangeNotifier {
     _mapController = controller;
   }
 
+  /// Sets the selected position and triggers reverse-geocoding + camera move.
   Future<void> setPlaceDetails({
     required LatLng position,
     required String placeName,
   }) async {
-    await _fillAddressDetailsFromLatLng(position);
+    _selectedPosition = position;
+    _selectedPlaceName = placeName; // initial (will be refined by reverse geocode)
+    await _reverseGeocode(position);
     _mapController?.animateCamera(CameraUpdate.newLatLng(position));
+    notifyListeners();
   }
 
-  Future<void> _fillAddressDetailsFromLatLng(LatLng position) async {
+  /// Reverse geocoding to fill address pieces.
+  Future<void> _reverseGeocode(LatLng position) async {
     try {
-      _selectedPosition = position;
+      final list = await placemarkFromCoordinates(position.latitude, position.longitude);
 
-      final placeMarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-
-      if (placeMarks.isNotEmpty) {
-        final p = placeMarks.first;
+      if (list.isNotEmpty) {
+        final p = list.first;
 
         final street = p.thoroughfare ?? '';
         final blockName = p.subLocality ?? '';
         final city = p.administrativeArea ?? '';
 
-        final List<String> addressParts = [
+        final parts = <String>[
           if (street.isNotEmpty) street,
           if (blockName.isNotEmpty) blockName,
           if (city.isNotEmpty) city,
         ];
 
-        _selectedPlaceName = addressParts.join(", ");
+        _selectedPlaceName = parts.isNotEmpty ? parts.join(', ') : _selectedPlaceName;
 
-        building = (p.subThoroughfare?.isNotEmpty == true) ? p.subThoroughfare : (p.name ?? '');
+        building = (p.subThoroughfare?.isNotEmpty == true)
+            ? p.subThoroughfare
+            : (p.name ?? '');
         block = blockName;
         community = p.locality ?? '';
       } else {
         building = null;
         block = null;
         community = null;
-        _selectedPlaceName = null;
       }
     } catch (e) {
+      // Silent fail → keep minimal info; clear fine-grained fields
       building = null;
       block = null;
       community = null;
-      _selectedPlaceName = null;
     }
-
-    notifyListeners();
   }
 
+  /// Fetch device location and center the map.
   Future<void> fetchCurrentLocation() async {
     try {
       final location = Location();
 
       bool serviceEnabled = await location.serviceEnabled();
-      if (!serviceEnabled) {
-        serviceEnabled = await location.requestService();
-        if (!serviceEnabled) return;
+      if (!serviceEnabled && !await location.requestService()) return;
+
+      PermissionStatus permission = await location.hasPermission();
+      if (permission == PermissionStatus.denied &&
+          await location.requestPermission() != PermissionStatus.granted) {
+        return;
       }
 
-      PermissionStatus permissionGranted = await location.hasPermission();
-      if (permissionGranted == PermissionStatus.denied) {
-        permissionGranted = await location.requestPermission();
-        if (permissionGranted != PermissionStatus.granted) return;
+      final current = await location.getLocation();
+      if (current.latitude != null && current.longitude != null) {
+        await setPlaceDetails(
+          position: LatLng(current.latitude!, current.longitude!),
+          placeName: 'Current Location',
+        );
       }
-
-      final currentLocation = await location.getLocation();
-      final position = LatLng(currentLocation.latitude!, currentLocation.longitude!);
-      await setPlaceDetails(position: position, placeName: "Current Location");
     } catch (e) {
-      debugPrint("Error getting current location: $e");
+      debugPrint('Error getting current location: $e');
     }
   }
 
@@ -103,6 +106,7 @@ class LocationPickerNotifier extends BaseChangeNotifier {
     building = null;
     block = null;
     community = null;
+    locationController.clear();
     notifyListeners();
   }
 }

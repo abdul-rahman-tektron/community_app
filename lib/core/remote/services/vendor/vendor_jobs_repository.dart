@@ -1,22 +1,22 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:community_app/core/model/common/error/common_response.dart';
-import 'package:community_app/core/model/common/error/error_response.dart';
-import 'package:community_app/core/model/common/jobs/ongoing_jobs_response.dart';
-import 'package:community_app/core/model/common/user/customer_id_request.dart';
-import 'package:community_app/core/model/customer/job/customer_history_detail_request.dart';
-import 'package:community_app/core/model/customer/job/customer_history_detail_response.dart';
-import 'package:community_app/core/model/customer/job/job_completion_request.dart';
-import 'package:community_app/core/model/vendor/assign_employee/assign_employee_request.dart';
-import 'package:community_app/core/model/vendor/jobs/ongoing_jobs_assigned_response.dart';
-import 'package:community_app/core/model/vendor/jobs/vendor_history_detail_request.dart';
-import 'package:community_app/core/model/vendor/jobs/vendor_history_detail_response.dart';
-import 'package:community_app/core/model/vendor/jobs/vendor_history_list.dart';
-import 'package:community_app/core/remote/network/api_url.dart';
-import 'package:community_app/core/remote/network/base_repository.dart';
-import 'package:community_app/utils/enums.dart';
-import 'package:community_app/utils/storage/secure_storage.dart';
+import 'package:Xception/core/model/common/error/common_response.dart';
+import 'package:Xception/core/model/common/error/error_response.dart';
+import 'package:Xception/core/model/common/jobs/ongoing_jobs_response.dart';
+import 'package:Xception/core/model/common/user/customer_id_request.dart';
+import 'package:Xception/core/model/customer/job/customer_history_detail_request.dart';
+import 'package:Xception/core/model/customer/job/customer_history_detail_response.dart';
+import 'package:Xception/core/model/customer/job/job_completion_request.dart';
+import 'package:Xception/core/model/vendor/assign_employee/assign_employee_request.dart';
+import 'package:Xception/core/model/vendor/jobs/ongoing_jobs_assigned_response.dart';
+import 'package:Xception/core/model/vendor/jobs/vendor_history_detail_request.dart';
+import 'package:Xception/core/model/vendor/jobs/vendor_history_detail_response.dart';
+import 'package:Xception/core/model/vendor/jobs/vendor_history_list.dart';
+import 'package:Xception/core/remote/network/api_url.dart';
+import 'package:Xception/core/remote/network/base_repository.dart';
+import 'package:Xception/utils/enums.dart';
+import 'package:Xception/utils/storage/secure_storage.dart';
 
 class VendorJobsRepository extends BaseRepository {
   VendorJobsRepository._internal();

@@ -1,23 +1,23 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/common/error/common_response.dart';
-import 'package:community_app/core/model/customer/job/job_completion_details_response.dart';
-import 'package:community_app/core/model/customer/job/job_completion_request.dart';
-import 'package:community_app/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
-import 'package:community_app/core/model/vendor/assign_employee/assign_employee_request.dart';
-import 'package:community_app/core/model/vendor/jobs/job_info_detail_response.dart';
-import 'package:community_app/core/remote/services/common_repository.dart';
-import 'package:community_app/core/remote/services/customer/customer_jobs_repository.dart';
-import 'package:community_app/core/remote/services/vendor/vendor_dashboard_repository.dart';
-import 'package:community_app/core/remote/services/vendor/vendor_jobs_repository.dart';
-import 'package:community_app/modules/common/image_viewer_screen.dart';
-import 'package:community_app/utils/enums.dart';
-import 'package:community_app/utils/extensions.dart';
-import 'package:community_app/utils/helpers/common_utils.dart';
-import 'package:community_app/utils/helpers/file_upload_helper.dart';
-import 'package:community_app/utils/helpers/toast_helper.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/core/model/common/error/common_response.dart';
+import 'package:Xception/core/model/customer/job/job_completion_details_response.dart';
+import 'package:Xception/core/model/customer/job/job_completion_request.dart';
+import 'package:Xception/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
+import 'package:Xception/core/model/vendor/assign_employee/assign_employee_request.dart';
+import 'package:Xception/core/model/vendor/jobs/job_info_detail_response.dart';
+import 'package:Xception/core/remote/services/common_repository.dart';
+import 'package:Xception/core/remote/services/customer/customer_jobs_repository.dart';
+import 'package:Xception/core/remote/services/vendor/vendor_dashboard_repository.dart';
+import 'package:Xception/core/remote/services/vendor/vendor_jobs_repository.dart';
+import 'package:Xception/modules/common/image_viewer_screen.dart';
+import 'package:Xception/utils/enums.dart';
+import 'package:Xception/utils/extensions.dart';
+import 'package:Xception/utils/helpers/common_utils.dart';
+import 'package:Xception/utils/helpers/file_upload_helper.dart';
+import 'package:Xception/utils/helpers/toast_helper.dart';
 import 'package:flutter/material.dart';
 
 class PhotoPair {

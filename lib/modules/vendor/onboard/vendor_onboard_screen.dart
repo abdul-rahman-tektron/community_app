@@ -1,16 +1,16 @@
 import 'dart:convert';
 
-import 'package:community_app/core/model/common/dropdown/service_dropdown_response.dart';
-import 'package:community_app/modules/vendor/onboard/vendor_onboard_notifier.dart';
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/res/fonts.dart';
-import 'package:community_app/res/styles.dart';
-import 'package:community_app/utils/helpers/dashed_border_container.dart';
-import 'package:community_app/utils/helpers/loader.dart';
-import 'package:community_app/utils/helpers/toast_helper.dart';
-import 'package:community_app/utils/widgets/custom_app_bar.dart';
-import 'package:community_app/utils/widgets/custom_buttons.dart';
-import 'package:community_app/utils/widgets/custom_textfields.dart';
+import 'package:Xception/core/model/common/dropdown/service_dropdown_response.dart';
+import 'package:Xception/modules/vendor/onboard/vendor_onboard_notifier.dart';
+import 'package:Xception/res/colors.dart';
+import 'package:Xception/res/fonts.dart';
+import 'package:Xception/res/styles.dart';
+import 'package:Xception/utils/helpers/dashed_border_container.dart';
+import 'package:Xception/utils/helpers/loader.dart';
+import 'package:Xception/utils/helpers/toast_helper.dart';
+import 'package:Xception/utils/widgets/custom_app_bar.dart';
+import 'package:Xception/utils/widgets/custom_buttons.dart';
+import 'package:Xception/utils/widgets/custom_textfields.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

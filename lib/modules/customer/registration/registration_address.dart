@@ -1,17 +1,17 @@
 
-import 'package:community_app/core/model/common/dropdown/community_dropdown_response.dart';
-import 'package:community_app/core/model/customer/map/map_data.dart';
-import 'package:community_app/modules/customer/registration/registration_notifier.dart';
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/res/fonts.dart';
-import 'package:community_app/res/images.dart';
-import 'package:community_app/utils/extensions.dart';
-import 'package:community_app/utils/helpers/screen_size.dart';
-import 'package:community_app/utils/helpers/validations.dart';
-import 'package:community_app/utils/router/routes.dart';
-import 'package:community_app/utils/widgets/custom_buttons.dart';
-import 'package:community_app/utils/widgets/custom_search_dropdown.dart';
-import 'package:community_app/utils/widgets/custom_textfields.dart';
+import 'package:Xception/core/model/common/dropdown/community_dropdown_response.dart';
+import 'package:Xception/core/model/customer/map/map_data.dart';
+import 'package:Xception/modules/customer/registration/registration_notifier.dart';
+import 'package:Xception/res/colors.dart';
+import 'package:Xception/res/fonts.dart';
+import 'package:Xception/res/images.dart';
+import 'package:Xception/utils/extensions.dart';
+import 'package:Xception/utils/helpers/screen_size.dart';
+import 'package:Xception/utils/helpers/validations.dart';
+import 'package:Xception/utils/router/routes.dart';
+import 'package:Xception/utils/widgets/custom_buttons.dart';
+import 'package:Xception/utils/widgets/custom_search_dropdown.dart';
+import 'package:Xception/utils/widgets/custom_textfields.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -141,6 +141,19 @@ class CustomerRegistrationAddressScreen extends StatelessWidget {
                   fieldName: "Address",
                   showAsterisk: true,
                   validator: (value) => Validations.validateAddress(context, value),
+                  readOnly: true,
+                  showCursor: false,
+                  onTap: () async {
+                    final result = await Navigator.of(context, rootNavigator: true)
+                        .pushNamed(AppRoutes.mapLocation);
+
+                    if (result is MapData) {
+                      customerChangeNotifier.addressController.text = result.address;
+                      customerChangeNotifier.buildingController.text = result.building;
+                      customerChangeNotifier.blockController.text = result.block;
+                      customerChangeNotifier.setLatLng(result.latitude, result.longitude);
+                    }
+                  },
                 ),
               ),
               10.horizontalSpace,

@@ -1,9 +1,9 @@
-import 'package:community_app/modules/customer/jobs/widgets/feedback/feedback_notifier.dart';
-import 'package:community_app/res/fonts.dart';
-import 'package:community_app/utils/widgets/custom_app_bar.dart';
-import 'package:community_app/utils/widgets/custom_buttons.dart';
-import 'package:community_app/utils/widgets/custom_drawer.dart';
-import 'package:community_app/utils/widgets/custom_textfields.dart';
+import 'package:Xception/modules/customer/jobs/widgets/feedback/feedback_notifier.dart';
+import 'package:Xception/res/fonts.dart';
+import 'package:Xception/utils/widgets/custom_app_bar.dart';
+import 'package:Xception/utils/widgets/custom_buttons.dart';
+import 'package:Xception/utils/widgets/custom_drawer.dart';
+import 'package:Xception/utils/widgets/custom_textfields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';

@@ -1,4 +1,4 @@
-import 'package:community_app/utils/widgets/custom_buttons.dart';
+import 'package:Xception/utils/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
 
 class NewServiceButton extends StatelessWidget {

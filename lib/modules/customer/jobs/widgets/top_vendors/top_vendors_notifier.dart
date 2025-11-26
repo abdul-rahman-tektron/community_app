@@ -1,16 +1,16 @@
 import 'dart:math';
 
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
-import 'package:community_app/core/model/customer/top_vendors/top_vendors_response.dart';
-import 'package:community_app/core/model/vendor/quotation_request/quotation_request_request.dart';
-import 'package:community_app/core/remote/services/common_repository.dart';
-import 'package:community_app/core/remote/services/customer/customer_dashboard_repository.dart';
-import 'package:community_app/core/remote/services/customer/customer_jobs_repository.dart';
-import 'package:community_app/utils/helpers/common_utils.dart';
-import 'package:community_app/utils/helpers/toast_helper.dart';
-import 'package:community_app/utils/location_helper.dart';
-import 'package:community_app/utils/router/routes.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
+import 'package:Xception/core/model/customer/top_vendors/top_vendors_response.dart';
+import 'package:Xception/core/model/vendor/quotation_request/quotation_request_request.dart';
+import 'package:Xception/core/remote/services/common_repository.dart';
+import 'package:Xception/core/remote/services/customer/customer_dashboard_repository.dart';
+import 'package:Xception/core/remote/services/customer/customer_jobs_repository.dart';
+import 'package:Xception/utils/helpers/common_utils.dart';
+import 'package:Xception/utils/helpers/toast_helper.dart';
+import 'package:Xception/utils/location_helper.dart';
+import 'package:Xception/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 

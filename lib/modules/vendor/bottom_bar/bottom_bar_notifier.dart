@@ -1,7 +1,7 @@
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/modules/vendor/dashboard/dashboard_screen.dart';
-import 'package:community_app/modules/vendor/jobs/jobs_screen.dart';
-import 'package:community_app/modules/vendor/quotation/quotation_screen.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/modules/vendor/dashboard/dashboard_screen.dart';
+import 'package:Xception/modules/vendor/jobs/jobs_screen.dart';
+import 'package:Xception/modules/vendor/quotation/quotation_screen.dart';
 import 'package:flutter/material.dart';
 
 class VendorBottomBarNotifier extends BaseChangeNotifier {

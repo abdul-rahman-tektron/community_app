@@ -1,10 +1,10 @@
-import 'package:community_app/core/model/vendor/jobs/ongoing_jobs_assigned_response.dart';
-import 'package:community_app/modules/vendor/jobs/widgets/ongoing_service/ongoing_service_card.dart';
-import 'package:community_app/modules/vendor/jobs/widgets/ongoing_service/ongoing_service_notifier.dart';
-import 'package:community_app/utils/helpers/common_utils.dart';
-import 'package:community_app/utils/helpers/loader.dart';
-import 'package:community_app/utils/router/routes.dart';
-import 'package:community_app/utils/widgets/custom_refresh_indicator.dart';
+import 'package:Xception/core/model/vendor/jobs/ongoing_jobs_assigned_response.dart';
+import 'package:Xception/modules/vendor/jobs/widgets/ongoing_service/ongoing_service_card.dart';
+import 'package:Xception/modules/vendor/jobs/widgets/ongoing_service/ongoing_service_notifier.dart';
+import 'package:Xception/utils/helpers/common_utils.dart';
+import 'package:Xception/utils/helpers/loader.dart';
+import 'package:Xception/utils/router/routes.dart';
+import 'package:Xception/utils/widgets/custom_refresh_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

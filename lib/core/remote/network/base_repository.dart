@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:community_app/core/remote/network/network_repository.dart';
+import 'package:Xception/core/remote/network/network_repository.dart';
 import 'package:flutter/foundation.dart';
 
 class BaseRepository with ChangeNotifier {

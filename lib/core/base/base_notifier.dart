@@ -1,6 +1,6 @@
-import 'package:community_app/core/model/common/login/login_response.dart';
-import 'package:community_app/utils/enums.dart';
-import 'package:community_app/utils/storage/hive_storage.dart';
+import 'package:Xception/core/model/common/login/login_response.dart';
+import 'package:Xception/utils/enums.dart';
+import 'package:Xception/utils/storage/hive_storage.dart';
 import 'package:flutter/foundation.dart';
 
 abstract class BaseChangeNotifier with ChangeNotifier {

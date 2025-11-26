@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:community_app/utils/widgets/custom_app_bar.dart';
+import 'package:Xception/utils/widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 
 class ImageViewer extends StatelessWidget {

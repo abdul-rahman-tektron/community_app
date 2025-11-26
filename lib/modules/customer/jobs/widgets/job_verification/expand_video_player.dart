@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:community_app/modules/customer/jobs/widgets/job_verification/job_verification_notifier.dart';
-import 'package:community_app/res/images.dart';
-import 'package:community_app/utils/helpers/loader.dart';
+import 'package:Xception/modules/customer/jobs/widgets/job_verification/job_verification_notifier.dart';
+import 'package:Xception/res/images.dart';
+import 'package:Xception/utils/helpers/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';

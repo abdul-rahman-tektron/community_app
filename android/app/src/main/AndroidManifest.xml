@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.community_app">
+    package="com.tektronix.xception">
 
     <!-- Permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
@@ -31,7 +31,7 @@
     </queries>
 
     <application
-        android:label="community_app"
+        android:label="Xception"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
@@ -58,8 +58,8 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="success" android:scheme="com.example.community_app" />
-                <data android:host="failure" android:scheme="com.example.community_app" />
+                <data android:host="success" android:scheme="com.tektronix.xception" />
+                <data android:host="failure" android:scheme="com.tektronix.xception" />
             </intent-filter>
         </activity>
 

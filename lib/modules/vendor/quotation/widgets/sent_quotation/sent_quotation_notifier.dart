@@ -1,7 +1,7 @@
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/vendor/vendor_quotation/vendor_quotation_request_list.dart';
-import 'package:community_app/core/remote/services/vendor/vendor_quotation_repository.dart';
-import 'package:community_app/utils/helpers/toast_helper.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/core/model/vendor/vendor_quotation/vendor_quotation_request_list.dart';
+import 'package:Xception/core/remote/services/vendor/vendor_quotation_repository.dart';
+import 'package:Xception/utils/helpers/toast_helper.dart';
 import 'package:flutter/material.dart';
 
 class SentQuotationNotifier extends BaseChangeNotifier {

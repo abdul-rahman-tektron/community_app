@@ -1,10 +1,10 @@
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/core/model/common/dropdown/service_dropdown_response.dart';
-import 'package:community_app/core/model/customer/dashboard/customer_dashboard_response.dart';
-import 'package:community_app/core/remote/services/common_repository.dart';
-import 'package:community_app/core/remote/services/customer/customer_dashboard_repository.dart';
-import 'package:community_app/modules/vendor/dashboard/dashboard_notifier.dart';
-import 'package:community_app/utils/router/routes.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/core/model/common/dropdown/service_dropdown_response.dart';
+import 'package:Xception/core/model/customer/dashboard/customer_dashboard_response.dart';
+import 'package:Xception/core/remote/services/common_repository.dart';
+import 'package:Xception/core/remote/services/customer/customer_dashboard_repository.dart';
+import 'package:Xception/modules/vendor/dashboard/dashboard_notifier.dart';
+import 'package:Xception/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -82,40 +82,33 @@ class CustomerDashboardNotifier extends BaseChangeNotifier {
   ];
 
   IconData getServiceIcon(String serviceName) {
-    switch (serviceName.toLowerCase()) {
-      case "plumbing":
-        return LucideIcons.wrench300;
-      case "laptop service":
-        return LucideIcons.laptop300;
-      case "handyman services":
-        return LucideIcons.hardHat300;
-      case "painting":
-        return LucideIcons.paintRoller300;
-      case "cleaning":
-        return LucideIcons.brushCleaning300;
-      case "electric works":
-        return LucideIcons.unplug300;
-      case "ac repair":
-        return LucideIcons.airVent300;
-      case "laundry":
-        return LucideIcons.washingMachine300;
-      case "pet grooming":
-        return LucideIcons.scissors300;
-      case "carpentry":
-        return LucideIcons.hammer300;
-      case "appliance repair":
-        return LucideIcons.trafficCone300;
-      case "pest control":
-        return LucideIcons.bug300;
-      case "security & cctv":
-        return LucideIcons.cctv300;
-      case "handyman jobs":
-        return LucideIcons.drill300;
-      default:
-        return LucideIcons.circle300; // fallback icon
-    }
-  }
+    final name = serviceName.toLowerCase();
 
+    if (name.contains("plumb")) return LucideIcons.wrench300;
+    if (name.contains("garden") || name.contains("landscape")) return LucideIcons.fence300;
+    if (name.contains("mobile")) return LucideIcons.smartphone300;
+    if (name.contains("laptop")) return LucideIcons.laptop300;
+    if (name.contains("handyman") || name.contains("repairman")) return LucideIcons.hardHat300;
+    if (name.contains("paint")) return LucideIcons.paintRoller300;
+    if (name.contains("clean")) return LucideIcons.brush300;
+    if (name.contains("electric")) return LucideIcons.plug300;
+    if (name.contains("ac") || name.contains("air")) return LucideIcons.airVent300;
+    if (name.contains("laundry")) return LucideIcons.washingMachine300;
+    if (name.contains("pet")) return LucideIcons.scissors300;
+    if (name.contains("carpent")) return LucideIcons.hammer300;
+    if (name.contains("appliance")) return LucideIcons.wrench300;
+    if (name.contains("pest")) return LucideIcons.bug300;
+    if (name.contains("security") || name.contains("cctv") || name.contains("camera")) return LucideIcons.camera300;
+    if (name.contains("drill") || name.contains("tools")) return LucideIcons.toolCase300;
+    if (name.contains("auto") || name.contains("car")) return LucideIcons.car300;
+    if (name.contains("roof")) return LucideIcons.house300;
+    if (name.contains("contract")) return LucideIcons.clipboardList300;
+    if (name.contains("move")) return LucideIcons.truck300;
+    if (name.contains("tree")) return LucideIcons.treePine300;
+
+    // Default fallback
+    return LucideIcons.circle;
+  }
 
   void selectCategory(BuildContext context, ServiceDropdownData category) {
     Navigator.pushReplacementNamed(

@@ -1,14 +1,14 @@
 import 'dart:convert';
 
-import 'package:community_app/core/model/common/login/login_response.dart';
-import 'package:community_app/core/model/common/user/update_user_response.dart';
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/res/fonts.dart';
-import 'package:community_app/res/images.dart';
-import 'package:community_app/utils/helpers/screen_size.dart';
-import 'package:community_app/utils/router/routes.dart';
-import 'package:community_app/utils/storage/hive_storage.dart';
-import 'package:community_app/utils/storage/secure_storage.dart';
+import 'package:Xception/core/model/common/login/login_response.dart';
+import 'package:Xception/core/model/common/user/update_user_response.dart';
+import 'package:Xception/res/colors.dart';
+import 'package:Xception/res/fonts.dart';
+import 'package:Xception/res/images.dart';
+import 'package:Xception/utils/helpers/screen_size.dart';
+import 'package:Xception/utils/router/routes.dart';
+import 'package:Xception/utils/storage/hive_storage.dart';
+import 'package:Xception/utils/storage/secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';

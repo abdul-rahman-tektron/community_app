@@ -1,10 +1,10 @@
 import 'dart:math';
 import 'dart:ui';
-import 'package:community_app/core/base/base_notifier.dart';
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/res/fonts.dart';
-import 'package:community_app/res/images.dart';
-import 'package:community_app/utils/enums.dart';
+import 'package:Xception/core/base/base_notifier.dart';
+import 'package:Xception/res/colors.dart';
+import 'package:Xception/res/fonts.dart';
+import 'package:Xception/res/images.dart';
+import 'package:Xception/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lottie/lottie.dart';

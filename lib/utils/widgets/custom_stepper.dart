@@ -1,5 +1,5 @@
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/res/fonts.dart';
+import 'package:Xception/res/colors.dart';
+import 'package:Xception/res/fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 

@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-import 'package:community_app/modules/common/settings/settings_notifier.dart';
-import 'package:community_app/res/colors.dart';
-import 'package:community_app/res/fonts.dart';
-import 'package:community_app/res/images.dart';
-import 'package:community_app/res/styles.dart';
-import 'package:community_app/utils/extensions.dart';
-import 'package:community_app/utils/widgets/custom_app_bar.dart';
-import 'package:community_app/utils/widgets/custom_drawer.dart';
+import 'package:Xception/modules/common/settings/settings_notifier.dart';
+import 'package:Xception/res/colors.dart';
+import 'package:Xception/res/fonts.dart';
+import 'package:Xception/res/images.dart';
+import 'package:Xception/res/styles.dart';
+import 'package:Xception/utils/extensions.dart';
+import 'package:Xception/utils/widgets/custom_app_bar.dart';
+import 'package:Xception/utils/widgets/custom_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
