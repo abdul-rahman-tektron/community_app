@@ -20,7 +20,7 @@ import 'package:url_launcher/url_launcher.dart';
 class TrackingNotifier extends BaseChangeNotifier {
   int? jobId;
   LatLng? _employeePosition;
-  LatLng _customerPosition = const LatLng(25.268938, 55.305338);
+  LatLng _customerPosition = const LatLng(25.26755278413158, 55.330203949253885);
 
   List<JobStatusTrackingData>? jobStatusTrackingData = [];
   List<JobStatusResponse>? jobStatus = [];
@@ -245,6 +245,10 @@ class TrackingNotifier extends BaseChangeNotifier {
 
     final origin = '${_employeePosition!.latitude},${_employeePosition!.longitude}';
     final destination = '${_customerPosition.latitude},${_customerPosition.longitude}';
+
+    print("origin Data");
+    print(origin);
+    print(destination);
 
     try {
       final responseData = await CustomerJobsRepository.instance.getRouteWithTraffic(

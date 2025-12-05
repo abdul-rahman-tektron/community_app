@@ -102,8 +102,13 @@ class VendorDashboardScreen extends StatelessWidget {
           5.verticalSpace,
           _buildKeyValueRow(
             "Status",
-            notifier.documentData?.active ?? false ? "Active" : "Inactive",
-            valueColor: notifier.documentData?.active ?? false ? Colors.green : Colors.red,
+            notifier.documentData?.documentExpiryDate != null &&
+                notifier.documentData!.documentExpiryDate!.isAfter(DateTime.now())
+                ? "Active"
+                : "Inactive",
+            valueColor: notifier.documentData?.documentExpiryDate != null &&
+                notifier.documentData!.documentExpiryDate!.isAfter(DateTime.now())
+                ? Colors.green : Colors.red,
           ),
         ],
       ),

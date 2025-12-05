@@ -109,11 +109,18 @@ class AddQuotationScreen extends StatelessWidget {
               backgroundColor: AppColors.background,
               textStyle: AppFonts.text14.regular.red.style,
               onPressed: () {
-                addQuotationNotifier.apiUpdateJobStatus(
+                showStatusNotesPopup(
                   context,
-                  AppStatus.vendorQuotationRejected.id,
-                  isReject: true,
+                  onSubmit: (notes) async {
+                    await addQuotationNotifier.apiUpdateJobStatus(
+                      context,
+                      AppStatus.vendorQuotationRejected.id,
+                      isReject: true,
+                      notes: notes
+                    );
+                  },
                 );
+
               },
             ),
         ],

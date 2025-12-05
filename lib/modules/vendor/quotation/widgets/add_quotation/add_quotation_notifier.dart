@@ -117,13 +117,13 @@ class AddQuotationNotifier extends BaseChangeNotifier {
   }
 
   Future<void> apiUpdateJobStatus(BuildContext context, int? statusId,
-      {bool? isReject = false}) async {
+      {bool? isReject = false, String? notes}) async {
     if (statusId == null) return;
     try {
       notifyListeners();
 
       final parsed = await CommonRepository.instance.apiUpdateJobStatus(
-        UpdateJobStatusRequest(jobId: jobId, statusId: statusId, createdBy: userData?.name ?? "", vendorId: userData?.customerId ?? 0),
+        UpdateJobStatusRequest(jobId: jobId, statusId: statusId, createdBy: userData?.name ?? "", vendorId: userData?.customerId ?? 0, notes: notes),
       );
 
       if (parsed is CommonResponse && parsed.success == true) {
