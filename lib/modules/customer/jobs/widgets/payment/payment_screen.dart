@@ -5,6 +5,7 @@ import 'package:Xception/res/fonts.dart';
 import 'package:Xception/res/styles.dart';
 import 'package:Xception/utils/extensions.dart';
 import 'package:Xception/utils/helpers/common_utils.dart';
+import 'package:Xception/utils/helpers/toast_helper.dart';
 import 'package:Xception/utils/widgets/custom_app_bar.dart';
 import 'package:Xception/utils/widgets/custom_buttons.dart';
 import 'package:Xception/utils/widgets/custom_checkbox.dart';
@@ -427,7 +428,16 @@ class PaymentScreen extends StatelessWidget {
       child: CustomButton(
         isLoading: notifier.isLoading,
         onPressed: () async {
-          notifier.apiCreatePayment(context, overrideGrandTotal: grand.toDouble());
+          // notifier.apiCreatePayment(context, overrideGrandTotal: grand.toDouble());
+          if (notifier.selectedPaymentMethod == null) {
+            ToastHelper.showError("Please select a payment method.");
+            return;
+          }
+          final items  = notifier.paymentDetail.lineItems ?? const <LineItem>[];
+          final subTotal = _subTotalFromItems(items);
+          final vatTotal = _vatFromItems(items);
+          final grand    = subTotal + vatTotal;
+          await notifier.makePayment(context, overrideGrandTotal: grand.toDouble());
         },
         text: "PAY ${money(grand)}",
       ),

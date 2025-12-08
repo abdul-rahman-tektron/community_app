@@ -90,5 +90,14 @@
 	</array>
 	<key>UIUserNotificationSettings</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>stripeflutter</string>  <!-- must match Stripe.urlScheme -->
+        </array>
+      </dict>
+    </array>
 </dict>
 </plist>

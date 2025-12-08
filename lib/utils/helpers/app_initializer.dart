@@ -1,6 +1,7 @@
 import 'package:Xception/core/model/common/login/login_response.dart';
 import 'package:Xception/firebase_options.dart';
 import 'package:Xception/main.dart';
+import 'package:Xception/res/api_constants.dart';
 import 'package:Xception/res/colors.dart';
 import 'package:Xception/utils/crashlytics_service.dart';
 import 'package:Xception/utils/location_helper.dart';
@@ -12,11 +13,15 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:hive_flutter/adapters.dart';
 
 class AppInitializer {
   static Future<void> initialize() async {
     WidgetsFlutterBinding.ensureInitialized();
+
+    Stripe.publishableKey = ApiConstants.stripePublishableKey;
+    Stripe.urlScheme = 'stripeflutter';
 
     await _initializePermissions();
     await _initializeFirebase();

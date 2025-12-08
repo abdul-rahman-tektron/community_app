@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:Xception/core/base/base_notifier.dart';
 import 'package:Xception/core/model/common/error/common_response.dart';
 import 'package:Xception/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
@@ -9,9 +11,11 @@ import 'package:Xception/core/remote/services/common_repository.dart';
 import 'package:Xception/core/remote/services/customer/customer_jobs_repository.dart';
 import 'package:Xception/res/images.dart';
 import 'package:Xception/utils/helpers/common_utils.dart';
+import 'package:Xception/utils/helpers/payment_service.dart';
 import 'package:Xception/utils/helpers/toast_helper.dart';
 import 'package:Xception/utils/router/routes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 
 class PaymentNotifier extends BaseChangeNotifier {
   bool saveCard = false;
@@ -191,7 +195,95 @@ class PaymentNotifier extends BaseChangeNotifier {
       ToastHelper.showError("Something Went Wrong");
     }
   }
+
+  Future<void> makePayment(BuildContext context, {double? overrideGrandTotal}) async {
+    if (selectedPaymentMethod == null) {
+      ToastHelper.showError("Please select a payment method.");
+      return;
+    }
+
+    try {
+      isLoading = true;
+      notifyListeners();
+
+      // 1) Calculate amount (AED)
+      final items  = paymentDetail.lineItems ?? const <LineItem>[];
+      num _linePreVatLocal(LineItem it) {
+        final q = it.quantity ?? 0;
+        if (q == 0) return it.rate ?? 0;
+        if (it.amount != null) return it.amount!;
+        return (it.rate ?? 0) * q;
+      }
+
+      final subTotal = items.fold<num>(0, (s, it) => s + _linePreVatLocal(it));
+      final vatTotal = items.fold<num>(0, (s, it) => s + (it.vat ?? 0));
+      final localGrand = (subTotal + vatTotal).toDouble();
+      final amountAED = overrideGrandTotal ?? localGrand;
+
+      // Stripe expects smallest currency unit: AED -> fils
+      final amountInFils = (amountAED * 100).round();
+
+      // 2) Get clientSecret from backend (later)
+      // final clientSecret = await PaymentService.createPaymentIntent(amountInFils);
+      // if (clientSecret == null) {
+      //   ToastHelper.showError("Unable to start payment. Please try again.");
+      //   return;
+      // }
+
+      // TEMP: using your hardcoded test client_secret for now
+      const clientSecret = "pi_3Sazj25Us833x6am0SARHyCy_secret_jhMBc9M2ZEtVGyywZ9OpCd3WM";
+
+      print("selectedPaymentMethod?.id");
+      print(selectedPaymentMethod?.id);
+
+
+      final isWallet = selectedPaymentMethod?.id == 1; // id 1 = Apple/Google Pay
+      final isAndroid = Platform.isAndroid;
+      final isIOS = Platform.isIOS;
+
+      print(isWallet && isAndroid);
+
+      // 3) Init PaymentSheet
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: clientSecret,
+          merchantDisplayName: "Xception",
+          // ✅ Only enable Google Pay on Android when wallet method selected
+          googlePay: (isWallet && isAndroid)
+              ? const PaymentSheetGooglePay(
+            merchantCountryCode: "AE",
+            testEnv: true,
+          )
+              : null,
+
+          // ✅ Only enable Apple Pay on iOS when wallet method selected
+          applePay: (isWallet && isIOS)
+              ? const PaymentSheetApplePay(
+            merchantCountryCode: "AE",
+          )
+              : null,
+        ),
+      );
+
+      // 4) Present PaymentSheet
+      await Stripe.instance.presentPaymentSheet();
+
+      // 5) On success → create payment record in your backend
+      await apiCreatePayment(context, overrideGrandTotal: amountAED);
+
+      ToastHelper.showSuccess("Payment successful.");
+    } on StripeException catch (e) {
+      ToastHelper.showError("Payment cancelled or failed: ${e.error.localizedMessage}");
+    } catch (e) {
+      print("Payment Failed: $e");
+      ToastHelper.showError('Payment Failed: $e');
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
 }
+
 
 class PaymentMethod {
   final int id;

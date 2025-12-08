@@ -5,6 +5,7 @@ class ApiConstants {
   static const defaultPageSize = 20;
 
   static const apiKey = "AIzaSyAqO39DAseHSaLtcKC1T6u6-uPz8_Lp7YA";
+  static const stripePublishableKey = "pk_test_51SXy365Us833x6ambjUZaETXcloIVjxPuQL48sioWBdyC1njC9unIMKA5r3BnlafVyK45j2hJPTabwqAN01OXW1J00QgXZscqf";
 
   static const String clientId = "sandbox_stage";
   static const String clientSecret = "sandbox_stage";

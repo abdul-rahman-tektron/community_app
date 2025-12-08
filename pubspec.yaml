@@ -71,6 +71,9 @@ dependencies:
   flutter_uae_pass: ^1.0.6
   flutter_email_sender: ^7.0.0
 
+  #Payment
+  flutter_stripe: 11.5.0
+
   #Map
   google_maps_flutter: ^2.12.2
   geocoding: ^4.0.0
