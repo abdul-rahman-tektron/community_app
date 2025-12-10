@@ -3,26 +3,30 @@ import 'package:dio/dio.dart';
 class PaymentService {
   static final Dio _dio = Dio();
 
-  static Future<String?> createPaymentIntent(int amount) async {
+  static Future<String?> createPaymentIntent({
+    required int amountInMinorUnits,
+    required String currency,
+    required String description,
+  }) async {
     try {
       final response = await _dio.post(
-        "https://your-backend-url.com/create-payment-intent",
+        '/payments/create-intent',
         data: {
-          "amount": amount,
-          "currency": "usd",
+          'amount': amountInMinorUnits,
+          'currency': currency,
+          'description': description,
         },
-        options: Options(
-          headers: {"Content-Type": "application/json"},
-        ),
       );
 
-      // response.data is already decoded JSON
-      return response.data["clientSecret"];
-    } on DioException catch (e) {
-      print("Dio Error: ${e.response?.data ?? e.message}");
+      if (response.statusCode == 200 &&
+          response.data != null &&
+          response.data['clientSecret'] != null) {
+        return response.data['clientSecret'] as String;
+      }
+
       return null;
     } catch (e) {
-      print("General Error: $e");
+      // You can log error here
       return null;
     }
   }

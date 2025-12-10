@@ -52,13 +52,13 @@ class PaymentScreen extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 5.h),
               child: Divider(),
             ),
-            if (paymentNotifier.selectedPaymentMethod?.isCard ?? false)
-              buildCardDetails(context, paymentNotifier),
-            if (paymentNotifier.selectedPaymentMethod?.isCard ?? false)
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 5.h),
-                child: Divider(),
-              ),
+            // if (paymentNotifier.selectedPaymentMethod?.isCard ?? false)
+            //   buildCardDetails(context, paymentNotifier),
+            // if (paymentNotifier.selectedPaymentMethod?.isCard ?? false)
+            //   Padding(
+            //     padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 5.h),
+            //     child: Divider(),
+            //   ),
             buildContactInfo(context, paymentNotifier),
             buildTermsAndConditions(context, paymentNotifier),
             buildPayButton(context, paymentNotifier),
@@ -418,29 +418,23 @@ class PaymentScreen extends StatelessWidget {
   String money(num? v) => _aed.format((v ?? 0).toDouble());
 
   Widget buildPayButton(BuildContext context, PaymentNotifier notifier) {
-    final items  = notifier.paymentDetail.lineItems ?? const <LineItem>[];
-    final subTotal = _subTotalFromItems(items);
-    final vatTotal = _vatFromItems(items);
-    final grand    = subTotal + vatTotal;
+    final grand = notifier.calculateGrandTotal();
 
     return Padding(
       padding: EdgeInsets.all(15.w),
       child: CustomButton(
         isLoading: notifier.isLoading,
         onPressed: () async {
-          // notifier.apiCreatePayment(context, overrideGrandTotal: grand.toDouble());
           if (notifier.selectedPaymentMethod == null) {
             ToastHelper.showError("Please select a payment method.");
             return;
           }
-          final items  = notifier.paymentDetail.lineItems ?? const <LineItem>[];
-          final subTotal = _subTotalFromItems(items);
-          final vatTotal = _vatFromItems(items);
-          final grand    = subTotal + vatTotal;
-          await notifier.makePayment(context, overrideGrandTotal: grand.toDouble());
+
+          await notifier.makePayment(context, overrideGrandTotal: grand);
         },
         text: "PAY ${money(grand)}",
       ),
     );
   }
 }
+
