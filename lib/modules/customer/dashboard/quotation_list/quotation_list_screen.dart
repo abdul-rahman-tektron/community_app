@@ -116,12 +116,13 @@ class QuotationListScreen extends StatelessWidget {
                 child: Text('${quotation.vendorName}', style: AppFonts.text16.regular.style),
               ),
               Text(
-                'Quotation ID: ${quotation.quotationRequestId}',
+                'ID: ${quotation.quotationRequestId}',
                 style: AppFonts.text14.medium.style,
               ),
             ],
           ),
           10.verticalSpace,
+          if(quotation.status == AppStatus.vendorQuotationRejected.name) 10.verticalSpace,
           quotation.jobQuotationResponseItems?.isNotEmpty ?? false
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,11 +154,30 @@ class QuotationListScreen extends StatelessWidget {
                       )
                     : _buildSiteVisitSection(context, quotation, notifier)
               : Center(
-                  child: Text(
-                    quotation.status == AppStatus.vendorQuotationRejected.name
-                        ? "Vendor Rejected your request"
-                        : "Quotation not provided yet",
-                    style: AppFonts.text14.semiBold.red.style,
+                  child: Column(
+                    children: [
+                      Text(
+                        quotation.status == AppStatus.vendorQuotationRejected.name
+                            ? "Vendor Rejected your request"
+                            : "Quotation not provided yet",
+                        style: AppFonts.text14.semiBold.red.style,
+                      ),
+                      if (quotation.status == AppStatus.vendorQuotationRejected.name) 10.verticalSpace,
+                      if (quotation.status == AppStatus.vendorQuotationRejected.name) Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Reason: ",
+                            style: AppFonts.text14.bold.style,
+                          ),
+                          Expanded(
+                            child: Text(quotation.customerRemarks ?? "",
+                              style: AppFonts.text14.regular.style,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
         ],

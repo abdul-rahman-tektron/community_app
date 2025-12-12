@@ -262,6 +262,7 @@ class JobQuotationResponce {
   DateTime? createdDate;
   DateTime? requestedDate;
   String? status;
+  String? customerRemarks;
   int? quotationResponceId;
   List<JobQuotationResponseItem>? jobQuotationResponseItems;
 
@@ -281,6 +282,7 @@ class JobQuotationResponce {
     this.createdBy,
     this.createdDate,
     this.status,
+    this.customerRemarks,
     this.quotationResponceId,
     this.requestedDate,
     this.jobQuotationResponseItems,
@@ -312,6 +314,7 @@ class JobQuotationResponce {
             ? null
             : DateTime.parse(json["requestedDate"]),
         status: json["status"],
+        customerRemarks: json["customerRemarks"],
         quotationResponceId: json["quotationResponceId"],
         jobQuotationResponseItems: json["jobQuotationResponseItems"] == null
             ? []
@@ -338,6 +341,7 @@ class JobQuotationResponce {
     "createdBy": createdBy,
     "createdDate": createdDate?.toIso8601String(),
     "status": status,
+    "customerRemarks": customerRemarks,
     "quotationResponceId": quotationResponceId,
     "requestedDate": requestedDate,
     "jobQuotationResponseItems": jobQuotationResponseItems == null
