@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:Xception/core/remote/network/api_url.dart';
@@ -58,7 +59,7 @@ class NetworkRepository {
       },
       onResponse: (response, handler) {
         _logger.i("✅ Response [${response.statusCode}] from ${response.realUri}");
-        _logger.d("Response Data: ${jsonEncode(response.data)}");
+        log("Response Data: ${jsonEncode(response.data)}");
         handler.next(response);
       },
       onError: (DioException e, handler) async {
