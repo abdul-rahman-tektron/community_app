@@ -163,14 +163,14 @@ class CustomerRegistrationPersonalScreen extends StatelessWidget {
           keyboardType: TextInputType.phone,
           validator: (value) => Validations.validateMobile(context, value),
         ),
-        15.verticalSpace,
-        CustomTextField(
-          controller: customerChangeNotifier.passwordController,
-          fieldName: context.locale.password,
-          showAsterisk: true,
-          isPassword: true,
-          validator: (value) => Validations.validatePassword(context, value),
-        ),
+        // 15.verticalSpace,
+        // CustomTextField(
+        //   controller: customerChangeNotifier.passwordController,
+        //   fieldName: context.locale.password,
+        //   showAsterisk: true,
+        //   isPassword: true,
+        //   validator: (value) => Validations.validatePassword(context, value),
+        // ),
       ],
     );
   }

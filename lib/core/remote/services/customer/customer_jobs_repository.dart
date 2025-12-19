@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:Xception/core/model/common/error/common_response.dart';
 import 'package:Xception/core/model/common/error/error_response.dart';
 import 'package:Xception/core/model/common/user/customer_id_request.dart';
+import 'package:Xception/core/model/customer/job/create_payment_intent_request.dart';
+import 'package:Xception/core/model/customer/job/create_payment_intent_response.dart';
 import 'package:Xception/core/model/customer/job/customer_history_detail_request.dart';
 import 'package:Xception/core/model/customer/job/customer_history_detail_response.dart';
 import 'package:Xception/core/model/customer/job/customer_history_list_response.dart';
@@ -19,6 +21,7 @@ import 'package:Xception/core/model/customer/payment/create_payment/create_payme
 import 'package:Xception/core/model/customer/payment/create_payment/create_payment_response.dart';
 import 'package:Xception/core/model/customer/payment/payment_detail_request.dart';
 import 'package:Xception/core/model/customer/payment/payment_detail_response.dart';
+import 'package:Xception/core/model/customer/payment/payment_status/payment_status_response.dart';
 import 'package:Xception/core/model/customer/quotation/customer_response_reject_response.dart';
 import 'package:Xception/core/model/customer/quotation/customer_response_request.dart';
 import 'package:Xception/core/model/customer/quotation/customer_response_response.dart';
@@ -282,6 +285,44 @@ class CustomerJobsRepository extends BaseRepository {
     if (response?.statusCode == HttpStatus.ok) {
       final createPaymentResponse = createPaymentResponseFromJson(jsonEncode(response?.data));
       return createPaymentResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+  Future<Object?> apiCreatePaymentIntent(CreatePaymentIntentRequest requestParams) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.post,
+      useXceptionBase: true,
+      pathUrl: ApiUrls.pathCreatePaymentIntent,
+      body: jsonEncode(requestParams.toJson()),
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final createPaymentIntentResponse = createPaymentIntentResponseFromJson(jsonEncode(response?.data));
+      return createPaymentIntentResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+  Future<Object?> apiPaymentStatus(String paymentIntentId) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.get,
+      useXceptionBase: true,
+      pathUrl: ApiUrls.pathPaymentStatus,
+      queryParam: paymentIntentId,
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final paymentStatusResponse = paymentStatusResponseFromJson(jsonEncode(response?.data));
+      return paymentStatusResponse;
     } else {
       throw ErrorResponse.fromJson(response?.data ?? {});
     }

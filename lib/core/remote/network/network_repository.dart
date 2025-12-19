@@ -28,6 +28,10 @@ class NetworkRepository {
 
   factory NetworkRepository() => _instance;
 
+  // ✅ Public access (read-only)
+  static BaseOptions get baseOptions => _baseOptions;
+  static BaseOptions get baseXceptionOptions => _baseXceptionOptions;
+
   final Logger _logger = Logger(
     printer: PrettyPrinter(
       methodCount: 0,
@@ -45,6 +49,15 @@ class NetworkRepository {
     receiveTimeout: const Duration(seconds: 60),
     sendTimeout: const Duration(seconds: 60),
   );
+
+  static final BaseOptions _baseXceptionOptions = BaseOptions(
+    baseUrl: ApiUrls.baseXceptionUrl,
+    responseType: ResponseType.json,
+    connectTimeout: const Duration(seconds: 60),
+    receiveTimeout: const Duration(seconds: 60),
+    sendTimeout: const Duration(seconds: 60),
+  );
+
 
   final Dio _dio = Dio(_baseOptions);
 
@@ -80,8 +93,16 @@ class NetworkRepository {
     ResponseType? responseType,
     CancelToken? cancelToken,
     int retryCount = 0,
+    bool useXceptionBase = false,
   }) async {
-    final url = _buildUrl(pathUrl, queryParam);
+    final selectedBaseUrl =
+    useXceptionBase ? _baseXceptionOptions.baseUrl : _baseOptions.baseUrl;
+
+    final url = _buildFullUrl(
+      baseUrl: selectedBaseUrl,
+      pathUrl: pathUrl,
+      queryParam: queryParam,
+    );
 
     final options = Options(
       headers: urlEncoded
@@ -150,6 +171,22 @@ class NetworkRepository {
         );
       }
     }
+  }
+
+  String _buildFullUrl({
+    required String baseUrl,
+    required String pathUrl,
+    String? queryParam,
+  }) {
+    final base = baseUrl.endsWith('/') ? baseUrl : '$baseUrl/';
+    final path = pathUrl.startsWith('/') ? pathUrl.substring(1) : pathUrl;
+
+    // if caller already passed full url, return as-is
+    if (pathUrl.startsWith('http://') || pathUrl.startsWith('https://')) {
+      return Uri.encodeFull('$pathUrl${queryParam ?? ''}');
+    }
+
+    return Uri.encodeFull('$base$path${queryParam ?? ''}');
   }
 
   String _buildUrl(String pathUrl, String? queryParam) {

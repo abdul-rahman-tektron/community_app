@@ -4,11 +4,14 @@ import 'dart:io';
 
 import 'package:Xception/core/base/base_notifier.dart';
 import 'package:Xception/core/model/common/error/common_response.dart';
+import 'package:Xception/core/model/customer/job/create_payment_intent_request.dart';
+import 'package:Xception/core/model/customer/job/create_payment_intent_response.dart';
 import 'package:Xception/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
 import 'package:Xception/core/model/customer/payment/create_payment/create_payment_request.dart';
 import 'package:Xception/core/model/customer/payment/create_payment/create_payment_response.dart';
 import 'package:Xception/core/model/customer/payment/payment_detail_request.dart';
 import 'package:Xception/core/model/customer/payment/payment_detail_response.dart';
+import 'package:Xception/core/model/customer/payment/payment_status/payment_status_response.dart';
 import 'package:Xception/core/remote/services/common_repository.dart';
 import 'package:Xception/core/remote/services/customer/customer_jobs_repository.dart';
 import 'package:Xception/res/images.dart';
@@ -30,23 +33,20 @@ class PaymentNotifier extends BaseChangeNotifier {
 
   // Stripe card field state
   CardFieldInputDetails? _cardFieldDetails;
+
   bool get isCardComplete => _cardFieldDetails?.complete ?? false;
 
   // Text controllers
   final promoCodeController = TextEditingController();
   final cardNumberController = TextEditingController(); // no longer used in UI
   final expiryDateController = TextEditingController(); // no longer used in UI
-  final cvvController = TextEditingController();        // no longer used in UI
+  final cvvController = TextEditingController(); // no longer used in UI
   final cardHolderNameController = TextEditingController();
 
   bool isTermsExpanded = false;
 
   List<PaymentMethod> paymentMethods = [
-    PaymentMethod(
-      id: 2,
-      name: "Credit / Debit Card",
-      isCard: true,
-    ),
+    PaymentMethod(id: 2, name: "Credit / Debit Card", isCard: true),
     PaymentMethod(
       id: 1,
       name: "Apple Pay / Google Pay",
@@ -159,23 +159,9 @@ class PaymentNotifier extends BaseChangeNotifier {
     }
   }
 
-  Future<void> apiCreatePayment(BuildContext context, {required double amountAED}) async {
+  Future<void> apiPaymentStatus(BuildContext context, String paymentIntentId) async {
     try {
-      final request = CreatePaymentRequest(
-        paymentIdentity: selectedPaymentMethod?.id ?? 0,
-        quotationId: jobId,
-        amountFrom: userData?.customerId ?? 0,
-        amountTo: vendorId,
-        jobId: jobId,
-        amount: amountAED,
-        mode: selectedPaymentMethod?.name ?? "Payment",
-        type: selectedPaymentMethod?.name ?? "Payment",
-        transactionDate: DateTime.now(),
-        referenceNumber: DateTime.now().millisecondsSinceEpoch.toString(),
-        referenceType: selectedPaymentMethod?.name ?? "Card",
-      );
-
-      final result = await CustomerJobsRepository.instance.apiCreatePayment(request);
+      final result = await CustomerJobsRepository.instance.apiPaymentStatus(paymentIntentId);
       await _handleCreatedPaymentSuccess(result, context);
     } catch (e) {
       print("apiCreatePayment error: $e");
@@ -185,9 +171,13 @@ class PaymentNotifier extends BaseChangeNotifier {
   }
 
   Future<void> _handleCreatedPaymentSuccess(dynamic result, BuildContext context) async {
-    if (result is CreatePaymentResponse) {
-      ToastHelper.showSuccess(result.message ?? "Payment recorded successfully.");
-      await apiUpdateJobStatus(context, AppStatus.paymentCompleted.id);
+    if (result is PaymentStatusResponse) {
+      if(result.transactionStatus == "succeeded") {
+        ToastHelper.showSuccess("Payment successfully.");
+        await apiUpdateJobStatus(context, AppStatus.paymentCompleted.id);
+      } else {
+        ToastHelper.showError("Payment Failed.");
+      }
     } else {
       ToastHelper.showError("Something went wrong while recording payment.");
     }
@@ -225,7 +215,6 @@ class PaymentNotifier extends BaseChangeNotifier {
   // ========== STRIPE – CARD ONLY (no wallets yet) ==========
 
   Future<void> _payWithCard(BuildContext context, {double? overrideGrandTotal}) async {
-
     try {
       isLoading = true;
       notifyListeners();
@@ -235,15 +224,37 @@ class PaymentNotifier extends BaseChangeNotifier {
       final amountInFils = (amountAED * 100).round(); // AED -> fils
 
       // 2) Ask backend to create PaymentIntent and return clientSecret
-      // final clientSecret = await PaymentService.createPaymentIntent(
-      //   amountInMinorUnits: amountInFils,
-      //   currency: 'aed',
-      //   description: 'Payment for job #$jobId',
-      // );
+      final clientSecretResponse = await CustomerJobsRepository.instance.apiCreatePaymentIntent(
+        CreatePaymentIntentRequest(
+          amount: amountInFils,
+          totalAmount: amountInFils,
+          remarks: "Test",
+          currency: "aed",
+          paymentIdentity: selectedPaymentMethod?.id ?? 0,
+          quotationId: jobId,
+          amountFrom: userData?.customerId ?? 0,
+          amountTo: vendorId,
+          jobId: jobId,
+          invoiceNumber: "",
+          paymentTowards: "",
+          transactionStatus: "",
+          mode: selectedPaymentMethod?.name ?? "Payment",
+          type: selectedPaymentMethod?.name ?? "Payment",
+          transactionDate: DateTime.now(),
+          referenceNumber: DateTime.now().millisecondsSinceEpoch.toString(),
+          referenceType: selectedPaymentMethod?.name ?? "Card",
+        )
+      );
 
-      final clientSecret = "pi_3Sbzcl5Us833x6am1GUyPTDX_secret_u1cxDNXIrAEvBbwXQ3Dn1ajzv";
+      String? clientSecret;
+      String? paymentIntentId;
 
-      if (clientSecret == null) {
+      if (clientSecretResponse is CreatePaymentIntentResponse) {
+        clientSecret = clientSecretResponse.clientSecret;
+        paymentIntentId = clientSecretResponse.stripePaymentIntentId;
+      }
+
+      if (clientSecretResponse == null) {
         ToastHelper.showError("Unable to start payment. Please try again.");
         return;
       }
@@ -252,6 +263,7 @@ class PaymentNotifier extends BaseChangeNotifier {
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: clientSecret,
+
           merchantDisplayName: "Xception",
           // No GooglePay/ApplePay here for now → card only
           style: ThemeMode.system,
@@ -261,10 +273,8 @@ class PaymentNotifier extends BaseChangeNotifier {
       // 4) Present PaymentSheet
       await Stripe.instance.presentPaymentSheet();
 
-      // 5) On success → record payment in your backend
-      await apiCreatePayment(context, amountAED: amountAED);
-
-      ToastHelper.showSuccess("Payment successful.");
+      // // 5) On success → record payment in your backend
+      await apiPaymentStatus(context, paymentIntentId ?? "");
     } on StripeException catch (e) {
       ToastHelper.showError("Payment cancelled or failed: ${e.error.localizedMessage}");
     } catch (e) {
@@ -298,27 +308,47 @@ class PaymentNotifier extends BaseChangeNotifier {
       final amountInFils = (amountAED * 100).round(); // AED -> fils
 
       // 2) Create PaymentIntent on backend and get clientSecret
-      // final clientSecret = await PaymentService.createPaymentIntent(
-      //   amountInMinorUnits: amountInFils,
-      //   currency: 'aed',
-      //   description: 'Payment for job #$jobId (Google Pay)',
-      // );
+      final clientSecretResponse = await CustomerJobsRepository.instance.apiCreatePaymentIntent(
+          CreatePaymentIntentRequest(
+            amount: amountInFils,
+            totalAmount: amountInFils,
+            remarks: "Test",
+            currency: "aed",
+            paymentIdentity: selectedPaymentMethod?.id ?? 0,
+            quotationId: jobId,
+            amountFrom: userData?.customerId ?? 0,
+            amountTo: vendorId,
+            jobId: jobId,
+            invoiceNumber: "",
+            paymentTowards: "",
+            transactionStatus: "",
+            mode: selectedPaymentMethod?.name ?? "Payment",
+            type: selectedPaymentMethod?.name ?? "Payment",
+            transactionDate: DateTime.now(),
+            referenceNumber: DateTime.now().millisecondsSinceEpoch.toString(),
+            referenceType: selectedPaymentMethod?.name ?? "Card",
+          )
+      );
 
-      // For quick test only, you *could* temporarily hardcode:
-      const clientSecret = "pi_3Sbzcl5Us833x6am1GUyPTDX_secret_u1cxDNXIrAEvBbwXQ3Dn1ajzv";
-      // but real flow should use the backend call above.
+      String? clientSecret;
+      String? paymentIntentId;
 
-      if (clientSecret == null) {
-        ToastHelper.showError("Unable to start Google Pay. Please try again.");
+      if (clientSecretResponse is CreatePaymentIntentResponse) {
+        clientSecret = clientSecretResponse.clientSecret;
+        paymentIntentId = clientSecretResponse.stripePaymentIntentId;
+      }
+
+      if (clientSecretResponse == null) {
+        ToastHelper.showError("Unable to start payment. Please try again.");
         return;
       }
 
       // 3) Launch native Google Pay sheet and confirm the PaymentIntent
       await Stripe.instance.confirmPlatformPayPaymentIntent(
-        clientSecret: clientSecret,
+        clientSecret: clientSecret ?? "",
         confirmParams: PlatformPayConfirmParams.googlePay(
           googlePay: GooglePayParams(
-            testEnv: true,            // true in test, false in production
+            testEnv: true, // true in test, false in production
             merchantName: 'Xception', // shown in Google Pay sheet
             merchantCountryCode: 'AE',
             currencyCode: 'AED',
@@ -327,8 +357,7 @@ class PaymentNotifier extends BaseChangeNotifier {
       );
 
       // 4) If we reach here without exception → success
-      await apiCreatePayment(context, amountAED: amountAED);
-      ToastHelper.showSuccess("Payment successful via Google Pay.");
+      await apiPaymentStatus(context, paymentIntentId ?? "");
     } on StripeException catch (e) {
       ToastHelper.showError("Google Pay cancelled or failed: ${e.error.localizedMessage}");
     } catch (e) {
@@ -387,7 +416,7 @@ class PaymentNotifier extends BaseChangeNotifier {
             // Single total line item – Stripe does the math on the backend
             cartItems: [
               ApplePayCartSummaryItem.immediate(
-                label: 'Service payment',      // what user sees
+                label: 'Service payment', // what user sees
                 amount: amountAED.toStringAsFixed(2),
               ),
             ],
@@ -396,8 +425,8 @@ class PaymentNotifier extends BaseChangeNotifier {
       );
 
       // 4) If no exception → success, log payment in your backend
-      await apiCreatePayment(context, amountAED: amountAED);
-      ToastHelper.showSuccess("Payment successful via Apple Pay.");
+      // await apiCreatePayment(context, amountAED: amountAED);
+    ToastHelper.showSuccess("Payment successful via Apple Pay.");
     } on StripeException catch (e) {
       ToastHelper.showError("Apple Pay cancelled or failed: ${e.error.localizedMessage}");
     } catch (e) {
@@ -416,10 +445,5 @@ class PaymentMethod {
   final List<String>? iconUrls;
   final bool isCard;
 
-  PaymentMethod({
-    required this.id,
-    required this.name,
-    this.iconUrls,
-    required this.isCard,
-  });
+  PaymentMethod({required this.id, required this.name, this.iconUrls, required this.isCard});
 }

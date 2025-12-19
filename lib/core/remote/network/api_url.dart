@@ -4,12 +4,14 @@ class ApiUrls {
   ///Base
   static const baseHttp = "https://";
   static const baseHost = "teksmartsolutions.com/CommunityServiceAPI";
+  static const baseXceptionHost = "teksmartsolutions.com/CommunityXecptionAPI";
 
   ///Test
   // static const baseHttp = "http://";
   // static const baseHost = "192.168.10.30/CommunityServiceAPI/api";
 
   static const baseUrl = "$baseHttp$baseHost";
+  static const baseXceptionUrl = "$baseHttp$baseXceptionHost";
 
   ///Common
   static const pathLogin = "/api/Auth/login"; // POST
@@ -19,7 +21,9 @@ class ApiUrls {
   static const pathForgotPassword = "/commonapi/Common/forgot-password"; // POST
   static const pathVerifyOTP = "/commonapi/Common/verify-otp"; // POST
   static const pathResetPassword = "/commonapi/Common/reset-password"; // POST
+  static const pathSetPassword = "/api/Customer/configurePassword"; // POST
   static const pathRegisterToken = "/commonapi/Common/register-token"; // POST
+  static const pathSendOtp = "/commonapi/Common/send-otp"; // POST
 
   ///Customer
   static const pathCustomerRegister = "/api/Customer/CreateCustomer"; // POST
@@ -45,6 +49,8 @@ class ApiUrls {
   static const pathSiteVisitCustomerResponse = "/api/SiteVisit/CustomerResponse"; // POST
   static const pathPaymentDetail = "/api/JobPayment/GetPaymentdetails"; // POST
   static const pathCreatePayment = "/api/JobPayment/CreatePayment"; // POST
+  static const pathCreatePaymentIntent = "/api/payments/create-intent"; // POST
+  static const pathPaymentStatus = "/api/payments/status/"; // POST
 
   ///Vendor
   static const pathVendorRegister = "/api/Vendor/RegisterVendor"; // POST

@@ -104,6 +104,9 @@ class HistoryServiceCard extends StatelessWidget {
           child: CustomButton(
             text: "View Details",
             height: 35,
+            backgroundColor: AppColors.white,
+            borderColor: AppColors.primary,
+            textStyle: AppFonts.text14.regular.style,
             onPressed: () {
               Navigator.pushNamed(
                 context,

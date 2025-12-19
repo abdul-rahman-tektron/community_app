@@ -107,7 +107,7 @@ class CustomerRegistrationNotifier extends BaseChangeNotifier {
 
   Future<void> _handleRegisterSuccess(dynamic result, BuildContext context) async {
     ToastHelper.showSuccess('Registration Successful');
-    Navigator.of(context, rootNavigator: true).pushReplacementNamed(AppRoutes.login);
+    Navigator.of(context, rootNavigator: true).pushNamed(AppRoutes.registerVerification, arguments: emailController.text.trim());
   }
 
   void setLatLng(double lat, double lng) {
