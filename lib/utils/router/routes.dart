@@ -110,7 +110,7 @@ class AppRouter {
     Widget screen;
 
     switch (settings.name) {
-      // 🔐 Auth
+    // 🔐 Auth
       case AppRoutes.login:
         screen = const LoginScreen();
         break;
@@ -128,7 +128,7 @@ class AppRouter {
         screen = ResetPasswordScreen(email: email, otp: otp);
         break;
 
-        case AppRoutes.setPassword:
+      case AppRoutes.setPassword:
         final args = settings.arguments as Map<String, dynamic>? ?? {};
         final email = args['email'] as String?;
         final otp = args['otp'] as String?;
@@ -141,7 +141,7 @@ class AppRouter {
         screen = RegisterVerifyScreen(email: args);
         break;
 
-      // 🧑‍🔧 Vendor
+    // 🧑‍🔧 Vendor
       case AppRoutes.vendorRegistrationHandler:
         screen = const VendorRegistrationHandler();
         break;
@@ -207,7 +207,7 @@ class AppRouter {
         screen = ProgressUpdateScreen(jobId: jobId, customerId: customerId, status: status, reworkNotes: reworkNotes,);
         break;
 
-      // 👤 Customer
+    // 👤 Customer
       case AppRoutes.customerRegistrationHandler:
         screen = CustomerRegistrationHandler();
         break;
@@ -284,7 +284,7 @@ class AppRouter {
           jobId: jobId, vendorId: vendorId, vendorName: vendorName, serviceName: serviceName,);
         break;
 
-      // 🌐 Common
+    // 🌐 Common
       case AppRoutes.mapLocation:
         screen = SelectLocationMap();
         break;
@@ -314,12 +314,12 @@ class AppRouter {
         screen = ImageViewer(base64Image: args,);
         break;
 
-      // ❗ Error
+    // ❗ Error
       case AppRoutes.networkError:
         screen = const NetworkErrorScreen();
         break;
 
-      // Default
+    // Default
       default:
         screen = const NotFoundScreen();
     }
@@ -333,11 +333,11 @@ class AppRouter {
 }
 
 Widget defaultPageTransition(
-  BuildContext context,
-  Animation<double> animation,
-  Animation<double> secondaryAnimation,
-  Widget child,
-) {
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+    ) {
   return FadeTransition(
     opacity: animation,
     child: BackdropFilter(
