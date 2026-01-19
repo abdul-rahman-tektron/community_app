@@ -8,7 +8,7 @@ import 'package:Xception/utils/helpers/toast_helper.dart';
 import 'package:Xception/utils/router/routes.dart';
 import 'package:flutter/material.dart';
 
-class OtpVerificationNotifier extends BaseChangeNotifier {
+class RegisterVerifyNotifier extends BaseChangeNotifier {
   final int otpLength = 6;
 
   late List<TextEditingController> otpControllers;
@@ -20,15 +20,16 @@ class OtpVerificationNotifier extends BaseChangeNotifier {
 
   String? email;
 
-  OtpVerificationNotifier(this.email) {
-    _initOtpFields();
+  RegisterVerifyNotifier(this.email) {
+    _initOtpFields(email ?? "");
     _startResendCountdown();
   }
 
-  void _initOtpFields() {
+  void _initOtpFields(String email) {
+    apiSendOTP(email);
     otpControllers = List.generate(
       otpLength,
-      (index) => TextEditingController(),
+          (index) => TextEditingController(),
     );
     focusNodes = List.generate(otpLength, (index) => FocusNode());
   }
@@ -44,20 +45,6 @@ class OtpVerificationNotifier extends BaseChangeNotifier {
       FocusScope.of(
         focusNodes[index].context!,
       ).requestFocus(focusNodes[index - 1]);
-    }
-  }
-
-  Future<void> apiSendOTP(
-      String email,
-      ) async {
-    try {
-      await CommonRepository.instance
-          .apiSendOTP(SendOtpRequest(email: email));
-
-      // Optionally notify success here, or handle response
-    } catch (e) {
-      // Handle errors here, e.g., show Toast or dialog
-      debugPrint('Error changing password: $e');
     }
   }
 
@@ -79,10 +66,10 @@ class OtpVerificationNotifier extends BaseChangeNotifier {
   }
 
   Future<void> apiVerifyOTP(
-    BuildContext context,
-    String email,
-    String otp,
-  ) async {
+      BuildContext context,
+      String email,
+      String otp,
+      ) async {
     try {
       final parsed = await CommonRepository.instance
           .apiVerifyOTP(VerifyOtpRequest(email: email, otp: otp));
@@ -91,8 +78,8 @@ class OtpVerificationNotifier extends BaseChangeNotifier {
         ToastHelper.showSuccess("OTP verified  successfully");
         Navigator.pushNamed(
           context,
-          AppRoutes.resetPassword,
-          arguments: {"email" : email, "otp" : otp},
+          AppRoutes.setPassword,
+          arguments: {"email" : email, "otp" : otp, "userId" : parsed.userId},
         );
       } else {
         ToastHelper.showError("Incorrect OTP");
@@ -104,9 +91,22 @@ class OtpVerificationNotifier extends BaseChangeNotifier {
     }
   }
 
+  Future<void> apiSendOTP(
+      String email,
+      ) async {
+    try {
+      await CommonRepository.instance
+          .apiSendOTP(SendOtpRequest(email: email));
+
+      // Optionally notify success here, or handle response
+    } catch (e) {
+      // Handle errors here, e.g., show Toast or dialog
+      debugPrint('Error changing password: $e');
+    }
+  }
+
   void resendOtp() {
     apiSendOTP(email ?? "");
-    print("Resending OTP...");
     secondsRemaining = 30;
     isResendEnabled = false;
     notifyListeners();

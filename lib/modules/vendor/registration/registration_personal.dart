@@ -155,14 +155,14 @@ class VendorRegistrationPersonalScreen extends StatelessWidget {
             keyboardType: TextInputType.phone,
             validator: (value) => Validations.validateContact2(context, value),
           ),
-          15.verticalSpace,
-          CustomTextField(
-            controller: vendorRegistrationNotifier.passwordController,
-            fieldName: context.locale.password,
-            showAsterisk: true,
-            isPassword: true,
-            validator: (value) => Validations.validatePassword(context, value),
-          ),
+          // 15.verticalSpace,
+          // CustomTextField(
+          //   controller: vendorRegistrationNotifier.passwordController,
+          //   fieldName: context.locale.password,
+          //   showAsterisk: true,
+          //   isPassword: true,
+          //   validator: (value) => Validations.validatePassword(context, value),
+          // ),
           40.verticalSpace,
           CustomButton(
             text: context.locale.next,

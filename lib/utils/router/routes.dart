@@ -3,7 +3,9 @@ import 'dart:ui';
 // Auth
 import 'package:Xception/modules/auth/login/login_screen.dart';
 import 'package:Xception/modules/auth/otp_verification/otp_verification_screen.dart';
+import 'package:Xception/modules/auth/register_verify/register_verify_screen.dart';
 import 'package:Xception/modules/auth/reset_password/reset_password_screen.dart';
+import 'package:Xception/modules/auth/set_password/set_password_screen.dart';
 import 'package:Xception/modules/auth/user_role_selection/user_role_selection_screen.dart';
 import 'package:Xception/modules/common/about_us/about_us_screen.dart';
 import 'package:Xception/modules/common/change_password/change_password_screen.dart';
@@ -59,10 +61,12 @@ class AppRoutes {
   static const String editProfile = '/edit-profile';
   static const String otpVerification = '/otp-verification';
   static const String resetPassword = '/reset-password';
+  static const String setPassword = '/set-password';
   static const String savedCards = '/saved-cards';
   static const String privacyPolicy = '/privacy-policy';
   static const String aboutUs = '/about-us';
   static const String imageViewer = '/image-viewer';
+  static const String registerVerification = '/register-verification';
 
   /// 👤 Customer
   static const String customerRegistrationPersonal = '/customer-registration-personal';
@@ -106,7 +110,7 @@ class AppRouter {
     Widget screen;
 
     switch (settings.name) {
-      // 🔐 Auth
+    // 🔐 Auth
       case AppRoutes.login:
         screen = const LoginScreen();
         break;
@@ -124,7 +128,20 @@ class AppRouter {
         screen = ResetPasswordScreen(email: email, otp: otp);
         break;
 
-      // 🧑‍🔧 Vendor
+      case AppRoutes.setPassword:
+        final args = settings.arguments as Map<String, dynamic>? ?? {};
+        final email = args['email'] as String?;
+        final otp = args['otp'] as String?;
+        final userId = args['userId'] as String?;
+        screen = SetPasswordScreen(email: email, otp: otp, userId: userId,);
+        break;
+
+      case AppRoutes.registerVerification:
+        final args = settings.arguments as String?;
+        screen = RegisterVerifyScreen(email: args);
+        break;
+
+    // 🧑‍🔧 Vendor
       case AppRoutes.vendorRegistrationHandler:
         screen = const VendorRegistrationHandler();
         break;
@@ -190,7 +207,7 @@ class AppRouter {
         screen = ProgressUpdateScreen(jobId: jobId, customerId: customerId, status: status, reworkNotes: reworkNotes,);
         break;
 
-      // 👤 Customer
+    // 👤 Customer
       case AppRoutes.customerRegistrationHandler:
         screen = CustomerRegistrationHandler();
         break;
@@ -267,7 +284,7 @@ class AppRouter {
           jobId: jobId, vendorId: vendorId, vendorName: vendorName, serviceName: serviceName,);
         break;
 
-      // 🌐 Common
+    // 🌐 Common
       case AppRoutes.mapLocation:
         screen = SelectLocationMap();
         break;
@@ -297,12 +314,12 @@ class AppRouter {
         screen = ImageViewer(base64Image: args,);
         break;
 
-      // ❗ Error
+    // ❗ Error
       case AppRoutes.networkError:
         screen = const NetworkErrorScreen();
         break;
 
-      // Default
+    // Default
       default:
         screen = const NotFoundScreen();
     }
@@ -316,11 +333,11 @@ class AppRouter {
 }
 
 Widget defaultPageTransition(
-  BuildContext context,
-  Animation<double> animation,
-  Animation<double> secondaryAnimation,
-  Widget child,
-) {
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+    ) {
   return FadeTransition(
     opacity: animation,
     child: BackdropFilter(

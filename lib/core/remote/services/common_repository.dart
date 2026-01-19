@@ -12,6 +12,10 @@ import 'package:Xception/core/model/common/password/change_password_request.dart
 import 'package:Xception/core/model/common/password/reset_password_request.dart';
 import 'package:Xception/core/model/common/password/send_otp_request.dart';
 import 'package:Xception/core/model/common/password/verify_otp_request.dart';
+import 'package:Xception/core/model/common/password/verify_otp_response.dart';
+import 'package:Xception/core/model/common/send_otp/send_otp_response.dart';
+import 'package:Xception/core/model/common/set_password/set_password_request.dart';
+import 'package:Xception/core/model/common/set_password/set_password_response.dart';
 import 'package:Xception/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
 import 'package:Xception/core/remote/network/api_url.dart';
 import 'package:Xception/core/remote/network/base_repository.dart';
@@ -42,8 +46,8 @@ class CommonRepository extends BaseRepository {
 
     if (statusCode == HttpStatus.ok) {
       final loginTokenResponse = loginResponseFromJson(jsonEncode(data));
+      await SecureStorageService.setToken(loginTokenResponse.token ?? "");
       if (!isRegister) {
-        await SecureStorageService.setToken(loginTokenResponse.token ?? "");
         await HiveStorageService.setUserData(jsonEncode(loginTokenResponse));
 
         CrashlyticsService.setUser({
@@ -161,24 +165,31 @@ class CommonRepository extends BaseRepository {
       headers: buildHeaders(),
     );
 
-    final statusCode = response?.statusCode;
-    final data = response?.data;
+    // final statusCode = response?.statusCode;
+    // final data = response?.data;
 
-    if (statusCode == HttpStatus.ok) {
-      final commonBasicResponse = data;
-
-      return commonBasicResponse["isValid"];
+    if (response?.statusCode == HttpStatus.ok) {
+      final verifyOTPResponse = verifyOtpResponseFromJson(jsonEncode(response?.data));
+      return verifyOTPResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
     }
 
-    if (statusCode == HttpStatus.unauthorized) {
-      return ErrorResponse(title: "Invalid OTP");
-    }
-
-    if (statusCode == HttpStatus.internalServerError) {
-      return ErrorResponse(title: "Invalid OTP");
-    }
-
-    return ErrorResponse(title: "Something went wrong");
+    // if (statusCode == HttpStatus.ok) {
+    //   final commonBasicResponse = data;
+    //
+    //   return commonBasicResponse["isValid"];
+    // }
+    //
+    // if (statusCode == HttpStatus.unauthorized) {
+    //   return ErrorResponse(title: "Invalid OTP");
+    // }
+    //
+    // if (statusCode == HttpStatus.internalServerError) {
+    //   return ErrorResponse(title: "Invalid OTP");
+    // }
+    //
+    // return ErrorResponse(title: "Something went wrong");
   }
 
   Future<Object?> apiResetPassword(ResetPasswordRequest requestParams) async {
@@ -191,6 +202,43 @@ class CommonRepository extends BaseRepository {
 
     final statusCode = response?.statusCode;
     final data = response?.data;
+
+    if (statusCode == HttpStatus.ok) {
+      final commonBasicResponse = data;
+
+      return commonBasicResponse["message"];
+    }
+
+    if (statusCode == HttpStatus.unauthorized) {
+      return ErrorResponse(title: "Invalid Password");
+    }
+
+    if (statusCode == HttpStatus.internalServerError) {
+      return ErrorResponse(title: "Invalid Password Format");
+    }
+
+    return ErrorResponse(title: "Something went wrong");
+  }
+
+  Future<Object?> apiSetPassword(SetPasswordRequest requestParams) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.post,
+      pathUrl: ApiUrls.pathSetPassword,
+      body: jsonEncode(requestParams.toJson()),
+      headers: buildHeaders(token: token),
+    );
+
+    final statusCode = response?.statusCode;
+    final data = response?.data;
+
+    if (response?.statusCode == HttpStatus.ok) {
+      final setPasswordResponse = setPasswordResponseFromJson(jsonEncode(response?.data));
+      return setPasswordResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
 
     if (statusCode == HttpStatus.ok) {
       final commonBasicResponse = data;
@@ -242,6 +290,30 @@ class CommonRepository extends BaseRepository {
       final commonBasicResponse = commonBasicResponseFromJson(jsonEncode(data));
 
       return commonBasicResponse;
+    }
+
+    if (statusCode == HttpStatus.unauthorized) {
+      return ErrorResponse(title: "Invalid credentials");
+    }
+
+    return ErrorResponse.fromJson(data ?? {});
+  }
+
+  Future<Object?> apiSendOTP(SendOtpRequest requestParams) async {
+    final response = await networkRepository.call(
+      method: Method.post,
+      pathUrl: ApiUrls.pathSendOtp,
+      body: jsonEncode(requestParams.toJson()),
+      headers: buildHeaders(),
+    );
+
+    final statusCode = response?.statusCode;
+    final data = response?.data;
+
+    if (statusCode == HttpStatus.ok) {
+      final sendOtpResponse = sendOtpResponseFromJson(jsonEncode(data));
+
+      return sendOtpResponse;
     }
 
     if (statusCode == HttpStatus.unauthorized) {

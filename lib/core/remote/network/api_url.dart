@@ -19,7 +19,9 @@ class ApiUrls {
   static const pathForgotPassword = "/commonapi/Common/forgot-password"; // POST
   static const pathVerifyOTP = "/commonapi/Common/verify-otp"; // POST
   static const pathResetPassword = "/commonapi/Common/reset-password"; // POST
+  static const pathSetPassword = "/api/Customer/configurePassword"; // POST
   static const pathRegisterToken = "/commonapi/Common/register-token"; // POST
+  static const pathSendOtp = "/commonapi/Common/send-otp"; // POST
 
   ///Customer
   static const pathCustomerRegister = "/api/Customer/CreateCustomer"; // POST
