@@ -3,6 +3,7 @@ import 'package:Xception/res/colors.dart';
 import 'package:Xception/res/fonts.dart';
 import 'package:Xception/utils/helpers/dashed_border_container.dart';
 import 'package:Xception/utils/helpers/toast_helper.dart';
+import 'package:Xception/utils/helpers/validations.dart';
 import 'package:Xception/utils/widgets/custom_buttons.dart';
 import 'package:Xception/utils/widgets/custom_popup.dart';
 import 'package:Xception/utils/widgets/custom_textfields.dart';
@@ -72,7 +73,7 @@ class _AssignBottomSheetState extends State<AssignBottomSheet> {
                   );
                   Navigator.pop(context);
                 } else {
-                  ToastHelper.showError("Please enter name & phone");
+                  ToastHelper.showError("Please enter Employee Name & Mobile");
                 }
               },
             ),
@@ -89,12 +90,14 @@ class _AssignBottomSheetState extends State<AssignBottomSheet> {
         CustomTextField(
           controller: nameController,
           fieldName: "Employee Name",
+          validator: (value) => Validations.validateName(context, value),
         ),
         15.verticalSpace,
         CustomTextField(
           controller: phoneController,
           fieldName: "Employee Mobile Number",
           keyboardType: TextInputType.phone,
+          validator: (value) => Validations.validateMobile(context, value),
         ),
         if (widget.showEmiratesId) ...[ // <-- Conditional visibility
           15.verticalSpace,

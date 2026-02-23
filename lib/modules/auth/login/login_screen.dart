@@ -129,6 +129,7 @@ class LoginScreen extends StatelessWidget {
           30.verticalSpace,
           CustomButton(
             text: context.locale.login,
+            isLoading: loginNotifier.isLoading,
             onPressed: () => loginNotifier.performLogin(context),
           ),
           // 20.verticalSpace,
@@ -163,7 +164,9 @@ class LoginScreen extends StatelessWidget {
               ],
             ),
           ),
-          10.verticalSpace,
+          20.verticalSpace,
+          if (loginNotifier.appVersionText.isNotEmpty)
+            Text(loginNotifier.appVersionText, style: AppFonts.text14.regular.black.style),
           // Text.rich(
           //   textAlign: TextAlign.center,
           //   TextSpan(

@@ -59,14 +59,13 @@ class VendorDashboardScreen extends StatelessWidget {
               _buildServiceStatusPieChart(notifier),
               // 15.verticalSpace,
               // ratingWidget(notifier),
-              25.verticalSpace,
-              Text("Quick Actions", style: AppFonts.text16.semiBold.style.copyWith(
-                fontSize: ScreenSize.width < 380 ? 14 : 16,
-              ),),
-              10.verticalSpace,
-              buildQuickActions(context, notifier),
-              25.verticalSpace,
-
+              // 25.verticalSpace,
+              // Text("Quick Actions", style: AppFonts.text16.semiBold.style.copyWith(
+              //   fontSize: ScreenSize.width < 380 ? 14 : 16,
+              // ),),
+              // 10.verticalSpace,
+              // buildQuickActions(context, notifier),
+              // 25.verticalSpace,
               // Text("Alerts", style: AppFonts.text16.semiBold.style),
               // _buildAlertsList(notifier),
             ],
@@ -159,42 +158,71 @@ class VendorDashboardScreen extends StatelessWidget {
       ),
       itemBuilder: (context, index) {
         final stat = notifier.quickStats[index];
-        return Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-          decoration: AppStyles.commonDecoration,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 36.w,
-                    height: 36.w,
-                    decoration: BoxDecoration(
-                      color: stat.iconBgColor,
-                      borderRadius: BorderRadius.circular(8.r),
+        return InkWell(
+          onTap: () {
+            if(stat.label == "New Requests") {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.vendorBottomBar,
+                arguments: {"currentIndex": 1, "subCurrentIndex": 0},
+              );
+            } else if(stat.label == "Quotation Awaiting") {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.vendorBottomBar,
+                arguments: {"currentIndex": 1, "subCurrentIndex": 1},
+              );
+            } else if(stat.label == "Service In Progress") {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.vendorBottomBar,
+                arguments: {"currentIndex": 2, "subCurrentIndex": 0},
+              );
+            } else if(stat.label == "Payment Pending") {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.vendorBottomBar,
+                arguments: {"currentIndex": 2, "subCurrentIndex": 0, "isPayment": true},
+              );
+            }
+          },
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+            decoration: AppStyles.commonDecoration,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 36.w,
+                      height: 36.w,
+                      decoration: BoxDecoration(
+                        color: stat.iconBgColor,
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Icon(stat.icon, color: stat.iconColor, size: 20.w),
                     ),
-                    child: Icon(stat.icon, color: stat.iconColor, size: 20.w),
-                  ),
-                  15.horizontalSpace,
-                  Text(
-                    stat.count.toString(),
-                    style: AppFonts.text24.semiBold.style,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-              15.verticalSpace,
-              Text(
-                stat.label,
-                style: AppFonts.text12.regular.style.copyWith(
-                  fontSize: ScreenSize.width < 380 ? 10 : 12,
+                    15.horizontalSpace,
+                    Text(
+                      stat.count.toString(),
+                      style: AppFonts.text24.semiBold.style,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                15.verticalSpace,
+                Text(
+                  stat.label,
+                  style: AppFonts.text12.regular.style.copyWith(
+                    fontSize: ScreenSize.width < 380 ? 10 : 12,
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

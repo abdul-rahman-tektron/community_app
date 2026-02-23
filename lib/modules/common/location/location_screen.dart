@@ -2,6 +2,7 @@ import 'package:Xception/core/model/customer/map/map_data.dart';
 import 'package:Xception/modules/common/location/location_notifier.dart';
 import 'package:Xception/res/api_constants.dart';
 import 'package:Xception/res/fonts.dart';
+import 'package:Xception/utils/widgets/custom_app_bar.dart';
 import 'package:Xception/utils/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -29,9 +30,9 @@ class SelectLocationMap extends StatelessWidget {
       child: Consumer<LocationPickerNotifier>(
         builder: (context, n, _) {
           return Scaffold(
-            appBar: AppBar(
-              title: const Text('Select Location'),
-              elevation: 0.5,
+            appBar: CustomAppBar(
+              showBackButton: true,
+              showDrawer: false,
             ),
             body: Stack(
               children: [

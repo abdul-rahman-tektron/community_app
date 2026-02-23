@@ -17,4 +17,5 @@ class AppColors {
   static const blueColor = Colors.blue;
   static const transparent = Colors.transparent;
   static const shadowColor = Color(0xFFc5c5c5);
+  static const primaryShaded = Color(0xFF6F8FAF);
 }

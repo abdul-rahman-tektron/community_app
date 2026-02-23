@@ -40,6 +40,9 @@ class ProgressUpdateNotifier extends BaseChangeNotifier {
   JobPhase currentPhase = JobPhase.initiated;
   JobInfoDetailResponse _jobDetail = JobInfoDetailResponse();
 
+  bool isPrimaryActionLoading = false;   // Assign / Start / Submit
+  bool isSecondaryActionLoading = false; // Hold / Continue / Complete
+
   List<AssignedEmployee> assignedEmployees = [];
   String notes = '';
   List<PhotoPair> photoPairs = [];
@@ -64,6 +67,42 @@ class ProgressUpdateNotifier extends BaseChangeNotifier {
   }
 
   TextEditingController notesController = TextEditingController();
+
+  Future<void> runPrimary(Future<void> Function() action) async {
+    debugPrint("🔵 runPrimary CALLED | isPrimaryActionLoading = $isPrimaryActionLoading");
+
+    if (isPrimaryActionLoading) {
+      debugPrint("⛔ runPrimary BLOCKED (already loading)");
+      return;
+    }
+
+    isPrimaryActionLoading = true;
+    notifyListeners();
+
+    debugPrint("✅ runPrimary STARTED");
+
+    try {
+      await action();
+    } catch (e) {
+      debugPrint("❌ runPrimary ERROR: $e");
+    } finally {
+      isPrimaryActionLoading = false;
+      notifyListeners();
+      debugPrint("🟢 runPrimary FINISHED");
+    }
+  }
+
+  Future<void> runSecondary(Future<void> Function() action) async {
+    if (isSecondaryActionLoading) return;
+    isSecondaryActionLoading = true;
+    notifyListeners();
+    try {
+      await action();
+    } finally {
+      isSecondaryActionLoading = false;
+      notifyListeners();
+    }
+  }
 
   void addEmployee(String name, String phone, {File? emiratesId}) {
     assignedEmployees.add(AssignedEmployee(name: name, phone: phone, emiratesId: emiratesId));
@@ -100,41 +139,59 @@ class ProgressUpdateNotifier extends BaseChangeNotifier {
   }
 
   Future<void> apiUpdateJobStatus(int? statusId, {String? notes, bool? showToast}) async {
-    if (statusId == null) return;
-    try {
-      notifyListeners();
-      final parsed = await CommonRepository.instance.apiUpdateJobStatus(
-        UpdateJobStatusRequest(jobId: jobId, statusId: statusId, notes: notes, createdBy: userData?.name ?? "", vendorId: userData?.customerId ?? 0),
-      );
+      if (statusId == null) return;
+      try {
+        notifyListeners();
+        final parsed = await CommonRepository.instance.apiUpdateJobStatus(
+          UpdateJobStatusRequest(jobId: jobId,
+              statusId: statusId,
+              notes: notes,
+              createdBy: userData?.name ?? "",
+              vendorId: userData?.customerId ?? 0),
+        );
 
-      if (parsed is CommonResponse && parsed.success == true) {
-        currentStatus = AppStatus.fromId(statusId)?.name;
-        updatePhaseFromStatus(AppStatus.fromId(statusId));
-        if(showToast ?? false) ToastHelper.showSuccess("Status updated to: ${AppStatus.fromName(currentStatus ?? "")?.name ?? ""}");
+        if (parsed is CommonResponse && parsed.success == true) {
+          currentStatus = AppStatus
+              .fromId(statusId)
+              ?.name;
+          updatePhaseFromStatus(AppStatus.fromId(statusId));
+          if (showToast ?? false) {
+            ToastHelper.showSuccess("Status updated to: ${AppStatus
+              .fromName(currentStatus ?? "")
+              ?.name ?? ""}");
+          }
+        }
+      } catch (e) {
+        // ToastHelper.showError('Error updating status: $e');
+      } finally {
+        notifyListeners();
       }
-    } catch (e) {
-      // ToastHelper.showError('Error updating status: $e');
-    } finally {
-      notifyListeners();
-    }
   }
 
   Future<void> assignEmployees(BuildContext context) async {
-    if (assignedEmployees.isEmpty) {
-      ToastHelper.showError("Please add at least one employee");
-      return;
-    }
+    await runPrimary(() async {
+      if (assignedEmployees.isEmpty) {
+        ToastHelper.showError("Please add at least one employee");
+        return;
+      }
 
-    final List<AssignEmployeeList> employeeList = await Future.wait(
-      assignedEmployees.map((e) async {
-        final base64Id = e.emiratesId != null ? await e.emiratesId!.toBase64() : null;
-        return AssignEmployeeList(employeeName: e.name, employeePhoneNumber: e.phone, emiratesIdPhoto: base64Id);
-      }),
-    );
+      final List<AssignEmployeeList> employeeList = await Future.wait(
+        assignedEmployees.map((e) async {
+          final base64Id = e.emiratesId != null ? await e.emiratesId!.toBase64() : null;
+          return AssignEmployeeList(
+            employeeName: e.name,
+            employeePhoneNumber: e.phone,
+            emiratesIdPhoto: base64Id,
+          );
+        }),
+      );
 
-    final request = AssignEmployeeRequest(jobId: jobId, customerId: customerId ?? 0, assignEmployeeList: employeeList);
+      final request = AssignEmployeeRequest(
+        jobId: jobId,
+        customerId: customerId ?? 0,
+        assignEmployeeList: employeeList,
+      );
 
-    try {
       final response = await VendorJobsRepository.instance.apiAssignEmployee(request);
 
       if (response is CommonResponse && response.success == true) {
@@ -144,53 +201,112 @@ class ProgressUpdateNotifier extends BaseChangeNotifier {
       } else {
         ToastHelper.showError("Something went wrong, please try again.");
       }
-    } catch (e) {
-      ToastHelper.showError("Failed to assign employees: $e");
-    }
+    });
   }
 
+  // Future<void> submitJobCompletion(BuildContext context) async {
+  //   await runPrimary(() async {
+  //     if (!canSubmit) {
+  //       ToastHelper.showError("Please complete all required fields and photos.");
+  //       return;
+  //     }
+  //
+  //     try {
+  //       List<JobCompletionPhotoPair> encodedPhotoPairs = [];
+  //
+  //       for (var pair in photoPairs) {
+  //         final beforeBase64 = base64Encode(await pair.before.readAsBytes());
+  //
+  //         // If the job is still initiated, send empty afterPhoto
+  //         final afterBase64 = currentPhase == JobPhase.initiated
+  //             ? "" // empty string
+  //             : pair.after != null
+  //             ? base64Encode(await pair.after!.readAsBytes())
+  //             : null; // optional for safety
+  //
+  //         encodedPhotoPairs.add(JobCompletionPhotoPair(
+  //           beforePhoto: beforeBase64,
+  //           afterPhoto: afterBase64,
+  //         ));
+  //       }
+  //
+  //
+  //
+  //       final response = await VendorJobsRepository.instance.apiJobCompletion(request);
+  //
+  //       if (response is CommonResponse && (response.success ?? false)) {
+  //         ToastHelper.showSuccess("Job completion submitted successfully.");
+  //       } else {
+  //         ToastHelper.showError(response is CommonResponse
+  //             ? response.message ?? ""
+  //             : "Failed to submit job completion.");
+  //       }
+  //     } catch (e) {
+  //       ToastHelper.showError("Error submitting job completion: $e");
+  //     }
+  //   });
+  // }
+
   Future<void> submitJobCompletion(BuildContext context) async {
-    if (!canSubmit) {
-      ToastHelper.showError("Please complete all required fields and photos.");
-      return;
-    }
+    debugPrint("🟡 submitJobCompletion CALLED");
 
-    try {
-      List<JobCompletionPhotoPair> encodedPhotoPairs = [];
+      debugPrint("🟢 submitJobCompletion ENTERED runPrimary");
 
-      for (var pair in photoPairs) {
-        final beforeBase64 = base64Encode(await pair.before.readAsBytes());
-
-        // If the job is still initiated, send empty afterPhoto
-        final afterBase64 = currentPhase == JobPhase.initiated
-            ? "" // empty string
-            : pair.after != null
-            ? base64Encode(await pair.after!.readAsBytes())
-            : null; // optional for safety
-
-        encodedPhotoPairs.add(JobCompletionPhotoPair(
-          beforePhoto: beforeBase64,
-          afterPhoto: afterBase64,
-        ));
+      if (!canSubmit) {
+        debugPrint("⛔ submitJobCompletion FAILED canSubmit");
+        ToastHelper.showError("Please complete all required fields and photos.");
+        return;
       }
 
-      final request = JobCompletionRequest(
-        jobId: jobId,
-        createdBy: "CurrentUser",
-        photoPairs: encodedPhotoPairs,
-        notes: notes.trim(),
-      );
+      try {
+        debugPrint("📸 Encoding photo pairs...");
 
-      final response = await VendorJobsRepository.instance.apiJobCompletion(request);
+        List<JobCompletionPhotoPair> encodedPhotoPairs = [];
 
-      if (response is CommonResponse && (response.success ?? false)) {
-        ToastHelper.showSuccess("Job completion submitted successfully.");
-      } else {
-        ToastHelper.showError(response is CommonResponse ? response.message ?? "" : "Failed to submit job completion.");
+        for (var pair in photoPairs) {
+          final beforeBase64 = base64Encode(await pair.before.readAsBytes());
+
+          final afterBase64 = currentPhase == JobPhase.initiated
+              ? ""
+              : pair.after != null
+              ? base64Encode(await pair.after!.readAsBytes())
+              : null;
+
+          encodedPhotoPairs.add(
+            JobCompletionPhotoPair(
+              beforePhoto: beforeBase64,
+              afterPhoto: afterBase64,
+            ),
+          );
+        }
+
+        final request = JobCompletionRequest(
+          jobId: jobId,
+          createdBy: userData?.name ?? "",
+          photoPairs: encodedPhotoPairs,
+          notes: notes.trim(),
+        );
+
+        debugPrint("🚀 Calling apiJobCompletion");
+
+        final response =
+        await VendorJobsRepository.instance.apiJobCompletion(request);
+
+        debugPrint("📥 apiJobCompletion RESPONSE = $response");
+
+        if (response is CommonResponse && (response.success ?? false)) {
+          ToastHelper.showSuccess("Job completion submitted successfully.");
+        } else {
+          ToastHelper.showError(
+            response is CommonResponse
+                ? response.message ?? ""
+                : "Failed to submit job completion.",
+          );
+        }
+      } catch (e) {
+        debugPrint("❌ submitJobCompletion ERROR: $e");
+        ToastHelper.showError("Error submitting job completion: $e");
       }
-    } catch (e) {
-      ToastHelper.showError("Error submitting job completion: $e");
-    }
   }
 
   Future<void> loadJobCompletionDetails() async {

@@ -9,7 +9,8 @@ import 'package:provider/provider.dart';
 
 class JobsScreen extends StatelessWidget {
   final int? currentIndex;
-  const JobsScreen({super.key, this.currentIndex = 0});
+  final bool? isPayment;
+  const JobsScreen({super.key, this.currentIndex = 0, this.isPayment = false});
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +82,6 @@ class JobsScreen extends StatelessWidget {
   }
 
   Widget tabBarView(BuildContext context, JobsNotifier jobsNotifier) {
-    return Expanded(child: TabBarView(children: [ OngoingServiceScreen(), JobHistoryScreen()]));
+    return Expanded(child: TabBarView(children: [ OngoingServiceScreen(isPayment: isPayment,), JobHistoryScreen()]));
   }
 }

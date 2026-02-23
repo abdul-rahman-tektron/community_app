@@ -51,6 +51,7 @@ class SortMeta {
 class ExploreNotifier extends BaseChangeNotifier {
   final searchController = TextEditingController();
   final serviceController = TextEditingController();
+  final scrollController = ScrollController();
 
   List<ExploreServiceData> exploreServices = [];
   List<ServiceDropdownData> serviceDropdownData = [];
@@ -61,68 +62,112 @@ class ExploreNotifier extends BaseChangeNotifier {
   RangeValues? selectedPriceRange;
   DistanceFilter? selectedDistance;
 
-  Timer? _debounce; // 👈 debounce timer
+  Timer? _debounce;
+
+  // ✅ Pagination state
+  int _pageNumber = 1;
+  final int _pageSize = 10;
+  bool hasMore = true;
+  bool isLoadingMore = false;
 
   ExploreNotifier({String? initialCategory}) {
     selectedCategoryId = int.tryParse(initialCategory ?? "");
     initializeData();
-    searchController.addListener(() {
-      _onSearchChanged();
-    });
+
+    searchController.addListener(_onSearchChanged);
+
+    // ✅ Listen scroll for lazy load
+    scrollController.addListener(_onScroll);
   }
 
   Future<void> initializeData() async {
-    await Future.wait([apiServiceDropdown(), fetchExploreServices()]);
+    await Future.wait([apiServiceDropdown(), fetchExploreServices(reset: true)]);
+  }
+
+  void _onScroll() {
+    if (!hasMore || isLoadingMore || isLoading) return;
+
+    // load when user reaches near bottom
+    final trigger = scrollController.position.maxScrollExtent - 200;
+    if (scrollController.position.pixels >= trigger) {
+      fetchExploreServices(loadMore: true);
+    }
   }
 
   void _onSearchChanged() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      fetchExploreServices(search: searchController.text);
+      fetchExploreServices(
+        reset: true,
+        search: searchController.text.trim().isEmpty ? null : searchController.text.trim(),
+      );
     });
   }
 
-  /// Call API with filters
   Future<void> fetchExploreServices({
     String? search,
+    bool reset = false,
+    bool loadMore = false,
   }) async {
     try {
-      isLoading = true;
-      exploreServices.clear();
-      notifyListeners();
+      // ✅ decide page
+      if (reset) {
+        _pageNumber = 1;
+        hasMore = true;
+        exploreServices.clear();
+        isLoading = true;
+        notifyListeners();
+      } else if (loadMore) {
+        if (!hasMore) return;
+        isLoadingMore = true;
+        notifyListeners();
+      } else {
+        // normal fetch (no reset, no loadMore)
+        _pageNumber = 1;
+        hasMore = true;
+        exploreServices.clear();
+        isLoading = true;
+        notifyListeners();
+      }
 
       final response = await CustomerExploreRepository.instance.apiExploreService(
         search: search,
+        pageNumber: _pageNumber,
+        pageSize: _pageSize,
         sortBy: _mapSortToApi(selectedSortOption),
-        // ✅ Only send if not full default range
         minPrice: (selectedPriceRange != null && selectedPriceRange!.start > 0)
             ? selectedPriceRange!.start.toInt()
             : null,
         maxPrice: (selectedPriceRange != null && selectedPriceRange!.end < 2000)
             ? selectedPriceRange!.end.toInt()
             : null,
-        serviceId: selectedCategory != 'All'
-            ? selectedCategoryId
-            : null,
+        serviceId: selectedCategory != 'All' ? selectedCategoryId : null,
       );
 
       if (response is ExploreServiceResponse && response.success == true) {
-        exploreServices = response.data ?? [];
+        final newItems = response.data ?? [];
+
+        // ✅ append for loadMore, replace for reset already cleared
+        exploreServices.addAll(newItems);
+
+        // ✅ if API returned less than pageSize -> no more pages
+        hasMore = newItems.length == _pageSize;
+
+        if (hasMore) _pageNumber++; // ✅ next page
       } else {
-        exploreServices = [];
+        hasMore = false;
       }
     } catch (e, stack) {
-      print("Error fetching explore jobs: $e");
-      print("Error fetching explore jobs: $stack");
-      exploreServices = [];
+      debugPrint("Error fetching explore jobs: $e");
+      debugPrint("$stack");
+      hasMore = false;
     } finally {
       isLoading = false;
+      isLoadingMore = false;
       notifyListeners();
     }
   }
 
-
-  /// Update filters and fetch API
   void updateFilters({
     String? category,
     RangeValues? priceRange,
@@ -132,7 +177,7 @@ class ExploreNotifier extends BaseChangeNotifier {
     if (priceRange != null) selectedPriceRange = priceRange;
     if (distance != null) selectedDistance = distance;
 
-    fetchExploreServices();
+    fetchExploreServices(reset: true, search: searchController.text.trim().isEmpty ? null : searchController.text.trim());
   }
 
   void clearFilters() {
@@ -142,10 +187,9 @@ class ExploreNotifier extends BaseChangeNotifier {
     selectedSortOption = null;
     serviceController.clear();
     searchController.clear();
-    fetchExploreServices();
+    fetchExploreServices(reset: true);
   }
 
-  /// Updates sorting option and fetches API
   void updateSortOption(SortOption option) {
     final isSameType = selectedSortOption?.type == option.type;
     final isTogglable = _isSortTypeTogglable(option.type);
@@ -159,10 +203,9 @@ class ExploreNotifier extends BaseChangeNotifier {
       selectedSortOption = SortOption(type: option.type, ascending: true);
     }
 
-    fetchExploreServices();
+    fetchExploreServices(reset: true, search: searchController.text.trim().isEmpty ? null : searchController.text.trim());
   }
 
-  /// Map SortOption -> API param
   String? _mapSortToApi(SortOption? option) {
     if (option == null) return null;
     switch (option.type) {
@@ -175,20 +218,14 @@ class ExploreNotifier extends BaseChangeNotifier {
     }
   }
 
-  bool _isSortTypeTogglable(SortType type) {
-    return type == SortType.price || type == SortType.rating;
-  }
+  bool _isSortTypeTogglable(SortType type) => type == SortType.price || type == SortType.rating;
 
-  //Service dropdown Api call
   Future<void> apiServiceDropdown() async {
     try {
       final result = await CommonRepository.instance.apiServiceDropdown();
-
       if (result is List<ServiceDropdownData>) {
         serviceDropdownData = result;
         notifyListeners();
-      } else {
-        debugPrint("Unexpected result type from apiServiceDropDown");
       }
     } catch (e) {
       debugPrint("Error in apiServiceDropdown: $e");
@@ -200,6 +237,7 @@ class ExploreNotifier extends BaseChangeNotifier {
     _debounce?.cancel();
     searchController.dispose();
     serviceController.dispose();
+    scrollController.dispose();
     super.dispose();
   }
 }

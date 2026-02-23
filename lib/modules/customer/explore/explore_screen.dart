@@ -97,7 +97,8 @@ class ExploreScreen extends StatelessWidget {
                     } else {
                       // ✅ Services Grid
                       return GridView.builder(
-                        itemCount: exploreNotifier.exploreServices.length,
+                        controller: exploreNotifier.scrollController, // ✅ important
+                        itemCount: exploreNotifier.exploreServices.length + (exploreNotifier.isLoadingMore ? 2 : 0),
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           crossAxisSpacing: 20,
@@ -105,6 +106,11 @@ class ExploreScreen extends StatelessWidget {
                           childAspectRatio: 1,
                         ),
                         itemBuilder: (context, index) {
+                          // ✅ show loader tiles at end
+                          if (index >= exploreNotifier.exploreServices.length) {
+                            return const Center(child: LottieLoader());
+                          }
+
                           final service = exploreNotifier.exploreServices[index];
                           return _buildServiceCard(context, service);
                         },

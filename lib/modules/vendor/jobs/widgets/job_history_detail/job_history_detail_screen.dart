@@ -300,7 +300,7 @@ class JobHistoryDetailScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text("Total Amount", style: AppFonts.text16.semiBold.style),
-        Text("AED ${notifier.vendorHistoryDetailData?.jobDetail?.totalAmount?.toStringAsFixed(2) ?? ""}", style: AppFonts.text16.semiBold.red.style),
+        Text("AED ${notifier.grandTotal(notifier.paymentDetail.lineItems ?? []) ?? ""}", style: AppFonts.text16.semiBold.red.style),
       ],
     );
   }

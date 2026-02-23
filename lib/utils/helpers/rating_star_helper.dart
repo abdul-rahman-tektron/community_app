@@ -34,7 +34,8 @@ class RatingStarHelper {
     if (rating >= 4.0) return "Very Good";
     if (rating >= 3.0) return "Good";
     if (rating >= 2.0) return "Average";
-    return "Poor";
+    if (rating >= 1.0) return "Average";
+    return "-";
   }
 
   static Color getStatusColor(double rating) {
@@ -42,6 +43,7 @@ class RatingStarHelper {
     if (rating >= 4.0) return Colors.green.shade500;
     if (rating >= 3.0) return Colors.orange.shade600;
     if (rating >= 2.0) return Colors.orange.shade800;
-    return Colors.red.shade600;
+    if (rating >= 1.0) return Colors.red.shade600;
+    return Colors.grey.shade600;
   }
 }

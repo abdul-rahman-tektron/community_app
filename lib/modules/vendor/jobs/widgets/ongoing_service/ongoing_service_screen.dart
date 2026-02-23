@@ -9,12 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class OngoingServiceScreen extends StatelessWidget {
-  const OngoingServiceScreen({super.key});
+  final bool? isPayment;
+  const OngoingServiceScreen({super.key, this.isPayment = false});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => OngoingServiceNotifier(),
+      create: (_) => OngoingServiceNotifier(isPayment),
       child: Consumer<OngoingServiceNotifier>(
         builder: (context, notifier, _) {
           return CustomRefreshIndicator(
@@ -41,10 +42,27 @@ class OngoingServiceScreen extends StatelessWidget {
     final sortedJobs = [...notifier.ongoingJobs]
       ..sort((a, b) => (b.jobId ?? 0).compareTo(a.jobId ?? 0));
 
+    // ✅ Filter if payment mode
+    final visibleJobs = notifier.isPayment
+        ? sortedJobs.where((job) {
+      final st = (job.status ?? '').toLowerCase();
+      print("st Data");
+      print(st);
+      return st == 'work completed - awaiting confirmation' || st.contains('work completed');
+    }).toList()
+        : sortedJobs;
+
+    // ✅ Empty state based on filtered list
+    if (visibleJobs.isEmpty) {
+      return Center(
+        child: Text(notifier.isPayment ? "No pending payments." : "No ongoing jobs."),
+      );
+    }
+
     return ListView.builder(
-      itemCount: sortedJobs.length,
+      itemCount: visibleJobs.length,
       itemBuilder: (context, index) {
-        final job = sortedJobs[index];
+        final job = visibleJobs[index];
 
         final status = AppStatus.fromName(job.status ?? "");
 

@@ -5,6 +5,7 @@ import 'package:Xception/res/fonts.dart';
 import 'package:Xception/res/styles.dart';
 import 'package:Xception/utils/extensions.dart';
 import 'package:Xception/utils/helpers/common_utils.dart';
+import 'package:Xception/utils/helpers/toast_helper.dart';
 import 'package:Xception/utils/widgets/custom_app_bar.dart';
 import 'package:Xception/utils/widgets/custom_buttons.dart';
 import 'package:Xception/utils/widgets/custom_checkbox.dart';
@@ -51,13 +52,13 @@ class PaymentScreen extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 5.h),
               child: Divider(),
             ),
-            if (paymentNotifier.selectedPaymentMethod?.isCard ?? false)
-              buildCardDetails(context, paymentNotifier),
-            if (paymentNotifier.selectedPaymentMethod?.isCard ?? false)
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 5.h),
-                child: Divider(),
-              ),
+            // if (paymentNotifier.selectedPaymentMethod?.isCard ?? false)
+            //   buildCardDetails(context, paymentNotifier),
+            // if (paymentNotifier.selectedPaymentMethod?.isCard ?? false)
+            //   Padding(
+            //     padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 5.h),
+            //     child: Divider(),
+            //   ),
             buildContactInfo(context, paymentNotifier),
             buildTermsAndConditions(context, paymentNotifier),
             buildPayButton(context, paymentNotifier),
@@ -205,7 +206,7 @@ class PaymentScreen extends StatelessWidget {
       items.fold<num>(0, (s, it) => s + _linePreVat(it));
 
   num _vatFromItems(List<LineItem> items) =>
-      items.fold<num>(0, (s, it) => s + (it.vat ?? 0));
+      items.fold<num>(0, (s, it) => s + (_linePreVat(it) * 0.05 ?? 0));
 
   Widget buildPromoCodeField(BuildContext context, PaymentNotifier notifier) {
     return Padding(
@@ -267,12 +268,8 @@ class PaymentScreen extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       Expanded(child: Text(method.name, style: AppFonts.text14.regular.style)),
-                      if (method.iconUrls != null)
-                        Row(
-                          children: method.iconUrls!.map((icon) {
-                            return Image.asset(icon, width: 50, fit: BoxFit.contain);
-                          }).toList(),
-                        ),
+                      if (method.iconUrl != null)
+                        Image.asset(method.iconUrl!, width: 50, fit: BoxFit.contain),
                     ],
                   ),
                 ),
@@ -417,20 +414,23 @@ class PaymentScreen extends StatelessWidget {
   String money(num? v) => _aed.format((v ?? 0).toDouble());
 
   Widget buildPayButton(BuildContext context, PaymentNotifier notifier) {
-    final items  = notifier.paymentDetail.lineItems ?? const <LineItem>[];
-    final subTotal = _subTotalFromItems(items);
-    final vatTotal = _vatFromItems(items);
-    final grand    = subTotal + vatTotal;
+    final grand = notifier.calculateGrandTotal();
 
     return Padding(
       padding: EdgeInsets.all(15.w),
       child: CustomButton(
         isLoading: notifier.isLoading,
         onPressed: () async {
-          notifier.apiCreatePayment(context, overrideGrandTotal: grand.toDouble());
+          if (notifier.selectedPaymentMethod == null) {
+            ToastHelper.showError("Please select a payment method.");
+            return;
+          }
+
+          await notifier.makePayment(context, overrideGrandTotal: grand);
         },
         text: "PAY ${money(grand)}",
       ),
     );
   }
 }
+

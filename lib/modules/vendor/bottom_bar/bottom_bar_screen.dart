@@ -12,12 +12,13 @@ import 'package:provider/provider.dart';
 class VendorBottomScreen extends StatelessWidget {
   final int? currentIndex;
   final int? subCurrentIndex;
-  const VendorBottomScreen({super.key, this.currentIndex = 0, this.subCurrentIndex = 0});
+  final bool? isPayment;
+  const VendorBottomScreen({super.key, this.currentIndex = 0, this.subCurrentIndex = 0, this.isPayment = false});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => VendorBottomBarNotifier(currentIndex, subCurrentIndex),
+      create: (context) => VendorBottomBarNotifier(currentIndex, subCurrentIndex, isPayment),
       child: Consumer<VendorBottomBarNotifier>(
         builder: (context, vendorBottomBarNotifier, child) {
           return buildBody(context, vendorBottomBarNotifier);

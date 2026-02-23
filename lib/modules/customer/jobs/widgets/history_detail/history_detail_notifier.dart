@@ -116,14 +116,34 @@ class HistoryDetailNotifier extends BaseChangeNotifier {
     return (it.rate ?? 0) * q;                       // fallback: rate * qty
   }
 
-  num _lineVat(LineItem it) => (it.vat ?? 0);
+  num _lineVat(LineItem it) {
+    final q = it.quantity ?? 0;
+    print('Quantity: $q');
+
+    if (q == 0) {
+      final vat = it.rate ?? 0;
+      print('Quantity is 0 → using rate as VAT: $vat');
+      return vat * 0.05;
+    }
+
+    if (it.amount != null) {
+      print('Amount is not null → using amount as VAT: ${it.amount}');
+      return it.amount! * 0.05;
+    }
+
+    final rate = it.rate ?? 0;
+    final vat = (rate * q) * 0.05;
+    print('Calculated VAT → rate: $rate, quantity: $q, VAT: $vat');
+
+    return vat;
+  }
 
   num _lineTotal(LineItem it) => _linePreVat(it) + _lineVat(it);
 
 // Totals
   num _subTotal(Iterable<LineItem> items) => items.fold<num>(0, (s, it) => s + _linePreVat(it));
   num _vatTotal(Iterable<LineItem> items) => items.fold<num>(0, (s, it) => s + _lineVat(it));
-  num _grandTotal(Iterable<LineItem> items) => _subTotal(items) + _vatTotal(items);
+  num grandTotal(Iterable<LineItem> items) => _subTotal(items) + _vatTotal(items);
 
 
   Future<Uint8List> generateInvoicePdf() async {

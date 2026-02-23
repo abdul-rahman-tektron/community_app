@@ -1,3 +1,4 @@
+import 'package:Xception/utils/widgets/custom_refresh_indicator.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:Xception/core/model/common/dropdown/service_dropdown_response.dart';
 import 'package:Xception/modules/customer/dashboard/dashboard_notifier.dart';
@@ -32,7 +33,7 @@ class CustomerDashboardScreen extends StatelessWidget {
 
   Widget buildBody(BuildContext context, CustomerDashboardNotifier notifier) {
     return Scaffold(
-      body: RefreshIndicator(
+      body: CustomRefreshIndicator(
         onRefresh: () async {
           await notifier.initializeData();
         },
@@ -74,7 +75,7 @@ class CustomerDashboardScreen extends StatelessWidget {
                     _buildCategoryChips(context, notifier),
                     20.verticalSpace,
                     // _buildHeader("Quick Access"),
-                    _buildQuickActions(context, notifier),
+                    // _buildQuickActions(context, notifier),
                   ],
                 ),
               ],
@@ -241,44 +242,57 @@ class CustomerDashboardScreen extends StatelessWidget {
       itemCount: notifier.quickStats.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 2 / 1,
+        childAspectRatio: 2.3 / 1,
         crossAxisSpacing: 12.w,
         mainAxisSpacing: 12.h,
       ),
       itemBuilder: (context, index) {
         final stat = notifier.quickStats[index];
-        return Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-          decoration: AppStyles.commonDecoration,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 36.w,
-                height: 36.w,
-                decoration: BoxDecoration(
-                  color: stat.iconBgColor,
-                  borderRadius: BorderRadius.circular(8.r),
+        return InkWell(
+          onTap: () {
+            if(stat.label == "Ongoing Service") {
+              Navigator.pushNamed(context, AppRoutes.customerBottomBar,  arguments: {"currentIndex": 2, "subCurrentIndex": 0},);
+            } else if(stat.label == "Completed Service") {
+              Navigator.pushNamed(context, AppRoutes.customerBottomBar,  arguments: {"currentIndex": 2, "subCurrentIndex": 1},);
+            } else if(stat.label == "Pending Quotation") {
+              Navigator.pushNamed(context, AppRoutes.quotationRequestList);
+            } else if(stat.label == "Pending Payments") {
+              Navigator.pushNamed(context, AppRoutes.customerBottomBar,  arguments: {"currentIndex": 2, "subCurrentIndex": 0, "isPayment": true},);
+            }
+          },
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
+            decoration: AppStyles.commonDecoration,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 36.w,
+                  height: 36.w,
+                  decoration: BoxDecoration(
+                    color: stat.iconBgColor,
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Icon(stat.icon, color: stat.iconColor, size: 20.w),
                 ),
-                child: Icon(stat.icon, color: stat.iconColor, size: 20.w),
-              ),
-              15.horizontalSpace,
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      stat.count.toString(),
-                      style: AppFonts.text18.semiBold.style,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    2.verticalSpace,
-                    Text(stat.label, style: AppFonts.text14.regular.style),
-                  ],
+                15.horizontalSpace,
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if(stat.count != "") Text(
+                        stat.count.toString(),
+                        style: AppFonts.text17.semiBold.style,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if(stat.count == "") 2.verticalSpace,
+                      Text(stat.label, style: AppFonts.text14.regular.style),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

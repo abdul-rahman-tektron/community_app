@@ -151,14 +151,15 @@ class AddQuotationNotifier extends BaseChangeNotifier {
         startDate: DateTime.now(),
         endDate: DateTime.now(),
         quotationDetails: notesController.text,
-        quotationAmount: grandTotal.toInt(),
+        quotationAmount: grandTotal,
         createdBy: userData?.name ?? "", // Can be dynamic
         status: "Submitted",
         jobQuotationResponseItems: quotationItems.map((item) {
+          final unitPrice = double.tryParse(item.unitPriceController.text) ?? 0.0;
           return JobQuotationResponseItem(
             product: item.productController.text,
             quantity: int.tryParse(item.qtyController.text) ?? 0,
-            price: int.tryParse(item.unitPriceController.text) ?? 0,
+            price: unitPrice.round(),
             totalAmount: (item.lineTotal).toInt(),
           );
         }).toList(),

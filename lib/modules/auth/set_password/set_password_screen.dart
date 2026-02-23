@@ -1,4 +1,3 @@
-import 'package:Xception/modules/auth/reset_password/reset_password_notifier.dart';
 import 'package:Xception/modules/auth/set_password/set_password_notifier.dart';
 import 'package:Xception/res/fonts.dart';
 import 'package:Xception/utils/enums.dart';
@@ -32,7 +31,7 @@ class SetPasswordScreen extends StatelessWidget {
 
   Widget buildBody(BuildContext context, SetPasswordNotifier notifier) {
     return Scaffold(
-      appBar: CustomAppBar(),
+      appBar: CustomAppBar(showBackButton: false,),
       drawer: CustomDrawer(),
       body: SingleChildScrollView(
         child: Padding(
@@ -67,12 +66,12 @@ class SetPasswordScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Reset Password",
+          "Set Password",
           style: AppFonts.text24.regular.style,
         ),
         10.verticalSpace,
         Text(
-          "Enter and confirm your new password to complete the reset process.",
+          "Enter and confirm your password to complete the process.",
           style: AppFonts.text14.regular.style,
         ),
       ],

@@ -5,18 +5,26 @@ import 'package:Xception/utils/widgets/custom_app_bar.dart';
 import 'package:Xception/utils/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 
 class BookingConfirmationScreen extends StatelessWidget {
-  final String bookingId;
+  final String? bookingId;
+  final String? email;
+  final String? bookingDate;
 
-  const BookingConfirmationScreen({super.key, required this.bookingId});
+  const BookingConfirmationScreen({
+    super.key,
+    required this.bookingId,
+    required this.email,
+    required this.bookingDate,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: CustomAppBar(showBackButton: false,),
+        appBar: CustomAppBar(showBackButton: false),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -30,7 +38,7 @@ class BookingConfirmationScreen extends StatelessWidget {
                 15.verticalSpace,
                 _buildDeliveryMessage(),
                 15.verticalSpace,
-                _buildServiceIdBox(bookingId),
+                _buildServiceIdBox(bookingId ?? ""),
                 15.verticalSpace,
                 _buildInfoText(),
                 50.verticalSpace,
@@ -50,10 +58,7 @@ class BookingConfirmationScreen extends StatelessWidget {
 
   /// "Thank You!" Heading
   Widget _buildThankYouMessage() {
-    return Text(
-      'Thank You for Booking!',
-      style: AppFonts.text24.semiBold.style,
-    );
+    return Text('Thank You for Booking!', style: AppFonts.text24.semiBold.style);
   }
 
   /// Service request confirmation message
@@ -64,13 +69,38 @@ class BookingConfirmationScreen extends StatelessWidget {
         style: AppFonts.text16.regular.style,
         children: [
           TextSpan(
-            text: 'Mon, April 5th',
+            text: formatBookingDate(bookingDate ?? ""),
             style: AppFonts.text16.semiBold.style,
           ),
         ],
       ),
       textAlign: TextAlign.center,
     );
+  }
+
+  String formatBookingDate(String bookingDate) {
+    final date = DateTime.parse(bookingDate);
+
+    final weekday = DateFormat('EEE').format(date);     // Tue
+    final month = DateFormat('MMMM').format(date);      // February
+    final year = date.year;
+    final dayWithSuffix = _ordinal(date.day);
+
+    return '$weekday, $month $dayWithSuffix $year';
+  }
+
+  String _ordinal(int day) {
+    if (day >= 11 && day <= 13) return '${day}th';
+    switch (day % 10) {
+      case 1:
+        return '${day}st';
+      case 2:
+        return '${day}nd';
+      case 3:
+        return '${day}rd';
+      default:
+        return '${day}th';
+    }
   }
 
   /// Service ID Display Box
@@ -86,11 +116,8 @@ class BookingConfirmationScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('Booking ID: ', style: AppFonts.text16.regular.style,),
-          Text(
-            id,
-            style: AppFonts.text16.semiBold.blue.style,
-          ),
+          Text('Booking ID: ', style: AppFonts.text16.regular.style),
+          Text(id, style: AppFonts.text16.semiBold.blue.style),
         ],
       ),
     );
@@ -105,11 +132,7 @@ class BookingConfirmationScreen extends StatelessWidget {
           style: AppFonts.text16.regular.style,
           textAlign: TextAlign.center,
         ),
-        Text(
-          'jondoe@mymail.com',
-          style: AppFonts.text16.bold.style,
-          textAlign: TextAlign.center,
-        ),
+        Text(email ?? "", style: AppFonts.text16.bold.style, textAlign: TextAlign.center),
         15.verticalSpace,
         Text(
           'To change or cancel booking go to Booking History',
@@ -124,7 +147,12 @@ class BookingConfirmationScreen extends StatelessWidget {
   Widget _buildViewVendorsButton(BuildContext context) {
     return CustomButton(
       onPressed: () {
-        Navigator.pushNamedAndRemoveUntil(context, AppRoutes.customerBottomBar, (route) => false ,arguments: {'currentIndex': 0},);
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.customerBottomBar,
+          (route) => false,
+          arguments: {'currentIndex': 0},
+        );
       },
       text: 'Back to Services',
     );

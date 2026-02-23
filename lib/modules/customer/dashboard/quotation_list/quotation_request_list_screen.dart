@@ -1,5 +1,6 @@
 import 'package:Xception/core/model/customer/quotation/quotation_request_list_response.dart';
 import 'package:Xception/modules/customer/dashboard/quotation_list/quotation_request_list_notifier.dart';
+import 'package:Xception/res/colors.dart';
 import 'package:Xception/res/fonts.dart';
 import 'package:Xception/res/styles.dart';
 import 'package:Xception/utils/extensions.dart';
@@ -83,6 +84,8 @@ class QuotationRequestListScreen extends StatelessWidget {
     int index,
     CustomerRequestListData request,
   ) {
+    final badgeText = notifier.getQuotationBadgeText(request);
+
     return GestureDetector(
       onTap: () {
         if (request.distributions?.isNotEmpty ?? false) {
@@ -132,25 +135,55 @@ class QuotationRequestListScreen extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             10.verticalSpace,
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if(request.siteVisitRequired ?? false) Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: const Color(0xffe7f3f9),
-                    borderRadius: BorderRadius.circular(5),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (request.siteVisitRequired ?? false)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xffe7f3f9),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Text(
+                  "Site Visit Required",
+                  style: AppFonts.text14.regular.style.copyWith(color: Colors.blue),
+                ),
+              ),
+
+            // Right side: date + badge
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "${request.expectedDate?.formatDate()}",
+                    style: AppFonts.text12.medium.style,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  child: Text("Site Visit Required", style: AppFonts.text14.regular.style.copyWith(color: Colors.blue)),
-                ),
-                Text(
-                  "${request.expectedDate?.formatDate()}",
-                  style: AppFonts.text12.medium.style,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+              
+                  if (badgeText != null) ...[
+                    8.horizontalSpace,
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: notifier.getQuotationBadgeBg(request),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        badgeText,
+                        style: AppFonts.text10.medium.style.copyWith(
+                          color: notifier.getQuotationBadgeTextColor(request),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
+          ],
+        ),
           ],
         ),
       ),

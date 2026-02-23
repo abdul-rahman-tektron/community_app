@@ -11,12 +11,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 class JobsScreen extends StatelessWidget {
-  const JobsScreen({super.key});
+  final int? currentIndex;
+  final bool? isPayment;
+  const JobsScreen({super.key, this.currentIndex = 0, this.isPayment = false});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => JobsNotifier(),
+      create: (context) => JobsNotifier(currentIndex),
       child: Consumer<JobsNotifier>(
         builder: (context, servicesNotifier, child) {
           return buildBody(context, servicesNotifier);
@@ -96,7 +98,10 @@ class JobsScreen extends StatelessWidget {
         children: [
           servicesNotifier.isLoading
               ? Center(child: LottieLoader())
-              : OngoingServicesWidget(upcomingJobs: servicesNotifier.upcomingServices),
+              : OngoingServicesWidget(
+            upcomingJobs: servicesNotifier.upcomingServices,
+            isPayment: isPayment ?? false, // ✅ pass it
+          ),
           servicesNotifier.isLoading
               ? Center(child: LottieLoader())
               : HistoryServicesWidget(historyServices: servicesNotifier.historyServices),
