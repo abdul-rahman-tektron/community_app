@@ -22,7 +22,8 @@ class JobsNotifier extends BaseChangeNotifier {
     notifyListeners();
   }
 
-  JobsNotifier() {
+  JobsNotifier(int? currentIndex) {
+    _selectedIndex = currentIndex ?? 0;
     initializeData();
   }
 

@@ -195,7 +195,7 @@ class QuotationListScreen extends StatelessWidget {
           (item) => _quotationItem(
             item.quantity?.toString() ?? "-",
             item.product ?? "-",
-            'AED ${item.price?.toStringAsFixed(2) ?? "0.00"}',
+            'AED ${item.totalAmount?.toStringAsFixed(2) ?? "0.00"}',
           ),
         ),
       ],
@@ -247,7 +247,7 @@ class QuotationListScreen extends StatelessWidget {
                       child: CustomButton(
                         height: 35,
                         onPressed: () async {
-                          await notifier.acceptSiteVisit(context, quotation.siteVisitId ?? 0);
+                          await notifier.acceptSiteVisit(context, quotation.siteVisitId ?? 0, vendorId: quotation.vendorId);
                         },
                         backgroundColor: AppColors.white,
                         borderColor: AppColors.primary,
@@ -260,7 +260,7 @@ class QuotationListScreen extends StatelessWidget {
                       child: CustomButton(
                         height: 35,
                         onPressed: () async {
-                          await notifier.rejectSiteVisit(context, quotation.siteVisitId ?? 0);
+                          await notifier.rejectSiteVisit(context, quotation.siteVisitId ?? 0, vendorId:  quotation.vendorId ?? 0);
                         },
                         backgroundColor: AppColors.white,
                         borderColor: AppColors.error,
@@ -386,8 +386,10 @@ class QuotationListScreen extends StatelessWidget {
               onPressed: () async {
                 await notifier.apiUpdateJobStatus(
                   AppStatus.vendorQuotationRejected.id,
+                  vendorId: quotation.vendorId ?? 0,
                   isReject: true,
                 );
+                await notifier.initializeData();
               },
               backgroundColor: AppColors.white,
               borderColor: AppColors.error,

@@ -25,7 +25,9 @@ class TrackingServiceCard extends StatelessWidget {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
       padding: EdgeInsets.all(12.w),
-      decoration: AppStyles.commonDecoration,
+      decoration: AppStyles.commonDecoration.copyWith(
+        border: Border.all(color: Color(0xFF90A4AE), width: 1.5),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

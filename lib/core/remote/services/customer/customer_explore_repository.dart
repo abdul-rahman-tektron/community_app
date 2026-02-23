@@ -22,6 +22,8 @@ class CustomerExploreRepository extends BaseRepository {
     int? minPrice,
     int? maxPrice,
     int? serviceId,
+    int? pageNumber,
+    int? pageSize,
   }) async {
     final token = await SecureStorageService.getToken();
 
@@ -42,6 +44,12 @@ class CustomerExploreRepository extends BaseRepository {
     }
     if (serviceId != null) {
       queryParams.add("servicesId=$serviceId");
+    }
+    if (pageNumber != null) {
+      queryParams.add("pagenumber=$pageNumber");
+    }
+    if (pageSize != null) {
+      queryParams.add("pagesize=$pageSize");
     }
 
     final queryString = queryParams.isNotEmpty ? "?${queryParams.join("&")}" : "";

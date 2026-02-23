@@ -151,7 +151,7 @@ class AddQuotationNotifier extends BaseChangeNotifier {
         startDate: DateTime.now(),
         endDate: DateTime.now(),
         quotationDetails: notesController.text,
-        quotationAmount: grandTotal.toInt(),
+        quotationAmount: grandTotal,
         createdBy: userData?.name ?? "", // Can be dynamic
         status: "Submitted",
         jobQuotationResponseItems: quotationItems.map((item) {

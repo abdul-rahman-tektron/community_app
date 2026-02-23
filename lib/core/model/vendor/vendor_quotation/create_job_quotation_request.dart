@@ -15,7 +15,7 @@ class VendorCreateJobQuotationRequest {
   int? vendorId;
   String? vendorName;
   String? quotationDetails;
-  int? quotationAmount;
+  double? quotationAmount;
   DateTime? startDate;
   DateTime? endDate;
   String? status;

@@ -15,6 +15,7 @@ import 'package:Xception/utils/router/routes.dart';
 import 'package:Xception/utils/widgets/custom_buttons.dart';
 import 'package:Xception/utils/widgets/custom_textfields.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -288,7 +289,8 @@ void showSiteVisitRequestPopup(
 
   final TextEditingController employeeNameController = TextEditingController();
   final TextEditingController employeePhoneNumberController = TextEditingController();
-  final TextEditingController employeeEmiratesIdNumberController = TextEditingController();
+  final TextEditingController employeeEmiratesIdNumberController =
+  TextEditingController(text: "784-");
   final TextEditingController dateController = TextEditingController();
   final ValueNotifier<bool> isLoading = ValueNotifier(false);
 
@@ -381,6 +383,7 @@ void showSiteVisitRequestPopup(
                   CustomTextField(
                     controller: dateController,
                     fieldName: "Preferred Date",
+                    isAutoValidate: false,
                     keyboardType: TextInputType.datetime,
                     startDate: DateTime.now(),
                     initialDate: DateTime.now(),
@@ -391,6 +394,7 @@ void showSiteVisitRequestPopup(
                   CustomTextField(
                     controller: employeeNameController,
                     fieldName: "Employee Name",
+                    isAutoValidate: false,
                     validator: (v) {
                       final base = _required(v, label: 'Employee Name');
                       if (base != null) return base;
@@ -403,6 +407,7 @@ void showSiteVisitRequestPopup(
                   CustomTextField(
                     controller: employeePhoneNumberController,
                     fieldName: "Employee Mobile Number",
+                    isAutoValidate: false,
                     keyboardType: TextInputType.phone,
                     validator: _validateUaeMobile,
                   ),
@@ -411,7 +416,12 @@ void showSiteVisitRequestPopup(
                   CustomTextField(
                     controller: employeeEmiratesIdNumberController,
                     fieldName: "Employee Emirates ID Number",
+                    isAutoValidate: false,
                     keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      EmiratesIdFormatter(),
+                    ],
                     validator: _validateEmiratesId,
                   ),
                   20.verticalSpace,
@@ -462,6 +472,39 @@ void showSiteVisitRequestPopup(
       ),
     ),
   );
+}
+
+class EmiratesIdFormatter extends TextInputFormatter {
+  // Format: 784-YYYY-NNNNNNN-N  (15 digits total)
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue,
+      TextEditingValue newValue,
+      ) {
+    // Keep digits only
+    final digits = newValue.text.replaceAll(RegExp(r'\D'), '');
+
+    // Limit to 15 digits
+    final trimmed = digits.length > 15 ? digits.substring(0, 15) : digits;
+
+    final buffer = StringBuffer();
+    for (int i = 0; i < trimmed.length; i++) {
+      buffer.write(trimmed[i]);
+
+      // Insert '-' after 3rd digit, after 7th digit (3+4), after 14th digit (3+4+7)
+      if (i == 2 || i == 6 || i == 13) {
+        if (i != trimmed.length - 1) buffer.write('-');
+      }
+    }
+
+    final formatted = buffer.toString();
+
+    // Put cursor at end (simple + reliable)
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
 }
 
 

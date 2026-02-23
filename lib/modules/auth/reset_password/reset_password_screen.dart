@@ -30,7 +30,7 @@ class ResetPasswordScreen extends StatelessWidget {
 
   Widget buildBody(BuildContext context, ResetPasswordNotifier notifier) {
     return Scaffold(
-      appBar: CustomAppBar(),
+      appBar: CustomAppBar(showBackButton: true,),
       drawer: CustomDrawer(),
       body: SingleChildScrollView(
         child: Padding(

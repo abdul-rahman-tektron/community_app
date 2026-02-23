@@ -91,7 +91,7 @@ class QuotationListNotifier extends BaseChangeNotifier {
       print("result");
       print(result);
 
-      await _handleCreatedJobSuccess(result, jobId, context);
+      await _handleCreatedJobSuccess(result, jobId, context, dateOfVisit);
     } catch (e) {
       print("result error");
       print(e);
@@ -100,13 +100,13 @@ class QuotationListNotifier extends BaseChangeNotifier {
     }
   }
 
-  Future<void> _handleCreatedJobSuccess(Object? result, int? jobId, BuildContext context) async {
+  Future<void> _handleCreatedJobSuccess(Object? result, int? jobId, BuildContext context, String dateOfVisit) async {
     // Case 1: Booking returned email preview (like site-visit)
     if (result is JobBookingResponse && result.emailPreview != null) {
       final emailData = result.emailPreview!;
       final email = Email(
         body: emailData.body ?? "",
-        subject: emailData.subject ?? "Job Booking Confirmation",
+        subject: emailData.subject ?? "Job  Booking Confirmation",
         recipients: emailData.to ?? const [],
         cc: emailData.cc ?? const [],
         isHTML: true,
@@ -124,7 +124,11 @@ class QuotationListNotifier extends BaseChangeNotifier {
       await apiUpdateJobStatus(AppStatus.quotationAccepted.id);
 
       // Navigate to success screen
-      Navigator.pushNamed(context, AppRoutes.bookingConfirmation, arguments: jobId?.toString());
+      Navigator.pushNamed(context, AppRoutes.bookingConfirmation, arguments: {
+        'bookingId': jobId?.toString(),
+        'email': userData?.email,
+        'bookingDate': dateOfVisit,
+      });
       return;
     }
 
@@ -145,13 +149,13 @@ class QuotationListNotifier extends BaseChangeNotifier {
   }
 
 
-  Future<void> apiUpdateJobStatus(int? statusId, {bool? isReject = false}) async {
+  Future<void> apiUpdateJobStatus(int? statusId, {int? vendorId, bool? isReject = false}) async {
     if (statusId == null) return;
     try {
       notifyListeners();
 
       final parsed = await CommonRepository.instance.apiUpdateJobStatus(
-        UpdateJobStatusRequest(jobId: jobId, statusId: statusId, createdBy: userData?.name ?? "", vendorId: userData?.customerId ?? 0),
+        UpdateJobStatusRequest(jobId: jobId, statusId: statusId, createdBy: userData?.name ?? "", vendorId: vendorId ?? 0),
       );
 
       if(isReject ?? false) ToastHelper.showSuccess("Quotation Rejected successfully!");
@@ -176,7 +180,7 @@ class QuotationListNotifier extends BaseChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> acceptSiteVisit(BuildContext context, int siteVisitId, {String? vendorEmail}) async {
+  Future<void> acceptSiteVisit(BuildContext context, int siteVisitId, { int? vendorId, String? vendorEmail}) async {
     try {
       isLoading = true;
       notifyListeners();
@@ -190,7 +194,7 @@ class QuotationListNotifier extends BaseChangeNotifier {
         final emailData = response.emailPreview!;
 
         // Update job status
-        await apiUpdateJobStatus(AppStatus.siteVisitAccepted.id);
+        await apiUpdateJobStatus(AppStatus.siteVisitAccepted.id, vendorId: vendorId ?? 0,);
 
         // Prepare dynamic email
         final email = Email(
@@ -225,7 +229,7 @@ class QuotationListNotifier extends BaseChangeNotifier {
   }
 
   // Reject Site Visit
-  Future<void> rejectSiteVisit(BuildContext context, int siteVisitId) async {
+  Future<void> rejectSiteVisit(BuildContext context, int siteVisitId, {int? vendorId}) async {
     try {
       isLoading = true;
       notifyListeners();
@@ -236,7 +240,7 @@ class QuotationListNotifier extends BaseChangeNotifier {
 
       if (response is CustomerResponseRejectResponse) {
         ToastHelper.showSuccess("Site visit rejected successfully");
-        await apiUpdateJobStatus(AppStatus.siteVisitRejected.id);
+        await apiUpdateJobStatus(AppStatus.siteVisitRejected.id, vendorId: vendorId ?? 0);
 
         // Pop the screen back
         Navigator.pop(context);

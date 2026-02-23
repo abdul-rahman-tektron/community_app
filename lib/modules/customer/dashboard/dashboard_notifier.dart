@@ -60,15 +60,29 @@ class CustomerDashboardNotifier extends BaseChangeNotifier {
         icon: LucideIcons.arrowUpNarrowWide,
         iconColor: Colors.blue,
         iconBgColor: Colors.blue.withOpacity(0.1),
-        label: "Ongoing",
+        label: "Ongoing Service",
         count: ongoingJobs ?? '0',
       ),
       QuickStat(
         icon: LucideIcons.check,
         iconColor: Colors.green,
         iconBgColor: Colors.green.withOpacity(0.1),
-        label: "Completed",
+        label: "Completed Service",
         count: completedJobs ?? '0',
+      ),
+      QuickStat(
+        icon: LucideIcons.receiptText,
+        iconColor: Colors.amber,
+        iconBgColor: Colors.amber.withOpacity(0.1),
+        label: "Pending Quotation",
+        count: '',
+      ),
+      QuickStat(
+        icon: LucideIcons.coins,
+        iconColor: Colors.purple,
+        iconBgColor: Colors.purple.withOpacity(0.1),
+        label: "Pending Payments",
+        count: '',
       ),
     ];
   }
@@ -77,8 +91,8 @@ class CustomerDashboardNotifier extends BaseChangeNotifier {
   final List<QuickAction> quickActions = [
     QuickAction(icon: LucideIcons.circlePlus300, label: 'New Service'),
     QuickAction(icon: LucideIcons.receiptText300, label: 'Pending Quotation'),
-    QuickAction(icon: LucideIcons.mapPin300, label: 'Track Request'),
-    QuickAction(icon: LucideIcons.circleDollarSign300, label: 'Make Payment'),
+    // QuickAction(icon: LucideIcons.mapPin300, label: 'Track Request'),
+    // QuickAction(icon: LucideIcons.circleDollarSign300, label: 'Make Payment'),
   ];
 
   IconData getServiceIcon(String serviceName) {

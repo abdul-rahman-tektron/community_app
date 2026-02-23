@@ -5,13 +5,15 @@ import 'package:Xception/modules/customer/jobs/widgets/ongoing/card/in_progress_
 import 'package:Xception/modules/customer/jobs/widgets/ongoing/card/tracking_service_card.dart';
 import 'package:Xception/utils/enums.dart';
 import 'package:Xception/utils/helpers/common_utils.dart';
+import 'package:Xception/utils/widgets/custom_refresh_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class OngoingServicesWidget extends StatelessWidget {
   final List<CustomerOngoingJobsData> upcomingJobs;
+  final bool isPayment;
 
-  const OngoingServicesWidget({super.key, required this.upcomingJobs});
+  const OngoingServicesWidget({super.key, required this.upcomingJobs, this.isPayment = false,});
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +26,13 @@ class OngoingServicesWidget extends StatelessWidget {
         .where((job) => job.status != AppStatus.cancelJob.name)
         .toList();
 
+    final jobsToShow = isPayment
+        ? visibleJobs.where((job) => job.status == "Job Verified & Payment Pending").toList()
+        : visibleJobs;
+
     final hasJobs = visibleJobs.isNotEmpty;
 
-    return RefreshIndicator(
+    return CustomRefreshIndicator(
       onRefresh: () async {
         final notifier = context.read<JobsNotifier>();
         await notifier.initializeData();
@@ -36,9 +42,9 @@ class OngoingServicesWidget extends StatelessWidget {
           ? ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.zero,
-        itemCount: visibleJobs.length,
+        itemCount: jobsToShow.length,
         itemBuilder: (context, index) {
-          final job = visibleJobs[index];
+          final job = jobsToShow[index];
 
           // Map raw category to enum (with special "paymentpending" handling)
           final rawCat = (job.jobStatusCategory ?? '').toLowerCase();

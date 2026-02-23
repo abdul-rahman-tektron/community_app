@@ -295,7 +295,6 @@ class CustomerJobsRepository extends BaseRepository {
 
     final response = await networkRepository.call(
       method: Method.post,
-      useXceptionBase: true,
       pathUrl: ApiUrls.pathCreatePaymentIntent,
       body: jsonEncode(requestParams.toJson()),
       headers: buildHeaders(token: token),

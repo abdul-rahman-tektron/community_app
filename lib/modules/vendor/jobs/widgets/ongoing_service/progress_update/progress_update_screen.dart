@@ -75,13 +75,14 @@ class ProgressUpdateScreen extends StatelessWidget {
         return _buildBeforePhotos(context, notifier);
 
       case JobPhase.inProgress:
+        print("🟣 notifier.reworkNotes: ${reworkNotes}");
         return notifier.currentStatus == AppStatus.holdTheJob.name
             ? Column(children: [Text(getVendorStatusMessage(notifier.currentStatus ?? ""))])
             : Column(
           crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if(reworkNotes != null) Text("Rework Notes: $reworkNotes"),
-                  if(reworkNotes != null) 15.verticalSpace,
+                  if(reworkNotes != null && (reworkNotes?.isNotEmpty ?? false)) Text("Rework Notes: $reworkNotes"),
+                  if(reworkNotes != null && (reworkNotes?.isNotEmpty ?? false)) 15.verticalSpace,
                   _buildAfterPhotos(context, notifier),
                   15.verticalSpace,
                   CustomTextField(
@@ -146,74 +147,82 @@ class ProgressUpdateScreen extends StatelessWidget {
     switch (notifier.currentPhase) {
       case JobPhase.assign:
         return CustomButton(
-          text: "Assign Employees",
-          onPressed: notifier.assignedEmployees.isNotEmpty
+          text: notifier.isPrimaryActionLoading ? "Assigning..." : "Assign Employees",
+          onPressed: (!notifier.isPrimaryActionLoading && notifier.assignedEmployees.isNotEmpty)
               ? () => notifier.assignEmployees(context)
               : null,
         );
 
       case JobPhase.initiated:
         return CustomButton(
-          text: "Start Job",
-          onPressed: notifier.photoPairs.isNotEmpty
-              ? () async {
-                  await notifier.submitJobCompletion(context);
-                  await notifier.apiUpdateJobStatus(AppStatus.workStartedInProgress.id);
-                  notifier.goToInProgress();
-                }
+          text: notifier.isPrimaryActionLoading ? "Starting..." : "Start Job",
+          onPressed: (!notifier.isPrimaryActionLoading && notifier.photoPairs.isNotEmpty)
+              ? () => notifier.runPrimary(() async {
+            debugPrint("🟣 Start Job BUTTON pressed");
+
+            await notifier.submitJobCompletion(context);
+
+            debugPrint("🟣 submitJobCompletion RETURNED");
+
+            await notifier.apiUpdateJobStatus(
+                AppStatus.workStartedInProgress.id);
+
+            debugPrint("🟣 Job status updated");
+
+            notifier.goToInProgress();
+          })
               : null,
         );
 
       case JobPhase.inProgress:
+        final canHoldOrContinue =
+            notifier.notes.trim().isNotEmpty || notifier.currentStatus == AppStatus.holdTheJob.name;
+
+        final canComplete =
+            notifier.notes.trim().isNotEmpty && notifier.photoPairs.any((pair) => pair.after != null);
+
         return Row(
           children: [
             Expanded(
               child: CustomButton(
-                text: notifier.currentStatus == AppStatus.holdTheJob.name ? "Continue" : "Hold",
-                onPressed:
-                    notifier.notes.trim().isNotEmpty ||
-                        notifier.currentStatus == AppStatus.holdTheJob.name
-                    ? () async {
-                        await notifier
-                            .apiUpdateJobStatus(
-                              notifier.currentStatus == AppStatus.holdTheJob.name
-                                  ? AppStatus.workStartedInProgress.id
-                                  : AppStatus.holdTheJob.id,
-                              notes: notifier.notesController.text,
-                              showToast: true,
-                            )
-                            .then((value) {
-                              Navigator.pop(context);
-                            });
-                      }
+                text: notifier.isSecondaryActionLoading
+                    ? "Please wait..."
+                    : (notifier.currentStatus == AppStatus.holdTheJob.name ? "Continue" : "Hold"),
+                onPressed: (!notifier.isSecondaryActionLoading && canHoldOrContinue)
+                    ? () => notifier.runSecondary(() async {
+                  await notifier.apiUpdateJobStatus(
+                    notifier.currentStatus == AppStatus.holdTheJob.name
+                        ? AppStatus.workStartedInProgress.id
+                        : AppStatus.holdTheJob.id,
+                    notes: notifier.notesController.text,
+                    showToast: true,
+                  );
+                  Navigator.pop(context);
+                })
                     : null,
               ),
             ),
             10.horizontalSpace,
             Expanded(
               child: CustomButton(
-                text: "Complete",
-                onPressed:
-                    (notifier.notes.trim().isNotEmpty &&
-                        notifier.photoPairs.any((pair) => pair.after != null))
-                    ? () async {
-                        await notifier.submitJobCompletion(context);
-                        await notifier
-                            .apiUpdateJobStatus(AppStatus.workCompletedAwaitingConfirmation.id)
-                            .then((value) {
-                              Navigator.pop(context);
-                            });
-                      }
+                text: notifier.isPrimaryActionLoading ? "Completing..." : "Complete",
+                onPressed: (!notifier.isPrimaryActionLoading && canComplete)
+                    ? () => notifier.runPrimary(() async {
+                  await notifier.submitJobCompletion(context);
+                  await notifier.apiUpdateJobStatus(AppStatus.workCompletedAwaitingConfirmation.id);
+                  Navigator.pop(context);
+                })
                     : null,
               ),
             ),
           ],
         );
-
       case JobPhase.completed:
         return CustomButton(
-          text: "Submit Completion",
-          onPressed: notifier.canSubmit ? () => notifier.submitJobCompletion(context) : null,
+          text: notifier.isPrimaryActionLoading ? "Submitting..." : "Submit Completion",
+          onPressed: (!notifier.isPrimaryActionLoading && notifier.canSubmit)
+              ? () => notifier.submitJobCompletion(context)
+              : null,
         );
     }
   }

@@ -278,7 +278,7 @@ class HistoryDetailScreen extends StatelessWidget {
           10.verticalSpace,
           _infoRow(
             "Total Amount:",
-            "AED ${notifier.customerHistoryDetailData?.jobDetail?.totalAmount?.toStringAsFixed(2) ?? ""}",
+            "AED ${notifier.grandTotal(notifier.paymentDetail.lineItems ?? [])}",
           ),
           _infoRow(
             "Payment Method:",

@@ -206,7 +206,7 @@ class PaymentScreen extends StatelessWidget {
       items.fold<num>(0, (s, it) => s + _linePreVat(it));
 
   num _vatFromItems(List<LineItem> items) =>
-      items.fold<num>(0, (s, it) => s + (it.vat ?? 0));
+      items.fold<num>(0, (s, it) => s + (_linePreVat(it) * 0.05 ?? 0));
 
   Widget buildPromoCodeField(BuildContext context, PaymentNotifier notifier) {
     return Padding(
@@ -268,12 +268,8 @@ class PaymentScreen extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       Expanded(child: Text(method.name, style: AppFonts.text14.regular.style)),
-                      if (method.iconUrls != null)
-                        Row(
-                          children: method.iconUrls!.map((icon) {
-                            return Image.asset(icon, width: 50, fit: BoxFit.contain);
-                          }).toList(),
-                        ),
+                      if (method.iconUrl != null)
+                        Image.asset(method.iconUrl!, width: 50, fit: BoxFit.contain),
                     ],
                   ),
                 ),

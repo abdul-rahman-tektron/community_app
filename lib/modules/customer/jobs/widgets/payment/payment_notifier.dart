@@ -45,15 +45,22 @@ class PaymentNotifier extends BaseChangeNotifier {
 
   bool isTermsExpanded = false;
 
-  List<PaymentMethod> paymentMethods = [
-    PaymentMethod(id: 2, name: "Credit / Debit Card", isCard: true),
-    PaymentMethod(
-      id: 1,
-      name: "Apple Pay / Google Pay",
-      iconUrls: [AppImages.applePay, AppImages.googlePay],
-      isCard: false,
-    ),
-  ];
+  List<PaymentMethod> get paymentMethods {
+    final walletsLabel = Platform.isIOS ? "Apple Pay" : "Google Pay";
+    final walletsIcon  = Platform.isIOS ? AppImages.applePay : AppImages.googlePay;
+
+    return [
+      PaymentMethod(id: 2, name: "Credit / Debit Card", isCard: true),
+
+      // show only the right wallet per OS
+      PaymentMethod(
+        id: 1,
+        name: walletsLabel,
+        iconUrl: walletsIcon,
+        isCard: false,
+      ),
+    ];
+  }
 
   PaymentNotifier(this.jobId, this.vendorId) {
     initializeData();
@@ -131,7 +138,7 @@ class PaymentNotifier extends BaseChangeNotifier {
   double calculateGrandTotal() {
     final items = paymentDetail.lineItems ?? const <LineItem>[];
     final subTotal = items.fold<num>(0, (s, it) => s + _linePreVat(it));
-    final vatTotal = items.fold<num>(0, (s, it) => s + (it.vat ?? 0));
+    final vatTotal = items.fold<num>(0, (s, it) => s + (_linePreVat(it) * 0.05 ?? 0));
     return (subTotal + vatTotal).toDouble();
   }
 
@@ -173,7 +180,6 @@ class PaymentNotifier extends BaseChangeNotifier {
   Future<void> _handleCreatedPaymentSuccess(dynamic result, BuildContext context) async {
     if (result is PaymentStatusResponse) {
       if(result.transactionStatus == "succeeded") {
-        ToastHelper.showSuccess("Payment successfully.");
         await apiUpdateJobStatus(context, AppStatus.paymentCompleted.id);
       } else {
         ToastHelper.showError("Payment Failed.");
@@ -219,7 +225,7 @@ class PaymentNotifier extends BaseChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      // 1) Calculate amount
+      // 1) Calculate amount11/02/2026
       final amountAED = overrideGrandTotal ?? calculateGrandTotal();
       final amountInFils = (amountAED * 100).round(); // AED -> fils
 
@@ -229,7 +235,7 @@ class PaymentNotifier extends BaseChangeNotifier {
           amount: amountInFils,
           totalAmount: amountInFils,
           remarks: "Test",
-          currency: "aed",
+          currency: "AED",
           paymentIdentity: selectedPaymentMethod?.id ?? 0,
           quotationId: jobId,
           amountFrom: userData?.customerId ?? 0,
@@ -263,9 +269,7 @@ class PaymentNotifier extends BaseChangeNotifier {
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: clientSecret,
-
           merchantDisplayName: "Xception",
-          // No GooglePay/ApplePay here for now → card only
           style: ThemeMode.system,
         ),
       );
@@ -275,7 +279,14 @@ class PaymentNotifier extends BaseChangeNotifier {
 
       // // 5) On success → record payment in your backend
       await apiPaymentStatus(context, paymentIntentId ?? "");
-    } on StripeException catch (e) {
+    } on StripeException catch (e, st) {
+      print("Payment cancelled or failed message: ${e.error.message}");
+      print("Payment cancelled or failed code: ${e.error.code}");
+      print("Payment cancelled or failed decline code: ${e.error.declineCode}");
+      print("Payment cancelled or failed localized messaage: ${e.error.localizedMessage}");
+      print("Payment cancelled or failed type: ${e.error.type}");
+      print("Payment cancelled or failed stripe error code: ${e.error.stripeErrorCode}");
+      print("Payment cancelled or failed st: ${st}");
       ToastHelper.showError("Payment cancelled or failed: ${e.error.localizedMessage}");
     } catch (e) {
       print("Payment Failed: $e");
@@ -291,7 +302,7 @@ class PaymentNotifier extends BaseChangeNotifier {
       // 0) Check if Google Pay is supported on this device
       final isSupported = await Stripe.instance.isPlatformPaySupported(
         googlePay: const IsGooglePaySupportedParams(
-          testEnv: true, // true for test mode
+          testEnv: false,
         ),
       );
 
@@ -313,7 +324,7 @@ class PaymentNotifier extends BaseChangeNotifier {
             amount: amountInFils,
             totalAmount: amountInFils,
             remarks: "Test",
-            currency: "aed",
+            currency: "AED",
             paymentIdentity: selectedPaymentMethod?.id ?? 0,
             quotationId: jobId,
             amountFrom: userData?.customerId ?? 0,
@@ -348,7 +359,7 @@ class PaymentNotifier extends BaseChangeNotifier {
         clientSecret: clientSecret ?? "",
         confirmParams: PlatformPayConfirmParams.googlePay(
           googlePay: GooglePayParams(
-            testEnv: true, // true in test, false in production
+            testEnv: false, // true in test, false in production
             merchantName: 'Xception', // shown in Google Pay sheet
             merchantCountryCode: 'AE',
             currencyCode: 'AED',
@@ -369,15 +380,13 @@ class PaymentNotifier extends BaseChangeNotifier {
     }
   }
 
-  Future<void> _payWithApplePayPlatform(BuildContext context, {double? overrideGrandTotal}) async {
+  Future<void> _payWithApplePayPlatform(
+      BuildContext context, {
+        double? overrideGrandTotal,
+      }) async {
     try {
-      // 0) Check if Apple Pay is supported on this device
-      final isSupported = await Stripe.instance.isPlatformPaySupported(
-        // applePay: const IsApplePaySupportedParams(),
-      );
-
-      if (!isSupported) {
-        ToastHelper.showError("Apple Pay is not available on this device.");
+      if (!Platform.isIOS) {
+        ToastHelper.showError("Apple Pay is only available on iOS.");
         return;
       }
 
@@ -386,37 +395,55 @@ class PaymentNotifier extends BaseChangeNotifier {
 
       // 1) Calculate amount (AED)
       final amountAED = overrideGrandTotal ?? calculateGrandTotal();
-      final amountInFils = (amountAED * 100).round(); // smallest unit
+      final amountInFils = (amountAED * 100).round(); // AED -> fils
 
-      // 2) Create PaymentIntent on your backend and get clientSecret
-      final clientSecret = await PaymentService.createPaymentIntent(
-        amountInMinorUnits: amountInFils,
-        currency: 'aed',
-        description: 'Payment for job #$jobId (Apple Pay)',
+      // 2) ✅ Use SAME backend endpoint as Card/GooglePay (important)
+      final clientSecretResponse =
+      await CustomerJobsRepository.instance.apiCreatePaymentIntent(
+        CreatePaymentIntentRequest(
+          amount: amountInFils,
+          totalAmount: amountInFils,
+          remarks: "Apple Pay",
+          currency: "aed",
+          paymentIdentity: selectedPaymentMethod?.id ?? 0,
+          quotationId: jobId,
+          amountFrom: userData?.customerId ?? 0,
+          amountTo: vendorId,
+          jobId: jobId,
+          invoiceNumber: "",
+          paymentTowards: "",
+          transactionStatus: "",
+          mode: selectedPaymentMethod?.name ?? "Apple Pay",
+          type: selectedPaymentMethod?.name ?? "Apple Pay",
+          transactionDate: DateTime.now(),
+          referenceNumber: DateTime.now().millisecondsSinceEpoch.toString(),
+          referenceType: "ApplePay",
+        ),
       );
 
-      // For quick temporary testing, you *could* hardcode:
-      // const clientSecret = "pi_..._secret_...";
-      // but production should always call backend as above.
+      String? clientSecret;
+      String? paymentIntentId;
 
-      if (clientSecret == null) {
+      if (clientSecretResponse is CreatePaymentIntentResponse) {
+        clientSecret = clientSecretResponse.clientSecret;
+        paymentIntentId = clientSecretResponse.stripePaymentIntentId;
+      }
+
+      if (clientSecret == null || clientSecret.isEmpty) {
         ToastHelper.showError("Unable to start Apple Pay. Please try again.");
         return;
       }
 
-      // 3) Launch native Apple Pay sheet and confirm the PaymentIntent
+      // 3) ✅ Confirm Apple Pay
       await Stripe.instance.confirmPlatformPayPaymentIntent(
         clientSecret: clientSecret,
         confirmParams: PlatformPayConfirmParams.applePay(
           applePay: ApplePayParams(
             merchantCountryCode: 'AE',
             currencyCode: 'AED',
-            // This appears in the Apple Pay sheet
-            // merchantName: 'Xception',
-            // Single total line item – Stripe does the math on the backend
             cartItems: [
               ApplePayCartSummaryItem.immediate(
-                label: 'Service payment', // what user sees
+                label: 'Service payment',
                 amount: amountAED.toStringAsFixed(2),
               ),
             ],
@@ -424,14 +451,17 @@ class PaymentNotifier extends BaseChangeNotifier {
         ),
       );
 
-      // 4) If no exception → success, log payment in your backend
-      // await apiCreatePayment(context, amountAED: amountAED);
-    ToastHelper.showSuccess("Payment successful via Apple Pay.");
-    } on StripeException catch (e) {
-      ToastHelper.showError("Apple Pay cancelled or failed: ${e.error.localizedMessage}");
+      // 4) ✅ Verify from backend & update job status
+      await apiPaymentStatus(context, paymentIntentId ?? "");
+    } on StripeException catch (e, st) {
+      print("Apple Pay failed: ${e.error.localizedMessage}");
+      print("Apple Pay code: ${e.error.code}");
+      print("Apple Pay type: ${e.error.type}");
+      print("Apple Pay stack: $st");
+      ToastHelper.showError("Apple Pay failed: ${e.error.localizedMessage}");
     } catch (e) {
       print("Apple Pay PlatformPay Failed: $e");
-      ToastHelper.showError('Payment Failed: $e');
+      ToastHelper.showError("Payment Failed: $e");
     } finally {
       isLoading = false;
       notifyListeners();
@@ -442,8 +472,8 @@ class PaymentNotifier extends BaseChangeNotifier {
 class PaymentMethod {
   final int id;
   final String name;
-  final List<String>? iconUrls;
+  final String? iconUrl;
   final bool isCard;
 
-  PaymentMethod({required this.id, required this.name, this.iconUrls, required this.isCard});
+  PaymentMethod({required this.id, required this.name, this.iconUrl, required this.isCard});
 }

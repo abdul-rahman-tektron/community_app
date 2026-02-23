@@ -21,7 +21,10 @@ class AppInitializer {
     WidgetsFlutterBinding.ensureInitialized();
 
     Stripe.publishableKey = ApiConstants.stripePublishableKey;
+    Stripe.merchantIdentifier = ApiConstants.stripeAppleMerchantIdentifier;
     Stripe.urlScheme = 'stripeflutter';
+
+    await Stripe.instance.applySettings();
 
     await _initializePermissions();
     await _initializeFirebase();

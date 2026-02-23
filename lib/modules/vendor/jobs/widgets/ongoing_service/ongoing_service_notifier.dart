@@ -5,10 +5,13 @@ import 'package:Xception/core/remote/services/vendor/vendor_jobs_repository.dart
 
 class OngoingServiceNotifier extends BaseChangeNotifier {
   List<OngoingJobsAssignedData> _ongoingJobs = [];
+  bool? _isPayment;
 
+  bool get isPayment => _isPayment ?? false;
   List<OngoingJobsAssignedData> get ongoingJobs => _ongoingJobs;
 
-  OngoingServiceNotifier() {
+  OngoingServiceNotifier(bool? isPayment) {
+    _isPayment = isPayment;
     initializeData();
   }
 

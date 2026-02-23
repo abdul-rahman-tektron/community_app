@@ -10,12 +10,14 @@ import 'package:provider/provider.dart';
 class CustomerBottomScreen extends StatelessWidget {
   final int? currentIndex;
   final String? initialCategory;
-  const CustomerBottomScreen({super.key, this.currentIndex = 0, this.initialCategory});
+  final int? subCurrentIndex;
+  final bool? isPayment;
+  const CustomerBottomScreen({super.key, this.currentIndex = 0, this.initialCategory, this.subCurrentIndex = 0, this.isPayment = false});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => BottomBarNotifier(currentIndex, initialCategory),
+      create: (context) => BottomBarNotifier(currentIndex, initialCategory, subCurrentIndex, isPayment),
       child: Consumer<BottomBarNotifier>(
         builder: (context, bottomBarNotifier, child) {
           return PopScope(

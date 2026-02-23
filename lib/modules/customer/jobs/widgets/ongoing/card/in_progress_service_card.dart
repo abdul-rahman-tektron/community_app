@@ -17,7 +17,9 @@ class InProgressServiceCard extends StatelessWidget {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
       padding: EdgeInsets.all(12.w),
-      decoration: AppStyles.commonDecoration,
+      decoration: AppStyles.commonDecoration.copyWith(
+        border: Border.all(color: Color(0xFFFF9800), width: 1.5),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -25,7 +27,7 @@ class InProgressServiceCard extends StatelessWidget {
           10.verticalSpace,
           _buildTechnicianDetails(),
           if(service.status == AppStatus.holdTheJob.name) 10.verticalSpace,
-          if(service.status == AppStatus.holdTheJob.name) _holdJobNotes(),
+          if(service.status == AppStatus.holdTheJob.name) _holdJobNotes(service.customerRemarks ?? ""),
           20.verticalSpace,
           _buildProgressBar(),
         ],
@@ -78,8 +80,8 @@ class InProgressServiceCard extends StatelessWidget {
     );
   }
 
-  Widget _holdJobNotes() {
-    return Text("Note: the Job is on hold because of some reason");
+  Widget _holdJobNotes(String notes) {
+    return Text("Note: $notes");
   }
 
   Widget _iconLabelRow({
@@ -142,6 +144,7 @@ class InProgressServiceCard extends StatelessWidget {
               5.verticalSpace,
               CustomLinearProgressIndicator(
                 percentage: AppStatus.fromName(service.status ?? "")?.percentage ?? 0, // Static or customize as needed
+                fillColor: Color(0xFFFF9800)  ,
                 borderRadius: 6,
               ),
             ],

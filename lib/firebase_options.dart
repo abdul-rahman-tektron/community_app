@@ -49,20 +49,22 @@ class DefaultFirebaseOptions {
     }
   }
 
+  // ✅ From your android google-services.json
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAGtk7I_kUsmUBGZxxtdDCciuOdVAlPxmE',
-    appId: '1:1024569195684:android:0e283bff095156b55fba31',
-    messagingSenderId: '1024569195684',
-    projectId: 'xceptionsolutions-a1e94',
-    storageBucket: 'xceptionsolutions-a1e94.firebasestorage.app',
+    apiKey: 'AIzaSyDrRkmpSRyXG9SBcEFRl1mriZzGCSlhXHE',
+    appId: '1:149754946577:android:240742349de7d5e0b73db0',
+    messagingSenderId: '149754946577',
+    projectId: 'xception-solutions',
+    storageBucket: 'xception-solutions.firebasestorage.app'
   );
 
+  // ✅ From your iOS GoogleService-Info.plist
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAm8QZbg0TUO3TO5X0D8Ayen37FWhXVRPQ',
-    appId: '1:1024569195684:ios:9febea42f5ba5d325fba31',
-    messagingSenderId: '1024569195684',
-    projectId: 'xceptionsolutions-a1e94',
-    storageBucket: 'xceptionsolutions-a1e94.firebasestorage.app',
-    iosBundleId: 'com.tektronix.xceptionapp',
+    apiKey: 'AIzaSyBqLjdZ7PKWt0mXqGkPtAN-i0C_5H_ibdI',
+    appId: '1:149754946577:ios:2fc6d599d9824458b73db0',
+    messagingSenderId: '149754946577',
+    projectId: 'xception-solutions',
+    storageBucket: 'xception-solutions.firebasestorage.app',
+    iosBundleId: 'com.tektronix.xceptionapp'
   );
 }

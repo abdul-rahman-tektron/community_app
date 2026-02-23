@@ -32,7 +32,7 @@ class RegisterVerifyScreen extends StatelessWidget {
       ) {
     return SafeArea(
       child: Scaffold(
-        appBar: CustomAppBar(),
+        appBar: CustomAppBar(showBackButton: false,),
         body: Center(
           child: SingleChildScrollView(
             child: Padding(

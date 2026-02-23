@@ -153,7 +153,8 @@ class AppRouter {
         final args = settings.arguments as Map<String, dynamic>? ?? {};
         final currentIndex = args['currentIndex'] as int?;
         final subCurrentIndex = args['subCurrentIndex'] as int?;
-        screen = VendorBottomScreen(currentIndex: currentIndex, subCurrentIndex: subCurrentIndex);
+        final isPayment = args['isPayment'] as bool?;
+        screen = VendorBottomScreen(currentIndex: currentIndex, subCurrentIndex: subCurrentIndex, isPayment: isPayment,);
         break;
       case AppRoutes.addQuotation:
         final args = settings.arguments as Map<String, dynamic>? ?? {};
@@ -215,7 +216,9 @@ class AppRouter {
         final args = settings.arguments as Map<String, dynamic>? ?? {};
         final currentIndex = args['currentIndex'] as int? ?? 0;
         final category = args['category'] as String?;
-        screen = CustomerBottomScreen(currentIndex: currentIndex, initialCategory: category);
+        final subCurrentIndex = args['subCurrentIndex'] as int?;
+        final isPayment = args['isPayment'] as bool?;
+        screen = CustomerBottomScreen(currentIndex: currentIndex, initialCategory: category, subCurrentIndex: subCurrentIndex, isPayment: isPayment,);
         break;
       case AppRoutes.newServices:
         final args = settings.arguments as Map<String, dynamic>? ?? {};
@@ -229,8 +232,11 @@ class AppRouter {
         screen = JobRequestConfirmationScreen(serviceId: serviceId);
         break;
       case AppRoutes.bookingConfirmation:
-        final bookingId = settings.arguments as String;
-        screen = BookingConfirmationScreen(bookingId: bookingId);
+        final args = settings.arguments as Map<String, dynamic>? ?? {};
+        final bookingId = args['bookingId'] as String?;
+        final email = args['email'] as String?;
+        final bookingDate = args['bookingDate'] as String?;
+        screen = BookingConfirmationScreen(bookingId: bookingId, email: email, bookingDate: bookingDate,);
         break;
       case AppRoutes.tracking:
         final jobId = settings.arguments as int?;

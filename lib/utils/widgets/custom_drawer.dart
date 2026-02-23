@@ -12,6 +12,7 @@ import 'package:Xception/utils/storage/secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class CustomDrawer extends StatelessWidget {
   final Function(int)? onItemSelected;
@@ -40,6 +41,8 @@ class CustomDrawer extends StatelessWidget {
             _buildGradientDivider(),
             15.verticalSpace,
             Expanded(child: _buildMenuList(context)),
+            _buildVersionNumber(context),
+            10.verticalSpace,
             _buildLogoutButton(context),
             15.verticalSpace,
           ],
@@ -184,6 +187,24 @@ class CustomDrawer extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+
+  Widget _buildVersionNumber(BuildContext context) {
+    return FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const SizedBox.shrink();
+
+        final info = snapshot.data!;
+        final text = "version ${info.version}(${info.buildNumber})";
+
+        return Text(
+          text,
+          style: AppFonts.text14.regular.black.style,
+        );
+      },
     );
   }
 

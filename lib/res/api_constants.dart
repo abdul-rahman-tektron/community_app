@@ -4,8 +4,11 @@ class ApiConstants {
   static const timeout = Duration(seconds: 30);
   static const defaultPageSize = 20;
 
-  static const apiKey = "AIzaSyAqO39DAseHSaLtcKC1T6u6-uPz8_Lp7YA";
-  static const stripePublishableKey = "pk_test_51SXy365Us833x6ambjUZaETXcloIVjxPuQL48sioWBdyC1njC9unIMKA5r3BnlafVyK45j2hJPTabwqAN01OXW1J00QgXZscqf";
+  // static const apiKey = "AIzaSyAqO39DAseHSaLtcKC1T6u6-uPz8_Lp7YA";
+  static const apiKey = "AIzaSyClztMrIk4CHNQDqz1j7kGJwtDgAUbxj1Q";
+  static const stripePublishableKey = "pk_live_51SXy2y8rnoEAV6GwS18UrreNGCoYf54vMhQw7ZMpZtTrqS2AUvahlb9jstoua4WpfNdWoNexoETYHbnyKsX0bBFW00HkvnGWlI";
+  // static const stripePublishableKey = "pk_test_51SXy365Us833x6ambjUZaETXcloIVjxPuQL48sioWBdyC1njC9unIMKA5r3BnlafVyK45j2hJPTabwqAN01OXW1J00QgXZscqf";
+  static const stripeAppleMerchantIdentifier = "merchant.com.tektronix.xceptionapp";
 
   static const String clientId = "sandbox_stage";
   static const String clientSecret = "sandbox_stage";

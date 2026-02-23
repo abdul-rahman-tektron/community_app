@@ -17,6 +17,7 @@ import 'package:Xception/utils/storage/hive_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class LoginNotifier extends BaseChangeNotifier {
   // Controllers
@@ -28,6 +29,7 @@ class LoginNotifier extends BaseChangeNotifier {
   bool isChecked = false;
   bool? isOnboarded;
   String loginError = '';
+  String appVersionText = ""; // e.g. version 1.1.1(6)
 
   // Form
   final formKey = GlobalKey<FormState>();
@@ -35,11 +37,24 @@ class LoginNotifier extends BaseChangeNotifier {
   LoginNotifier() {
     initNotifier();
     _init();
+    _loadAppVersion();
   }
 
   Future<void> _init() async {
     await rememberMeData();
     await isOnboardedData();
+  }
+
+  Future<void> _loadAppVersion() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      // info.version -> 1.1.1
+      // info.buildNumber -> 6
+      appVersionText = "version ${info.version}(${info.buildNumber})";
+    } catch (_) {
+      appVersionText = ""; // fallback (or keep "version -" if you want)
+    }
+    notifyListeners();
   }
 
   Future<void> initNotifier() async {
@@ -92,6 +107,7 @@ class LoginNotifier extends BaseChangeNotifier {
   }
 
   Future<void> performLogin(BuildContext context) async {
+    isLoading = true;
     if (!validateAndSave()) return;
 
     final request = LoginRequest(
@@ -115,6 +131,8 @@ class LoginNotifier extends BaseChangeNotifier {
       debugPrint('Login Exception: $e');
       debugPrint('StackTrace: $stackTrace');
       notifyListeners();
+    } finally {
+      isLoading = false;
     }
   }
 

@@ -22,7 +22,9 @@ class CompletedServiceCard extends StatelessWidget {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
       padding: EdgeInsets.all(12.w),
-      decoration: AppStyles.commonDecoration,
+      decoration: AppStyles.commonDecoration.copyWith(
+        border: Border.all(color: Color(0xFF4CAF50), width: 1.5),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -70,7 +72,7 @@ class CompletedServiceCard extends StatelessWidget {
           ? "Add Feedback"
           : "Verify Progress",
       backgroundColor: AppColors.white,
-      borderColor: AppColors.primary,
+      borderColor: Color(0xFF4CAF50),
       textStyle: AppFonts.text14.regular.style,
       onPressed: () {
         final notifier = context.read<JobsNotifier>();
@@ -114,6 +116,7 @@ class CompletedServiceCard extends StatelessWidget {
               5.verticalSpace,
               CustomLinearProgressIndicator(
                 percentage: AppStatus.fromName(service.status ?? "")?.percentage ?? 0, // Static or customize as needed
+                fillColor: Color(0xFF4CAF50),
                 borderRadius: 6,
               ),
             ],

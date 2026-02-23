@@ -145,7 +145,7 @@ class VendorOnboardScreen extends StatelessWidget {
               backgroundColor: AppColors.white,
               borderColor: AppColors.primary,
               textStyle: AppFonts.text14.regular.style,
-              text: "Submit",
+              text: "Select",
             ),
           ],
         ),
@@ -225,6 +225,6 @@ class VendorOnboardScreen extends StatelessWidget {
   /// Submit button
   Widget _buildSubmitButton(BuildContext context, VendorOnboardNotifier vendorOnboardNotifier) {
     return CustomButton(onPressed: () => vendorOnboardNotifier.submit(context),
-        text: isEdit ?? false ? "Back" : "Submit");
+        text: isEdit ?? false ? "Back" : "Proceed");
   }
 }
