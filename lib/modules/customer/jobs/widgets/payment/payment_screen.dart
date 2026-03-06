@@ -18,15 +18,14 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class PaymentScreen extends StatelessWidget {
-  final int? jobId;
-  final int? vendorId;
+  final PaymentArgs args;
 
-  PaymentScreen({super.key, this.jobId, this.vendorId});
+  PaymentScreen({super.key, required this.args});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => PaymentNotifier(jobId, vendorId),
+      create: (context) => PaymentNotifier(args: args),
       child: Consumer<PaymentNotifier>(
         builder: (context, paymentNotifier, child) {
           return buildBody(context, paymentNotifier);
@@ -79,7 +78,7 @@ class PaymentScreen extends StatelessWidget {
           Row(
             children: [
               Expanded(child: Text("Service Details", style: AppFonts.text16.semiBold.style)),
-              Text("#${jobId.toString()}", style: AppFonts.text14.regular.style),
+              Text("#${args.jobId.toString()}", style: AppFonts.text14.regular.style),
             ],
           ),
           10.verticalSpace,
@@ -156,10 +155,12 @@ class PaymentScreen extends StatelessWidget {
   Widget buildPriceBreakdown(BuildContext context, PaymentNotifier notifier) {
     final items  = notifier.paymentDetail.lineItems ?? const <LineItem>[];
 
-    // compute locally (prefer BE totals if you REALLY trust them, but you asked to do it from your end)
     final subTotal = _subTotalFromItems(items);
     final vatTotal = _vatFromItems(items);
     final grand    = subTotal + vatTotal;
+
+    final paidAmount = notifier.paidAmountFromApi;
+    final payableNow = notifier.calculatePayableAmount();
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
@@ -169,7 +170,6 @@ class PaymentScreen extends StatelessWidget {
           Text("Price Breakdown", style: AppFonts.text16.semiBold.style),
           10.verticalSpace,
 
-          // Each line shows pre-VAT using qty==0 rule
           ...items.map((item) {
             final q = (item.quantity ?? 0);
             final desc = (q > 0 && (item.rate ?? 0) > 0)
@@ -182,10 +182,19 @@ class PaymentScreen extends StatelessWidget {
           const Divider(),
 
           _infoPriceRow("Subtotal", money(subTotal)),
-          _infoPriceRow("VAT",      money(vatTotal)),
+          _infoPriceRow("VAT", money(vatTotal)),
 
           const Divider(),
-          _infoPriceRow("TOTAL",    money(grand)),
+
+          _infoPriceRow("Total Amount", money(grand)),
+
+          if (paidAmount > 0)
+            _infoPriceRow("Amount Received", money(paidAmount)),
+
+          if (notifier.isPartialPayment)
+            _infoPriceRow("Current Payable (50%)", money(payableNow))
+          else
+            _infoPriceRow("Outstanding Amount", money(payableNow)),
         ],
       ),
     );
@@ -414,7 +423,7 @@ class PaymentScreen extends StatelessWidget {
   String money(num? v) => _aed.format((v ?? 0).toDouble());
 
   Widget buildPayButton(BuildContext context, PaymentNotifier notifier) {
-    final grand = notifier.calculateGrandTotal();
+    final grand = notifier.calculatePayableAmount();
 
     return Padding(
       padding: EdgeInsets.all(15.w),
@@ -423,6 +432,11 @@ class PaymentScreen extends StatelessWidget {
         onPressed: () async {
           if (notifier.selectedPaymentMethod == null) {
             ToastHelper.showError("Please select a payment method.");
+            return;
+          }
+
+          if (grand <= 0) {
+            ToastHelper.showError("No payable amount remaining.");
             return;
           }
 

@@ -20,7 +20,7 @@ class AppInitializer {
   static Future<void> initialize() async {
     WidgetsFlutterBinding.ensureInitialized();
 
-    Stripe.publishableKey = ApiConstants.stripePublishableKey;
+    Stripe.publishableKey = ApiConstants.stripeKey;
     Stripe.merchantIdentifier = ApiConstants.stripeAppleMerchantIdentifier;
     Stripe.urlScheme = 'stripeflutter';
 

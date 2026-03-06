@@ -149,6 +149,8 @@ class Totals {
   num? subTotal;
   num? vatTotal;
   num? grandTotal;
+  num? balanceAmount;
+  num? paidAmount;
   String? vatInWords;
   String? totalInWords;
 
@@ -156,6 +158,8 @@ class Totals {
     this.subTotal,
     this.vatTotal,
     this.grandTotal,
+    this.balanceAmount,
+    this.paidAmount,
     this.vatInWords,
     this.totalInWords,
   });
@@ -164,6 +168,8 @@ class Totals {
     subTotal: json['subTotal'],
     vatTotal: json['vatTotal'],
     grandTotal: json['grandTotal'],
+    balanceAmount: json['balanceAmount'],
+    paidAmount: json['paidAmount'],
     vatInWords: json['vatInWords'],
     totalInWords: json['totalInWords'],
   );

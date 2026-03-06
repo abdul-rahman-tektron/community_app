@@ -95,14 +95,15 @@ class NetworkRepository {
     int retryCount = 0,
     bool useXceptionBase = false,
   }) async {
-    final selectedBaseUrl =
-    useXceptionBase ? _baseXceptionOptions.baseUrl : _baseOptions.baseUrl;
+    _dio.options.baseUrl = useXceptionBase ? ApiUrls.baseXceptionUrl : ApiUrls.baseUrl;
 
-    final url = _buildFullUrl(
-      baseUrl: selectedBaseUrl,
-      pathUrl: pathUrl,
-      queryParam: queryParam,
-    );
+    // Use only path here
+    final path = pathUrl; // e.g. ApiUrls.pathLogin
+
+    // If you have queryParam as raw string "?a=b", you can keep it,
+    // but cleaner is queryParameters map.
+    // For now keep your existing approach:
+    final finalPath = _buildUrl(path, queryParam);
 
     final options = Options(
       headers: urlEncoded
@@ -119,14 +120,14 @@ class NetworkRepository {
         switch (method) {
           case Method.get:
             response = await _dio.get(
-              url,
+              finalPath,
               options: options,
               cancelToken: cancelToken,
             );
             break;
           case Method.post:
             response = await _dio.post(
-              url,
+              finalPath,
               data: body,
               options: options,
               cancelToken: cancelToken,
@@ -134,7 +135,7 @@ class NetworkRepository {
             break;
           case Method.put:
             response = await _dio.put(
-              url,
+              finalPath,
               data: body,
               options: options,
               cancelToken: cancelToken,
@@ -142,7 +143,7 @@ class NetworkRepository {
             break;
           case Method.delete:
             response = await _dio.delete(
-              url,
+              finalPath,
               data: body,
               options: options,
               cancelToken: cancelToken,
@@ -157,15 +158,15 @@ class NetworkRepository {
                 e.type == DioExceptionType.receiveTimeout ||
                 e.error is SocketException)) {
           attempts++;
-          _logger.w("Retrying... attempt $attempts for $url");
+          _logger.w("Retrying... attempt $attempts for $finalPath");
           continue; // retry
         }
         await _handleError(e);
         return e.response;
       } catch (e) {
-        _logger.e("Unexpected error during request to $url: $e");
+        _logger.e("Unexpected error during request to $finalPath: $e");
         return Response(
-          requestOptions: RequestOptions(path: url),
+          requestOptions: RequestOptions(path: finalPath),
           statusCode: HttpStatus.internalServerError,
           statusMessage: "An unexpected error occurred",
         );

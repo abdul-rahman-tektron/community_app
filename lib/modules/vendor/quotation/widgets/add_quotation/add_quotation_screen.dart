@@ -82,6 +82,7 @@ class AddQuotationScreen extends StatelessWidget {
             buildQuotationInfo(context, addQuotationNotifier),
             Divider(),
             buildNotes(context, addQuotationNotifier),
+            requestPartialPayment(context, addQuotationNotifier),
             buildPrice(context, addQuotationNotifier),
             buildSubmitButton(context, addQuotationNotifier),
           ],
@@ -461,6 +462,67 @@ class AddQuotationScreen extends StatelessWidget {
         fieldName: "Notes",
         hintText: "Add any additional notes here",
         titleVisibility: false,
+      ),
+    );
+  }
+
+  Widget requestPartialPayment(BuildContext context, AddQuotationNotifier notifier) {
+    return GestureDetector(
+      onTap: () {
+        notifier.togglePartialPayment(!notifier.partialPaymentChecked);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Row(
+                children: [
+                  Text("Request Partial Payment", style: AppFonts.text16.regular.style),
+                  5.horizontalSpace,
+                  Tooltip(
+                    richMessage: WidgetSpan(
+                      alignment: PlaceholderAlignment.baseline,
+                      baseline: TextBaseline.alphabetic,
+                      child: Container(
+                        constraints: const BoxConstraints(maxWidth: 250),
+                        child: Text(
+                          "If enabled, the customer must pay 50% of the quoted amount before the service begins. The service will not start until the partial payment is received.",
+                        ),
+                      ),
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: const BorderRadius.all(Radius.circular(4)),
+                    ),
+                    preferBelow: false,
+                    showDuration: Duration(seconds: 5),
+                    verticalOffset: 15,
+                    triggerMode: TooltipTriggerMode.tap,
+                    child: const Icon(
+                      LucideIcons.info,
+                      size: 20,
+                      color: Colors.black,
+                    ),
+                  )
+                ],
+              ),
+            ),
+            Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.primary, width: 1.5),
+                borderRadius: BorderRadius.circular(6),
+                color: notifier.partialPaymentChecked ? AppColors.white : Colors.transparent,
+              ),
+              child: notifier.partialPaymentChecked
+                  ? Icon(LucideIcons.check, size: 18, color: Colors.black)
+                  : null,
+            ),
+          ],
+        ),
       ),
     );
   }

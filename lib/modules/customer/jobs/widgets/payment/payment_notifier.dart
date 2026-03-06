@@ -4,6 +4,8 @@ import 'dart:io';
 
 import 'package:Xception/core/base/base_notifier.dart';
 import 'package:Xception/core/model/common/error/common_response.dart';
+import 'package:Xception/core/model/customer/job/create_job_booking_request.dart';
+import 'package:Xception/core/model/customer/job/create_job_booking_response.dart';
 import 'package:Xception/core/model/customer/job/create_payment_intent_request.dart';
 import 'package:Xception/core/model/customer/job/create_payment_intent_response.dart';
 import 'package:Xception/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
@@ -13,21 +15,28 @@ import 'package:Xception/core/model/customer/payment/payment_detail_request.dart
 import 'package:Xception/core/model/customer/payment/payment_detail_response.dart';
 import 'package:Xception/core/model/customer/payment/payment_status/payment_status_response.dart';
 import 'package:Xception/core/remote/services/common_repository.dart';
+import 'package:Xception/core/remote/services/customer/customer_dashboard_repository.dart';
 import 'package:Xception/core/remote/services/customer/customer_jobs_repository.dart';
 import 'package:Xception/res/images.dart';
 import 'package:Xception/utils/helpers/common_utils.dart';
 import 'package:Xception/utils/helpers/payment_service.dart';
 import 'package:Xception/utils/helpers/toast_helper.dart';
 import 'package:Xception/utils/router/routes.dart';
+import 'package:Xception/utils/widgets/custom_popup.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 
 class PaymentNotifier extends BaseChangeNotifier {
   bool saveCard = false;
   PaymentMethod? selectedPaymentMethod;
 
-  int? jobId;
-  int? vendorId;
+
+  final PaymentArgs args;
+
+  bool get isPartialPayment => args.isPartialPayment ?? false;
+  int get jobId => args.jobId;
+  int get vendorId => args.vendorId;
 
   PaymentDetailResponse paymentDetail = PaymentDetailResponse();
 
@@ -62,7 +71,7 @@ class PaymentNotifier extends BaseChangeNotifier {
     ];
   }
 
-  PaymentNotifier(this.jobId, this.vendorId) {
+  PaymentNotifier({required this.args}) {
     initializeData();
   }
 
@@ -142,6 +151,38 @@ class PaymentNotifier extends BaseChangeNotifier {
     return (subTotal + vatTotal).toDouble();
   }
 
+  double get paidAmountFromApi {
+    return (paymentDetail.totals?.paidAmount ?? 0).toDouble();
+  }
+
+  double calculatePayableAmount() {
+    final frontEndGrandTotal = calculateGrandTotal();
+    final paidAmount = paidAmountFromApi;
+
+    // Partial payment flow -> always pay 50% of frontend total
+    if (isPartialPayment) {
+      return double.parse((frontEndGrandTotal / 2).toStringAsFixed(2));
+    }
+
+    // Full/remaining payment flow
+    final remaining = frontEndGrandTotal - paidAmount;
+
+    // safety: never go below zero
+    if (remaining <= 0) {
+      return 0.0;
+    }
+
+    return double.parse(remaining.toStringAsFixed(2));
+  }
+
+  int calculatePayableAmountInFils() {
+    return (calculatePayableAmount() * 100).round();
+  }
+
+  double calculateFrontEndGrandTotal() {
+    return calculateGrandTotal();
+  }
+
   // ========== BACKEND JOB STATUS / PAYMENT RECORD ==========
 
   Future<void> apiUpdateJobStatus(BuildContext context, int? statusId) async {
@@ -157,7 +198,9 @@ class PaymentNotifier extends BaseChangeNotifier {
       );
 
       if (parsed is CommonResponse && parsed.success == true) {
-        Navigator.pushNamed(context, AppRoutes.feedback, arguments: jobId);
+        if(!(isPartialPayment)) {
+          Navigator.pushNamed(context, AppRoutes.feedback, arguments: jobId);
+        }
       }
     } catch (e) {
       ToastHelper.showError('Error updating status: $e');
@@ -166,10 +209,11 @@ class PaymentNotifier extends BaseChangeNotifier {
     }
   }
 
-  Future<void> apiPaymentStatus(BuildContext context, String paymentIntentId) async {
+  Future<void> apiPaymentStatus(BuildContext context, String paymentIntentId,
+      {bool? isPartialPayment}) async {
     try {
-      final result = await CustomerJobsRepository.instance.apiPaymentStatus(paymentIntentId);
-      await _handleCreatedPaymentSuccess(result, context);
+        final result = await CustomerJobsRepository.instance.apiPaymentStatus(paymentIntentId);
+        await _handleCreatedPaymentSuccess(result, context);
     } catch (e) {
       print("apiCreatePayment error: $e");
       ToastHelper.showError('An error occurred. Please try again.');
@@ -181,6 +225,24 @@ class PaymentNotifier extends BaseChangeNotifier {
     if (result is PaymentStatusResponse) {
       if(result.transactionStatus == "succeeded") {
         await apiUpdateJobStatus(context, AppStatus.paymentCompleted.id);
+        if (isPartialPayment) {
+          bookingConfirmationPopup(
+            context,
+            onConfirm: (String isoDate, String? note) async {
+              await apiJobBooking(
+                context,
+                jobId: args.metaData?.jobId ?? 0,
+                quotationRequestId: args.metaData?.quotationRequestId ?? 0,
+                quotationResponseId: args.metaData?.quotationResponseId ?? 0,
+                vendorId: args.metaData?.vendorId ?? 0,
+                remarks: (note != null && note.isNotEmpty)
+                    ? note
+                    : "Accepted by customer",
+                dateOfVisit: isoDate,
+              );
+            },
+          );
+        }
       } else {
         ToastHelper.showError("Payment Failed.");
       }
@@ -188,6 +250,91 @@ class PaymentNotifier extends BaseChangeNotifier {
       ToastHelper.showError("Something went wrong while recording payment.");
     }
   }
+
+  Future<void> apiJobBooking(
+      BuildContext context, {
+        required int jobId,
+        required int quotationRequestId,
+        required int quotationResponseId,
+        required int vendorId,
+        String? remarks,
+        required String dateOfVisit, // yyyy-MM-dd
+      }) async {
+    try {
+      final request = CreateJobBookingRequest(
+        jobId: jobId,
+        quotationRequestId: quotationRequestId,
+        quotationResponseId: quotationResponseId,
+        vendorId: vendorId,
+        remarks: remarks ?? "Accepted by customer",
+        createdBy: userData?.name ?? "Customer",
+        dateOfVisit: dateOfVisit,
+
+        // ⚠️ If your DB requires VisitorEmail (as the error showed), include it here:
+        // visitorEmail: userData?.email,  // <- add this field in the request model if present
+      );
+
+      final result = await CustomerDashboardRepository.instance.apiCreateJobBookingRequest(request);
+      print("result");
+      print(result);
+
+      await _handleCreatedJobSuccess(result, jobId, context, dateOfVisit);
+    } catch (e) {
+      print("result error");
+      print(e);
+      ToastHelper.showError('An error occurred. Please try again.');
+      notifyListeners();
+    }
+  }
+
+  Future<void> _handleCreatedJobSuccess(Object? result, int? jobId, BuildContext context, String dateOfVisit) async {
+    // Case 1: Booking returned email preview (like site-visit)
+    if (result is JobBookingResponse && result.emailPreview != null) {
+      final emailData = result.emailPreview!;
+      final email = Email(
+        body: emailData.body ?? "",
+        subject: emailData.subject ?? "Job  Booking Confirmation",
+        recipients: emailData.to ?? const [],
+        cc: emailData.cc ?? const [],
+        isHTML: true,
+      );
+
+      try {
+        await FlutterEmailSender.send(email);
+        ToastHelper.showSuccess(result.message ?? "Booking created and email prepared.");
+      } catch (e) {
+        print("Error launching email client: $e");
+        ToastHelper.showError("No email client available on this device.");
+      }
+
+      // Update status if you have a status for booking confirmation
+      await apiUpdateJobStatus(context, AppStatus.quotationAccepted.id);
+
+      // Navigate to success screen
+      Navigator.pushNamed(context, AppRoutes.bookingConfirmation, arguments: {
+        'bookingId': jobId?.toString(),
+        'email': userData?.email,
+        'bookingDate': dateOfVisit,
+      });
+      return;
+    }
+
+    // Case 2: Generic common response
+    if (result is CommonResponse) {
+      if (result.success == true) {
+        ToastHelper.showSuccess(result.message ?? "Booking created successfully.");
+        await apiUpdateJobStatus(context, AppStatus.quotationAccepted.id);
+        Navigator.pushNamed(context, AppRoutes.bookingConfirmation, arguments: jobId?.toString());
+      } else {
+        ToastHelper.showError(result.message ?? "Failed to create booking.");
+      }
+      return;
+    }
+
+    // Fallback
+    ToastHelper.showError("Unexpected response from server.");
+  }
+
 
   // ========== STRIPE – PUBLIC ENTRY POINT ==========
 
@@ -226,8 +373,8 @@ class PaymentNotifier extends BaseChangeNotifier {
       notifyListeners();
 
       // 1) Calculate amount11/02/2026
-      final amountAED = overrideGrandTotal ?? calculateGrandTotal();
-      final amountInFils = (amountAED * 100).round(); // AED -> fils
+      final amountAED = overrideGrandTotal ?? calculatePayableAmount();
+      final amountInFils = (amountAED * 100).round();
 
       // 2) Ask backend to create PaymentIntent and return clientSecret
       final clientSecretResponse = await CustomerJobsRepository.instance.apiCreatePaymentIntent(
@@ -278,7 +425,7 @@ class PaymentNotifier extends BaseChangeNotifier {
       await Stripe.instance.presentPaymentSheet();
 
       // // 5) On success → record payment in your backend
-      await apiPaymentStatus(context, paymentIntentId ?? "");
+      await verifyPaymentAndProceed(context, paymentIntentId ?? "");
     } on StripeException catch (e, st) {
       print("Payment cancelled or failed message: ${e.error.message}");
       print("Payment cancelled or failed code: ${e.error.code}");
@@ -315,8 +462,8 @@ class PaymentNotifier extends BaseChangeNotifier {
       notifyListeners();
 
       // 1) Calculate amount
-      final amountAED = overrideGrandTotal ?? calculateGrandTotal();
-      final amountInFils = (amountAED * 100).round(); // AED -> fils
+      final amountAED = overrideGrandTotal ?? calculatePayableAmount();
+      final amountInFils = (amountAED * 100).round();
 
       // 2) Create PaymentIntent on backend and get clientSecret
       final clientSecretResponse = await CustomerJobsRepository.instance.apiCreatePaymentIntent(
@@ -368,7 +515,7 @@ class PaymentNotifier extends BaseChangeNotifier {
       );
 
       // 4) If we reach here without exception → success
-      await apiPaymentStatus(context, paymentIntentId ?? "");
+      await verifyPaymentAndProceed(context, paymentIntentId ?? "");
     } on StripeException catch (e) {
       ToastHelper.showError("Google Pay cancelled or failed: ${e.error.localizedMessage}");
     } catch (e) {
@@ -394,8 +541,8 @@ class PaymentNotifier extends BaseChangeNotifier {
       notifyListeners();
 
       // 1) Calculate amount (AED)
-      final amountAED = overrideGrandTotal ?? calculateGrandTotal();
-      final amountInFils = (amountAED * 100).round(); // AED -> fils
+      final amountAED = overrideGrandTotal ?? calculatePayableAmount();
+      final amountInFils = (amountAED * 100).round();
 
       // 2) ✅ Use SAME backend endpoint as Card/GooglePay (important)
       final clientSecretResponse =
@@ -452,7 +599,7 @@ class PaymentNotifier extends BaseChangeNotifier {
       );
 
       // 4) ✅ Verify from backend & update job status
-      await apiPaymentStatus(context, paymentIntentId ?? "");
+      await verifyPaymentAndProceed(context, paymentIntentId ?? "");
     } on StripeException catch (e, st) {
       print("Apple Pay failed: ${e.error.localizedMessage}");
       print("Apple Pay code: ${e.error.code}");
@@ -467,6 +614,29 @@ class PaymentNotifier extends BaseChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> verifyPaymentAndProceed(BuildContext context, String paymentIntentId) async {
+    try {
+      // 1) ✅ update status first (ignore response body)
+      final updated = await CustomerJobsRepository.instance.apiPaymentUpdateStatus(paymentIntentId);
+
+      if (!updated) {
+        ToastHelper.showError("Payment update failed.");
+        return;
+      }
+
+      // 2) ✅ if update API returned 200, then fetch payment status
+      final result = await CustomerJobsRepository.instance.apiPaymentStatus(paymentIntentId);
+
+      // 3) continue your existing flow
+      await _handleCreatedPaymentSuccess(result, context);
+    } catch (e) {
+      print("verifyPaymentAndProceed error: $e");
+      ToastHelper.showError("An error occurred. Please try again.");
+    } finally {
+      notifyListeners();
+    }
+  }
 }
 
 class PaymentMethod {
@@ -476,4 +646,33 @@ class PaymentMethod {
   final bool isCard;
 
   PaymentMethod({required this.id, required this.name, this.iconUrl, required this.isCard});
+}
+
+
+class PaymentMetaData {
+  final int? jobId;
+  final int? quotationRequestId;
+  final int? quotationResponseId;
+  final int? vendorId;
+
+  const PaymentMetaData({
+    this.jobId,
+    this.quotationRequestId,
+    this.quotationResponseId,
+    this.vendorId,
+  });
+}
+
+class PaymentArgs {
+  final int jobId;
+  final int vendorId;
+  final bool? isPartialPayment;
+  final PaymentMetaData? metaData;
+
+  const PaymentArgs({
+    required this.jobId,
+    required this.vendorId,
+    this.isPartialPayment,
+    this.metaData,
+  });
 }

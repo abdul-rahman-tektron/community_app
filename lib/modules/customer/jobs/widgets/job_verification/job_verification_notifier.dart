@@ -4,6 +4,7 @@ import 'package:Xception/core/model/customer/job/job_completion_details_response
 import 'package:Xception/core/model/customer/job/job_status_tracking/update_job_status_request.dart';
 import 'package:Xception/core/remote/services/common_repository.dart';
 import 'package:Xception/core/remote/services/customer/customer_jobs_repository.dart';
+import 'package:Xception/modules/customer/jobs/widgets/payment/payment_notifier.dart';
 import 'package:Xception/utils/helpers/common_utils.dart';
 import 'package:Xception/utils/helpers/toast_helper.dart';
 import 'package:Xception/utils/router/routes.dart';
@@ -74,7 +75,10 @@ class JobVerificationNotifier extends BaseChangeNotifier {
           Navigator.pushNamed(
             context,
             AppRoutes.payment,
-            arguments: {"jobId": int.parse(jobId ?? "0"), "vendorId" : vendorId},
+            arguments: PaymentArgs(
+              jobId: int.parse(jobId ?? "0"),
+              vendorId: vendorId ?? 0,
+            ),
           );
         }
       }

@@ -1,3 +1,5 @@
+import 'package:Xception/core/env/env.dart';
+
 class ApiConstants {
   ApiConstants._();
 
@@ -7,7 +9,11 @@ class ApiConstants {
   // static const apiKey = "AIzaSyAqO39DAseHSaLtcKC1T6u6-uPz8_Lp7YA";
   static const apiKey = "AIzaSyClztMrIk4CHNQDqz1j7kGJwtDgAUbxj1Q";
   static const stripePublishableKey = "pk_live_51SXy2y8rnoEAV6GwS18UrreNGCoYf54vMhQw7ZMpZtTrqS2AUvahlb9jstoua4WpfNdWoNexoETYHbnyKsX0bBFW00HkvnGWlI";
-  // static const stripePublishableKey = "pk_test_51SXy365Us833x6ambjUZaETXcloIVjxPuQL48sioWBdyC1njC9unIMKA5r3BnlafVyK45j2hJPTabwqAN01OXW1J00QgXZscqf";
+  static const stripeDevPublishableKey = "pk_test_51SXy365Us833x6ambjUZaETXcloIVjxPuQL48sioWBdyC1njC9unIMKA5r3BnlafVyK45j2hJPTabwqAN01OXW1J00QgXZscqf";
+
+  static String get stripeKey =>
+      Env.isDev ? stripeDevPublishableKey : stripePublishableKey;
+
   static const stripeAppleMerchantIdentifier = "merchant.com.tektronix.xceptionapp";
 
   static const String clientId = "sandbox_stage";
