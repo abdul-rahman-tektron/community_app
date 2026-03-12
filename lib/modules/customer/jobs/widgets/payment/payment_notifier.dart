@@ -551,7 +551,7 @@ class PaymentNotifier extends BaseChangeNotifier {
           amount: amountInFils,
           totalAmount: amountInFils,
           remarks: "Apple Pay",
-          currency: "aed",
+          currency: "AED",
           paymentIdentity: selectedPaymentMethod?.id ?? 0,
           quotationId: jobId,
           amountFrom: userData?.customerId ?? 0,
@@ -590,7 +590,7 @@ class PaymentNotifier extends BaseChangeNotifier {
             currencyCode: 'AED',
             cartItems: [
               ApplePayCartSummaryItem.immediate(
-                label: 'Service payment',
+                label: 'Xception',
                 amount: amountAED.toStringAsFixed(2),
               ),
             ],
