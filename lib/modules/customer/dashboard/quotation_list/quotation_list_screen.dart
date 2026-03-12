@@ -1,11 +1,13 @@
 import 'package:Xception/core/model/vendor/quotation_request/quotation_request_list_response.dart';
 import 'package:Xception/modules/customer/dashboard/quotation_list/quotation_list_notifier.dart';
+import 'package:Xception/modules/customer/jobs/widgets/payment/payment_notifier.dart';
 import 'package:Xception/res/colors.dart';
 import 'package:Xception/res/fonts.dart';
 import 'package:Xception/res/styles.dart';
 import 'package:Xception/utils/extensions.dart';
 import 'package:Xception/utils/helpers/common_utils.dart';
 import 'package:Xception/utils/helpers/loader.dart';
+import 'package:Xception/utils/router/routes.dart';
 import 'package:Xception/utils/widgets/custom_app_bar.dart';
 import 'package:Xception/utils/widgets/custom_buttons.dart';
 import 'package:Xception/utils/widgets/custom_popup.dart';
@@ -115,14 +117,11 @@ class QuotationListScreen extends StatelessWidget {
               Expanded(
                 child: Text('${quotation.vendorName}', style: AppFonts.text16.regular.style),
               ),
-              Text(
-                'ID: ${quotation.quotationRequestId}',
-                style: AppFonts.text14.medium.style,
-              ),
+              Text('ID: ${quotation.quotationRequestId}', style: AppFonts.text14.medium.style),
             ],
           ),
           10.verticalSpace,
-          if(quotation.status == AppStatus.vendorQuotationRejected.name) 10.verticalSpace,
+          if (quotation.status == AppStatus.vendorQuotationRejected.name) 10.verticalSpace,
           quotation.jobQuotationResponseItems?.isNotEmpty ?? false
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,6 +130,7 @@ class QuotationListScreen extends StatelessWidget {
                     _buildServiceCharge(vat),
                     _buildTotalWithVat(totalWithVat),
                     // _buildSiteVisitRequired(job.siteVisitRequired ?? false),
+                    _buildPartialPaymentRequest(isRequested: quotation.requiredPartialPayment ?? false),
                     _buildRemarksNotes(quotation.quotationDetails ?? ""),
                     // _buildCompletionAvailability("2 Days", "12 Jul", "10:00 AM"),
                     quotation.status == AppStatus.vendorQuotationRejected.name
@@ -162,21 +162,21 @@ class QuotationListScreen extends StatelessWidget {
                             : "Quotation not provided yet",
                         style: AppFonts.text14.semiBold.red.style,
                       ),
-                      if (quotation.status == AppStatus.vendorQuotationRejected.name) 10.verticalSpace,
-                      if (quotation.status == AppStatus.vendorQuotationRejected.name) Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Reason: ",
-                            style: AppFonts.text14.bold.style,
-                          ),
-                          Expanded(
-                            child: Text(quotation.customerRemarks ?? "",
-                              style: AppFonts.text14.regular.style,
+                      if (quotation.status == AppStatus.vendorQuotationRejected.name)
+                        10.verticalSpace,
+                      if (quotation.status == AppStatus.vendorQuotationRejected.name)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Reason: ", style: AppFonts.text14.bold.style),
+                            Expanded(
+                              child: Text(
+                                quotation.customerRemarks ?? "",
+                                style: AppFonts.text14.regular.style,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
                     ],
                   ),
                 ),
@@ -233,7 +233,10 @@ class QuotationListScreen extends StatelessWidget {
               children: [
                 Text("Site Visit Requested By Vendor", style: AppFonts.text16.semiBold.style),
                 15.verticalSpace,
-                Text("Requested Date: ${quotation.requestedDate?.formatDate()}", style: AppFonts.text14.regular.style),
+                Text(
+                  "Requested Date: ${quotation.requestedDate?.formatDate()}",
+                  style: AppFonts.text14.regular.style,
+                ),
                 15.verticalSpace,
                 Text(
                   "The vendor cannot evaluate the issue remotely. "
@@ -247,7 +250,11 @@ class QuotationListScreen extends StatelessWidget {
                       child: CustomButton(
                         height: 35,
                         onPressed: () async {
-                          await notifier.acceptSiteVisit(context, quotation.siteVisitId ?? 0, vendorId: quotation.vendorId);
+                          await notifier.acceptSiteVisit(
+                            context,
+                            quotation.siteVisitId ?? 0,
+                            vendorId: quotation.vendorId,
+                          );
                         },
                         backgroundColor: AppColors.white,
                         borderColor: AppColors.primary,
@@ -260,7 +267,11 @@ class QuotationListScreen extends StatelessWidget {
                       child: CustomButton(
                         height: 35,
                         onPressed: () async {
-                          await notifier.rejectSiteVisit(context, quotation.siteVisitId ?? 0, vendorId:  quotation.vendorId ?? 0);
+                          await notifier.rejectSiteVisit(
+                            context,
+                            quotation.siteVisitId ?? 0,
+                            vendorId: quotation.vendorId ?? 0,
+                          );
                         },
                         backgroundColor: AppColors.white,
                         borderColor: AppColors.error,
@@ -336,6 +347,87 @@ class QuotationListScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildPartialPaymentRequest({bool? isRequested}) {
+    if (!isRequested!) return const SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
+      decoration: BoxDecoration(
+        color: Colors.orange.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.orange.withOpacity(0.25)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          10.horizontalSpace,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      height: 26,
+                      width: 26,
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withOpacity(0.18),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: const Icon(LucideIcons.wallet, size: 15, color: Colors.orange),
+                    ),
+                    6.horizontalSpace,
+                    Expanded(
+                      child: Text(
+                        "Partial Payment Required",
+                        style: AppFonts.text14.semiBold.style,
+                      ),
+                    ),
+                    Tooltip(
+                      triggerMode: TooltipTriggerMode.tap,
+                      preferBelow: false,
+                      verticalOffset: 18,
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.symmetric(horizontal: 18),
+                      showDuration: const Duration(seconds: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.black87,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      textStyle: const TextStyle(color: Colors.white, fontSize: 14, height: 1.3),
+                      message:
+                          "To proceed with this service, a 50% advance payment of the quoted amount is required. The service will be scheduled and initiated after the advance payment is completed.",
+                      child: const Icon(LucideIcons.info, size: 18, color: Colors.black54),
+                    ),
+                    10.horizontalSpace,
+                  ],
+                ),
+                6.verticalSpace,
+                Text(
+                  "An advance payment is needed before the vendor starts the service.",
+                  style: AppFonts.text12.regular.grey.style,
+                ),
+                8.verticalSpace,
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text("50% in Advance", style: AppFonts.text12.semiBold.style),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildRemarksNotes(String remarks) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -358,20 +450,38 @@ class QuotationListScreen extends StatelessWidget {
             child: CustomButton(
               height: 40,
               onPressed: () {
-                bookingConfirmationPopup(
-                  context,
-                  onConfirm: (String isoDate, String? note) async {
-                    await notifier.apiJobBooking(
-                      context,
+                if (quotation.requiredPartialPayment ?? false) {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.payment,
+                    arguments: PaymentArgs(
                       jobId: quotation.jobId ?? 0,
-                      quotationRequestId: quotation.quotationResponceId ?? 0,
-                      quotationResponseId: quotation.quotationResponceId ?? 0,
                       vendorId: quotation.vendorId ?? 0,
-                      remarks: (note != null && note.isNotEmpty) ? note : "Accepted by customer",
-                      dateOfVisit: isoDate, // yyyy-MM-dd
-                    );
-                  },
-                );
+                      isPartialPayment: quotation.requiredPartialPayment ?? false,
+                      metaData: PaymentMetaData(
+                        jobId: quotation.jobId ?? 0,
+                        quotationRequestId: quotation.quotationResponceId ?? 0,
+                        quotationResponseId: quotation.quotationResponceId ?? 0,
+                        vendorId: quotation.vendorId ?? 0,
+                      ),
+                    ),
+                  );
+                } else {
+                  bookingConfirmationPopup(
+                    context,
+                    onConfirm: (String isoDate, String? note) async {
+                      await notifier.apiJobBooking(
+                        context,
+                        jobId: quotation.jobId ?? 0,
+                        quotationRequestId: quotation.quotationResponceId ?? 0,
+                        quotationResponseId: quotation.quotationResponceId ?? 0,
+                        vendorId: quotation.vendorId ?? 0,
+                        remarks: (note != null && note.isNotEmpty) ? note : "Accepted by customer",
+                        dateOfVisit: isoDate, // yyyy-MM-dd
+                      );
+                    },
+                  );
+                }
               },
               backgroundColor: AppColors.white,
               borderColor: AppColors.primary,

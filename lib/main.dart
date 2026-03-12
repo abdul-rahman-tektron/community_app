@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:Xception/core/env/env.dart';
 import 'package:Xception/core/generated_locales/l10n.dart';
 import 'package:Xception/core/model/common/login/login_response.dart';
 import 'package:Xception/core/notifier/language_notifier.dart';
+import 'package:Xception/core/remote/network/api_url.dart';
 import 'package:Xception/modules/auth/login/login_screen.dart';
 import 'package:Xception/modules/auth/user_role_selection/user_role_selection_screen.dart';
 import 'package:Xception/modules/customer/bottom_bar/bottom_screen.dart';
@@ -26,6 +28,8 @@ Future<void> main() async {
     await AppInitializer.initialize();
 
     final userData = await AppInitializer.loadUserData();
+
+    print("ENV=${Env.mode} BASE_URL=${ApiUrls.baseUrl}");
 
     final app = MyApp(
       token: userData["token"],

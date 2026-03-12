@@ -1,16 +1,23 @@
+import 'package:Xception/core/env/env.dart';
+
 class ApiUrls {
   ApiUrls._();
 
   ///Base
   static const baseHttp = "https://";
   static const baseHost = "teksmartsolutions.com/CommunityServiceAPI";
+  static const baseDevHost = "teksmartsolutions.com/CommunityAppTestEnv";
   static const baseXceptionHost = "teksmartsolutions.com/CommunityXecptionAPI";
 
   ///Test
   // static const baseHttp = "http://";
   // static const baseHost = "192.168.10.30/CommunityServiceAPI/api";
 
-  static const baseUrl = "$baseHttp$baseHost";
+  static String get baseUrl {
+    final host = Env.pickHost(prodHost: baseHost, devHost: baseDevHost);
+    return "$baseHttp$host";
+  }
+
   static const baseXceptionUrl = "$baseHttp$baseXceptionHost";
 
   ///Common
@@ -50,6 +57,7 @@ class ApiUrls {
   static const pathPaymentDetail = "/api/JobPayment/GetPaymentdetails"; // POST
   static const pathCreatePayment = "/api/JobPayment/CreatePayment"; // POST
   static const pathCreatePaymentIntent = "/api/payments/create-intent"; // POST
+  static const pathPaymentUpdateStatus = "/api/payments/updatePayment/"; // POST
   static const pathPaymentStatus = "/api/payments/status/"; // POST
 
   ///Vendor

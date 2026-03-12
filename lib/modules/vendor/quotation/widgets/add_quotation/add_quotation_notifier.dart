@@ -16,6 +16,8 @@ import 'package:flutter/material.dart';
 class AddQuotationNotifier extends BaseChangeNotifier {
   List<QuotationItem> quotationItems = [];
 
+  bool partialPaymentChecked = false;
+
   JobInfoDetailResponse _jobDetail = JobInfoDetailResponse();
 
   int? jobId;
@@ -154,6 +156,7 @@ class AddQuotationNotifier extends BaseChangeNotifier {
         quotationAmount: grandTotal,
         createdBy: userData?.name ?? "", // Can be dynamic
         status: "Submitted",
+        requiredPartialPayment: partialPaymentChecked,
         jobQuotationResponseItems: quotationItems.map((item) {
           final unitPrice = double.tryParse(item.unitPriceController.text) ?? 0.0;
           return JobQuotationResponseItem(
@@ -234,6 +237,11 @@ class AddQuotationNotifier extends BaseChangeNotifier {
     } else {
       ToastHelper.showError("At least one ${itemToRemove.type.name} item is required.");
     }
+  }
+
+  void togglePartialPayment(bool value) {
+    partialPaymentChecked = value;
+    notifyListeners();
   }
 
   @override

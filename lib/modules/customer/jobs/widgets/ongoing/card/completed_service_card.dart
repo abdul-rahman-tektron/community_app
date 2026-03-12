@@ -1,5 +1,6 @@
 import 'package:Xception/core/model/customer/job/ongoing_jobs_response.dart';
 import 'package:Xception/modules/customer/jobs/jobs_notifier.dart';
+import 'package:Xception/modules/customer/jobs/widgets/payment/payment_notifier.dart';
 import 'package:Xception/res/colors.dart';
 import 'package:Xception/res/fonts.dart';
 import 'package:Xception/res/styles.dart';
@@ -82,7 +83,10 @@ class CompletedServiceCard extends StatelessWidget {
 
         if (service.status == AppStatus.jobVerifiedPaymentPending.name) {
           route = AppRoutes.payment;
-          argument = {"jobId": service.jobId, "vendorId" : service.customerId};
+          argument = PaymentArgs(
+            jobId: service.jobId ?? 0,
+            vendorId: service.customerId ?? 0,
+          );
         } else if (service.status == AppStatus.paymentCompleted.name) {
           route = AppRoutes.feedback;
         } else {

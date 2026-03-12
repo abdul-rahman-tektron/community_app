@@ -31,6 +31,7 @@ import 'package:Xception/modules/customer/jobs/widgets/job_verification/job_veri
 import 'package:Xception/modules/customer/jobs/widgets/new_jobs/booking_complete.dart';
 import 'package:Xception/modules/customer/jobs/widgets/new_jobs/new_job_confirmation.dart';
 import 'package:Xception/modules/customer/jobs/widgets/new_jobs/new_job_screen.dart';
+import 'package:Xception/modules/customer/jobs/widgets/payment/payment_notifier.dart';
 import 'package:Xception/modules/customer/jobs/widgets/payment/payment_screen.dart';
 import 'package:Xception/modules/customer/jobs/widgets/top_vendors/top_vendors_screen.dart';
 import 'package:Xception/modules/customer/jobs/widgets/tracking/tracking_screen.dart';
@@ -265,10 +266,8 @@ class AppRouter {
         screen = JobVerificationScreen(jobId: jobId.toString(), vendorId: vendorId,);
         break;
       case AppRoutes.payment:
-        final args = settings.arguments as Map<String, dynamic>? ?? {};
-        final jobId = args['jobId'] as int?;
-        final vendorId = args['vendorId'] as int?;
-        screen = PaymentScreen(jobId: jobId, vendorId: vendorId,);
+        final args = settings.arguments as PaymentArgs;
+        screen = PaymentScreen(args: args);
         break;
       case AppRoutes.feedback:
         final jobId = settings.arguments as int?;

@@ -313,7 +313,6 @@ class CustomerJobsRepository extends BaseRepository {
 
     final response = await networkRepository.call(
       method: Method.get,
-      useXceptionBase: true,
       pathUrl: ApiUrls.pathPaymentStatus,
       queryParam: paymentIntentId,
       headers: buildHeaders(token: token),
@@ -322,6 +321,23 @@ class CustomerJobsRepository extends BaseRepository {
     if (response?.statusCode == HttpStatus.ok) {
       final paymentStatusResponse = paymentStatusResponseFromJson(jsonEncode(response?.data));
       return paymentStatusResponse;
+    } else {
+      throw ErrorResponse.fromJson(response?.data ?? {});
+    }
+  }
+
+  Future<bool> apiPaymentUpdateStatus(String paymentIntentId) async {
+    final token = await SecureStorageService.getToken();
+
+    final response = await networkRepository.call(
+      method: Method.get,
+      pathUrl: ApiUrls.pathPaymentUpdateStatus,
+      queryParam: paymentIntentId,
+      headers: buildHeaders(token: token),
+    );
+
+    if (response?.statusCode == HttpStatus.ok) {
+      return true; // ✅ ignore response body
     } else {
       throw ErrorResponse.fromJson(response?.data ?? {});
     }
